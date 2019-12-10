@@ -36,12 +36,12 @@ class PythonHocObject:
 
   def __ref__(self, obj):
     # Magic method that will store a strong reference to another object.
-    self.__references.append(transform(obj))
+    self.__references.append(obj)
 
   def __deref__(self, obj):
     # Magic method that will remove a strong reference to another object.
     try:
-      self.__references.remove(transform(obj))
+      self.__references.remove(obj)
       return True
     except ValueError as _:
       return False
