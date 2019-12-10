@@ -4,44 +4,50 @@ class PythonHocObject:
   def __init__(self, interpreter, ptr):
     # Initialize ourselves with a reference to our own "pointer"
     # and prepare a list for other references.
-    self.__dict__['__ptr'] = ptr
-    self.__references = []
-    self.__interpreter = interpreter
+    self._neuron_ptr = ptr
+    self._references = []
+    self._interpreter = interpreter
 
   def __getattr__(self, attr):
       # Return underlying attributes that aren't explicitly set on the wrapper
-      return getattr(self.__dict__['__ptr'], attr)
+      return getattr(self.__dict__["_neuron_ptr"], attr)
 
   def __setattr__(self, attr, value):
     # Set attributes on the underlying pointer, and set on self if they don't
     # exist on the underlying pointer. This allows you to set arbitrary values
     # on the NEURON objects as you would be able to with a real Pythonic object.
     try:
-        setattr(self.__ptr, attr, value)
-    except AttributeError as _:
+        setattr(self._neuron_ptr, attr, value)
+    except (LookupError, AttributeError) as _:
         self.__dict__[attr] = value
 
   def __call__(self, *args, **kwargs):
     # Relay calls to self to the underlying pointer
-    return self.__ptr(*args, **kwargs)
+    return self._neuron_ptr(*args, **kwargs)
 
   def __iter__(self):
+    # Create an iterator from ourselves.
+    ptr = self.__neuron__()
+    if type(ptr).__name__ == "Section":
+      # Obviously __iter__ isn't correctly implemented on Sections, must be
+      # "procedural" aswell
+      return ptr
     # Relay iteration to the underlying pointer
-    return iter(self.__neuron__())
+    return iter(ptr)
 
   def __neuron__(self):
     # Magic method that allows duck typing of this object as something that
     # needs to be represented differently when passed to NEURON.
-    return self.__dict__['__ptr']
+    return self._neuron_ptr
 
   def __ref__(self, obj):
     # Magic method that will store a strong reference to another object.
-    self.__references.append(obj)
+    self._references.append(obj)
 
   def __deref__(self, obj):
     # Magic method that will remove a strong reference to another object.
     try:
-      self.__references.remove(obj)
+      self._references.remove(obj)
       return True
     except ValueError as _:
       return False
@@ -60,6 +66,18 @@ class Section(PythonHocObject):
       target.__ref__(self)
     self.__ref__(target)
 
+  def __call__(self, *args, **kwargs):
+    v = super().__call__(*args, **kwargs)
+    if type(v).__name__ != "Segment":
+      raise TypeError("Section call did not return a Segment.")
+    return Segment(self._interpreter, v)
+
+  def __iter__(self, *args, **kwargs):
+    iter = super().__iter__(*args, **kwargs)
+    for v in iter:
+      if type(v).__name__ != "Segment":
+        raise TypeError("Section iteration did not return a Segment.")
+      yield Segment(self._interpreter, v)
 
 class NetStim(PythonHocObject):
   def __init__(self, *args, **kwargs):
@@ -69,4 +87,8 @@ class NetStim(PythonHocObject):
 
 
 class NetCon(PythonHocObject):
+  pass
+
+
+class Segment(PythonHocObject):
   pass

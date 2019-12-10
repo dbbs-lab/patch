@@ -31,4 +31,4 @@ class TestReferencing(unittest.TestCase):
             s4 = p.Section()
             s4.connect(s3)
         patched_closure()
-        self.assertEqual(1, len(s3.children()), 'NEURON has seen the light and created strong references.')
+        self.assertEqual(1, len(s3.children()), 'Referencing failure, child section garbage collected.')

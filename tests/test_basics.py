@@ -27,4 +27,16 @@ class TestPatch(unittest.TestCase):
         self.assertIs(nrn_section1, transform(nrn_section1), 'Transform on a NEURON object did not return the object.')
 
     def test_section_call(self):
-        pass
+        s = p.Section()
+        s.nseg = 5
+        seg = s(0.5)
+        self.assertEqual(patch.objects.Segment, type(seg), 'Section call did not return a Segment')
+
+    def test_section_iter(self):
+        s = p.Section()
+        s.nseg = 5
+        count = 0
+        for seg in s:
+            count += 1
+            self.assertEqual(patch.objects.Segment, type(seg), 'Section iteration did not return a Segment')
+        self.assertEqual(count, 5, 'Section iteration did not return `nseg` segments.')
