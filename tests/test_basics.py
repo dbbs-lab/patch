@@ -40,3 +40,5 @@ class TestPatch(unittest.TestCase):
             count += 1
             self.assertEqual(patch.objects.Segment, type(seg), 'Section iteration did not return a Segment')
         self.assertEqual(count, 5, 'Section iteration did not return `nseg` segments.')
+        # Test that other HocObjects aren't iterable.
+        self.assertRaises(TypeError, iter, p.NetStim())
