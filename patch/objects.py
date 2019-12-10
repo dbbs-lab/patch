@@ -28,7 +28,7 @@ class PythonHocObject:
   def __neuron__(self):
     # Magic method that allows duck typing of this object as something that
     # needs to be represented differently when passed to NEURON.
-    return self.__ptr
+    return self.__dict__['__ptr']
 
   def __ref__(self, obj):
     # Magic method that will store a strong reference to another object.
@@ -45,14 +45,14 @@ class PythonHocObject:
 
 class Section(PythonHocObject):
   def __init__(self, *args, **kwargs):
-    super().__init__(self, *args, **kwargs)
+    super().__init__(*args, **kwargs)
     # Prepare a dictionary that lists which other NEURON parts this
     self._connections = {}
 
 
 class NetStim(PythonHocObject):
   def __init__(self, *args, **kwargs):
-    super().__init__(self, *args, **kwargs)
+    super().__init__(*args, **kwargs)
     # Prepare a dictionary that lists which other NEURON parts this
     self._connections = {}
 
