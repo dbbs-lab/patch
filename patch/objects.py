@@ -25,6 +25,10 @@ class PythonHocObject:
     # Relay calls to self to the underlying pointer
     return self.__ptr(*args, **kwargs)
 
+  def __iter__(self):
+    # Relay iteration to the underlying pointer
+    return iter(self.__neuron__())
+
   def __neuron__(self):
     # Magic method that allows duck typing of this object as something that
     # needs to be represented differently when passed to NEURON.
