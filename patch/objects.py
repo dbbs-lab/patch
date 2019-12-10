@@ -53,6 +53,13 @@ class Section(PythonHocObject):
     # Prepare a dictionary that lists which other NEURON parts this is connected to
     self._connections = {}
 
+  def connect(self, target, *args, **kwargs):
+    nrn_target = transform(target)
+    self.__neuron__().connect(nrn_target, *args, **kwargs)
+    if hasattr(target, "__ref__"):
+      target.__ref__(self)
+    self.__ref__(target)
+
 
 class NetStim(PythonHocObject):
   def __init__(self, *args, **kwargs):
