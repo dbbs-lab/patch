@@ -18,3 +18,13 @@ class TestPatch(unittest.TestCase):
         self.assertEqual(section, patch.objects.Section, 'Incorrect Section wrapping: ' + str(section))
         self.assertEqual(net_stim, patch.objects.NetStim, 'Incorrect NetStim wrapping: ' + str(net_stim))
         self.assertEqual(net_con, patch.objects.NetCon, 'Incorrect NetCon wrapping: ' + str(net_con))
+
+    def test_transform(self):
+        from patch.core import transform
+        from neuron import h
+        nrn_section1 = transform(p.Section())
+        self.assertEqual("nrn", type(nrn_section1).__module__, 'Transform on a Patch object did not return a NEURON object.')
+        self.assertIs(nrn_section1, transform(nrn_section1), 'Transform on a NEURON object did not return the object.')
+
+    def test_section_call(self):
+        pass
