@@ -20,6 +20,12 @@ class PythonHocInterpreter:
     else:
       return attr
 
+  def __setattr__(self, attr, value):
+    if hasattr(self.__h, attr):
+      setattr(self.__h, attr, value)
+    else:
+      self.__dict__[attr] = value
+
   def wrap(self, factory, name):
     def wrapper(*args, **kwargs):
       obj = factory(*args, **kwargs)
