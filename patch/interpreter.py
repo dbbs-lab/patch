@@ -5,7 +5,7 @@ from .exceptions import *
 class PythonHocInterpreter:
   def __init__(self):
     from neuron import h
-    self.__h = h
+    self.__dict__["_PythonHocInterpreter__h"] = h
     # Wrapping should occur around all calls to functions that share a name with
     # child classes of the PythonHocObject like h.Section, h.NetStim, h.NetCon
     self.__object_classes = PythonHocObject.__subclasses__().copy()
@@ -15,7 +15,7 @@ class PythonHocInterpreter:
     # Get the missing attribute from h, if it requires wrapping return a wrapped
     # object instead.
     attr = getattr(self.__h, attr_name)
-    if self.__requires_wrapping:
+    if attr_name in self.__requires_wrapping:
       return self.wrap(attr, attr_name)
     else:
       return attr
