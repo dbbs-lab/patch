@@ -11,6 +11,15 @@ class TestReferencing(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_ref_deref(self):
+        s = p.Section()
+        s2 = p.Section()
+        s.__ref__(s2)
+        self.assertIn(s2, s._references, 'Referencing failure.')
+        self.assertEqual(len(s._references), 1, 'Referencing failure: added object twice.')
+        self.assertTrue(s.__deref__(s2), 'Dereferencing failure: could not find object.')
+        self.assertFalse(s.__deref__(s2), 'Dereferencing failure: found reference object twice.')
+
     def test_section_ref(self):
         '''
             Test whether connected sections keep eachother alive

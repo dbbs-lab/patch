@@ -33,7 +33,10 @@ class PythonHocObject:
       # "procedural" aswell
       return ptr
     # Relay iteration to the underlying pointer
-    return iter(ptr)
+    try:
+      return iter(ptr)
+    except TypeError as _:
+      raise
 
   def __neuron__(self):
     # Magic method that allows duck typing of this object as something that
@@ -42,7 +45,8 @@ class PythonHocObject:
 
   def __ref__(self, obj):
     # Magic method that will store a strong reference to another object.
-    self._references.append(obj)
+    if obj not in self._references:
+      self._references.append(obj)
 
   def __deref__(self, obj):
     # Magic method that will remove a strong reference to another object.
@@ -68,14 +72,14 @@ class Section(PythonHocObject):
 
   def __call__(self, *args, **kwargs):
     v = super().__call__(*args, **kwargs)
-    if type(v).__name__ != "Segment":
+    if type(v).__name__ != "Segment":  # pragma: no cover
       raise TypeError("Section call did not return a Segment.")
     return Segment(self._interpreter, v)
 
   def __iter__(self, *args, **kwargs):
     iter = super().__iter__(*args, **kwargs)
     for v in iter:
-      if type(v).__name__ != "Segment":
+      if type(v).__name__ != "Segment":  # pragma: no cover
         raise TypeError("Section iteration did not return a Segment.")
       yield Segment(self._interpreter, v)
 
