@@ -50,14 +50,14 @@ class PythonHocObject:
 class Section(PythonHocObject):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    # Prepare a dictionary that lists which other NEURON parts this
+    # Prepare a dictionary that lists which other NEURON parts this is connected to
     self._connections = {}
 
 
 class NetStim(PythonHocObject):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    # Prepare a dictionary that lists which other NEURON parts this
+    # Prepare a dictionary that lists which other NEURON parts this is connected to
     self._connections = {}
 
 

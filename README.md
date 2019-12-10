@@ -4,6 +4,10 @@
 pip install nrn-patch
 ```
 
+Be aware that the interface is currently incomplete. Feel free to open an issue
+or fork this project and open a pull request for missing or broken parts of the
+interface.
+
 # Philosophy
 
 Python interfaces should be Pythonic, this wrapper offers just that:
@@ -30,7 +34,7 @@ When using just Patch the difference between NEURON and Patch objects is handled
 transparently, but if you wish to mix interpreters you can transform all Patch
 objects back to NEURON objects with `obj.__neuron__()`.
 
-```
+```python
 from patch import p
 import glia as g
 
