@@ -13,6 +13,7 @@ class TestPatch(unittest.TestCase):
 
     def test_attributes(self):
         # Test Hoc attributes
+        self.assertTrue(p.E - 2.7 < 0.2, 'Can\'t read attributes from HocInterpreter')
         p.celsius = 11.004
         self.assertEqual(p._PythonHocInterpreter__h.celsius, 11.004, 'Can\'t set attributes on HocInterpreter')
         # Test python hoc attributes
