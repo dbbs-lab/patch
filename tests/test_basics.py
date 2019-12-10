@@ -11,6 +11,23 @@ class TestPatch(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_attributes(self):
+        # Test Hoc attributes
+        p.celsius = 11.004
+        self.assertEqual(p._PythonHocInterpreter__h.celsius, 11.004, 'Can\'t set attributes on HocInterpreter')
+        # Test python hoc attributes
+        p.something_else = 15.4
+        self.assertEqual(p.__dict__['something_else'], 15.4, 'Can\'t set attributes on PythonHocInterpreter')
+        # Test nonsense attributes
+        self.assertRaises(AttributeError, lambda: p.doesnt_exist)
+        # Test object attributes
+        s = p.Section()
+        s.nseg = 5
+        self.assertEqual(s.__neuron__().nseg, 5, 'Couldn\'t set attributes on HocObject')
+        s.nseggg = 55
+        self.assertRaises(AttributeError, lambda: s.__neuron__().nseggg)
+        self.assertEqual(s.__dict__['nseggg'], 55, 'Couldn\'t set attributes on PythonHocObject')
+
     def test_wrapping(self):
         net_con = type(p.NetCon(p.NetStim(), p.NetStim()))
         net_stim = type(p.NetStim())
