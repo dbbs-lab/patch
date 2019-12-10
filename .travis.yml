@@ -1,0 +1,14 @@
+language: python
+os: linux
+jobs:
+  include:
+    - name: "Python 3.7.0 on Xenial Linux"
+      python: 3.7
+      before_install:
+        - wget https://neuron.yale.edu/ftp/neuron/versions/v7.7/nrn-7.7.x86_64-linux.deb
+        - sudo dpkg -i nrn-7.7.x86_64-linux.deb
+install:
+  - pip3 install --upgrade pip
+  - pip3 install -r requirements.txt
+script:
+  - python3 -m unittest discover -v -s ./tests || python -m unittest discover -v -s ./tests
