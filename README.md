@@ -7,9 +7,13 @@
 pip install nrn-patch
 ```
 
-Be aware that the interface is currently incomplete. Feel free to open an issue
-or fork this project and open a pull request for missing or broken parts of the
-interface.
+![Inline replacement](https://s5.gifyu.com/images/ezgif.com-video-to-gif-13b2788fb8bc11ca7.gif)
+
+Be aware that the interface is currently incomplete, this means that most parts
+are still "just" NEURON. I've only patched holes I frequently encounter myself
+when using the `h.Section`, `h.NetStim` and `h.NetCon` functions. Feel free to 
+open an issue or fork this project and open a pull request for missing or broken 
+parts of the interface.
 
 # Philosophy
 
