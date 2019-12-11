@@ -58,3 +58,11 @@ from neuron import h
 nrn_section = h.Section()
 nrn_section.connect(section.__neuron__())
 ```
+
+# Known unpatched holes
+
+* When inserting point processes the returned object is unwrapped.
+  This can be resolved using [Glia](https://github.com/dbbs-lab/glia), or by
+  using this syntax:
+
+    point_process = p.PointProcess(p.MyMechanismName, \*args, \*\*kwargs)

@@ -1,4 +1,4 @@
-from .objects import PythonHocObject, NetCon
+from .objects import PythonHocObject, NetCon, PointProcess
 from .core import transform
 from .exceptions import *
 
@@ -46,3 +46,7 @@ class PythonHocInterpreter:
     source._connections[target] = connection
     target._connections[source] = connection
     return connection
+
+  def PointProcess(self, factory, *args, **kwargs):
+    point_process = factory(*args, **kwargs)
+    return PointProcess(self, point_process)

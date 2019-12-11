@@ -57,11 +57,16 @@ class PythonHocObject:
       return False
 
 
-class Section(PythonHocObject):
-  def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
+class connectable:
+  def __init__(self):
     # Prepare a dictionary that lists which other NEURON parts this is connected to
     self._connections = {}
+
+
+class Section(PythonHocObject, connectable):
+  def __init__(self, *args, **kwargs):
+    PythonHocObject.__init__(self, *args, **kwargs)
+    connectable.__init__(self)
 
   def connect(self, target, *args, **kwargs):
     nrn_target = transform(target)
@@ -83,16 +88,24 @@ class Section(PythonHocObject):
         raise TypeError("Section iteration did not return a Segment.")
       yield Segment(self._interpreter, v)
 
-class NetStim(PythonHocObject):
+
+class NetStim(PythonHocObject, connectable):
   def __init__(self, *args, **kwargs):
-    super().__init__(*args, **kwargs)
-    # Prepare a dictionary that lists which other NEURON parts this is connected to
-    self._connections = {}
+    PythonHocObject.__init__(self, *args, **kwargs)
+    connectable.__init__(self)
 
 
 class NetCon(PythonHocObject):
   pass
 
 
-class Segment(PythonHocObject):
-  pass
+class Segment(PythonHocObject, connectable):
+  def __init__(self, *args, **kwargs):
+    PythonHocObject.__init__(self, *args, **kwargs)
+    connectable.__init__(self)
+
+
+class PointProcess(PythonHocObject, connectable):
+  def __init__(self, *args, **kwargs):
+    PythonHocObject.__init__(self, *args, **kwargs)
+    connectable.__init__(self)
