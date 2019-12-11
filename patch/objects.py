@@ -1,4 +1,4 @@
-from .core import transform
+from .core import transform, is_sequence
 
 class PythonHocObject:
   def __init__(self, interpreter, ptr):
@@ -87,6 +87,30 @@ class Section(PythonHocObject, connectable):
       if type(v).__name__ != "Segment":  # pragma: no cover
         raise TypeError("Section iteration did not return a Segment.")
       yield Segment(self._interpreter, v)
+
+  def set_dimensions(self, length, diameter):
+    self.L = length
+    self.diam = diameter
+
+  def set_segments(self, segments):
+    self.nseg = segments
+
+  def add_3d(self, points, diameters=None):
+    '''
+      Add a new 3D point to this section xyz data.
+
+      :param points: A 2D array of xyz points.
+      :param diameters: A scalar or array of diameters corresponding to the points. Default value is the section diameter.
+      :type diameters: float or array
+    '''
+    if diameters is None:
+        diameters = [self.diam for _ in range(len(points))]
+    if not is_sequence(diameters):
+        diameters = [diameter for _ in range(len(points))]
+    self.__neuron__().push()
+    for point, diameter in zip(points, diameters):
+        self._interpreter.pt3dadd(*point, diameter)
+    self._interpreter.pop_section()
 
 
 class NetStim(PythonHocObject, connectable):

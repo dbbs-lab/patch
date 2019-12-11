@@ -6,3 +6,7 @@ def transform(obj):
   if hasattr(obj, "__neuron__"):
     return obj.__neuron__()
   return obj
+
+def is_sequence(obj):
+    t = type(obj)
+    return hasattr(t, '__len__') and hasattr(t, '__getitem__')
