@@ -112,6 +112,9 @@ class Section(PythonHocObject, connectable):
         self._interpreter.pt3dadd(*point, diameter)
     self._interpreter.pop_section()
 
+  def wholetree(self):
+    return [Section(self._interpreter, s) for s in self.__neuron__().wholetree()]
+
 
 class NetStim(PythonHocObject, connectable):
   def __init__(self, *args, **kwargs):
