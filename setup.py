@@ -1,11 +1,12 @@
 import setuptools
+import patch
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
      name='nrn-patch',
-     version='0.0.3',
+     version=patch.__version__,
      author="Robin De Schepper",
      author_email="robingilbert.deschepper@unipv.it",
      description="A Pythonic, object-oriented, monkey patch for NEURON",
