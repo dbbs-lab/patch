@@ -133,6 +133,10 @@ class Segment(PythonHocObject, connectable):
 
 
 class PointProcess(PythonHocObject, connectable):
+  """
+    Wrapper for all point processes (membrane and synapse mechanisms). Use
+    ``PythonHocInterpreter.PointProcess`` to construct these objects.
+  """
   def __init__(self, *args, **kwargs):
     PythonHocObject.__init__(self, *args, **kwargs)
     connectable.__init__(self)

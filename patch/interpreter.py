@@ -48,5 +48,9 @@ class PythonHocInterpreter:
     return connection
 
   def PointProcess(self, factory, *args, **kwargs):
+    """
+      Creates a point process from a h.MyMechnism factory. The first arg should be the
+      `Segment` this point process has to be inserted into.
+    """
     point_process = factory(*args, **kwargs)
     return PointProcess(self, point_process)
