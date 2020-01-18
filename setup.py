@@ -8,7 +8,7 @@ setuptools.setup(
      version='0.0.3',
      author="Robin De Schepper",
      author_email="robingilbert.deschepper@unipv.it",
-     description="A Pythonic, object-oriented, minimalistic wrapper for NEURON",
+     description="A Pythonic, object-oriented, monkey patch for NEURON",
      long_description=long_description,
      long_description_content_type="text/markdown",
      url="https://github.com/helveg/patch",
