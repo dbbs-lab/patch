@@ -71,4 +71,9 @@ nrn_section.connect(section.__neuron__())
   This can be resolved using [Glia](https://github.com/dbbs-lab/glia), or by
   using this syntax:
 
-    point_process = p.PointProcess(p.MyMechanismName, \*args, \*\*kwargs)
+```python
+  # In neuron
+  process = h.MyMechanismName(my_section(0.5), *args, **kwargs)
+  # In patch
+  point_process = p.PointProcess(p.MyMechanismName, my_section(0.5), *args, **kwargs)
+```
