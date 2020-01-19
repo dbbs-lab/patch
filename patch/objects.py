@@ -88,6 +88,13 @@ class Section(PythonHocObject, connectable):
         raise TypeError("Section iteration did not return a Segment.")
       yield Segment(self._interpreter, v)
 
+  def insert(self, *args, **kwargs):
+    # Catch nrn.Section return value, always seems to be self.
+    # So if Neuron doesn't raise an error, return self.
+    # Probably for method chaining?
+    self.__neuron__().insert(*args, **kwargs)
+    return self
+
   def set_dimensions(self, length, diameter):
     self.L = length
     self.diam = diameter
