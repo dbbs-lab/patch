@@ -1,5 +1,5 @@
 from .objects import PythonHocObject, NetCon, PointProcess
-from .core import transform, suppress_stdout
+from .core import transform, transform_netcon, suppress_stdout
 from .exceptions import *
 import io
 
@@ -35,8 +35,8 @@ class PythonHocInterpreter:
     return wrapper
 
   def NetCon(self, source, target, *args, **kwargs):
-    nrn_source = transform(source)
-    nrn_target = transform(target)
+    nrn_source = transform_netcon(source)
+    nrn_target = transform_netcon(target)
     with io.StringIO() as error_stream:
       try:
         with suppress_stdout(error_stream):

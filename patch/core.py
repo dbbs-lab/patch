@@ -10,6 +10,11 @@ def transform(obj):
     return obj.__neuron__()
   return obj
 
+def transform_netcon(obj):
+    if hasattr(obj, "__netcon__"):
+        return obj.__netcon__()
+    return transform(obj)
+
 def is_sequence(obj):
     t = type(obj)
     return hasattr(t, '__len__') and hasattr(t, '__getitem__')
