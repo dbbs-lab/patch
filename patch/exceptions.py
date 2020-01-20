@@ -4,3 +4,15 @@ class PatchError(Exception):
 
 class NotConnectableError(PatchError):
     pass
+
+
+class TransformError(PatchError):
+    pass
+
+
+class HocError(PatchError):
+    pass
+
+
+class HocConnectError(HocError):
+    pass
