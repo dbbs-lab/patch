@@ -4,7 +4,7 @@ class PythonHocObject:
   def __init__(self, interpreter, ptr):
     # Initialize ourselves with a reference to our own "pointer"
     # and prepare a list for other references.
-    self._neuron_ptr = ptr
+    self._neuron_ptr = transform(ptr)
     self._references = []
     self._interpreter = interpreter
 
