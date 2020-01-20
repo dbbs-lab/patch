@@ -95,6 +95,9 @@ class Section(PythonHocObject, connectable):
     self.__neuron__().insert(*args, **kwargs)
     return self
 
+  def connect_points(self, target, x=0.5):
+    self._interpreter.NetCon(self(x)._ref_v, target)
+
   def set_dimensions(self, length, diameter):
     self.L = length
     self.diam = diameter
