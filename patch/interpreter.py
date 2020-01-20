@@ -31,7 +31,7 @@ class PythonHocInterpreter:
     def wrapper(*args, **kwargs):
       obj = factory(*args, **kwargs)
       cls = next((c for c in self.__object_classes if c.__name__ == name), None)
-      return cls(self.__h, obj)
+      return cls(self, obj)
     return wrapper
 
   def NetCon(self, source, target, *args, **kwargs):
