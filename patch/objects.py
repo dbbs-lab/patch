@@ -1,4 +1,5 @@
 from .core import transform, is_sequence
+import types
 
 class PythonHocObject:
   def __init__(self, interpreter, ptr):
@@ -96,7 +97,12 @@ class Section(PythonHocObject, connectable):
     return self
 
   def connect_points(self, target, x=0.5):
-    self._interpreter.NetCon(self(x)._ref_v, target)
+    segment = self(x)
+    # Add a bound __netcon__ method to the segment
+    segment.__netcon__ = types.MethodType(lambda s: s._ref_v, segment)
+    self.push()
+    self._interpreter.NetCon(segment, target)
+    self._interpreter.pop_section()
 
   def set_dimensions(self, length, diameter):
     self.L = length
