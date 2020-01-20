@@ -1,6 +1,7 @@
 from .objects import PythonHocObject, NetCon, PointProcess
-from .core import transform
+from .core import transform, suppress_stdout
 from .exceptions import *
+import io
 
 class PythonHocInterpreter:
   def __init__(self):
@@ -36,7 +37,18 @@ class PythonHocInterpreter:
   def NetCon(self, source, target, *args, **kwargs):
     nrn_source = transform(source)
     nrn_target = transform(target)
-    connection = NetCon(self, self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs))
+    with io.StringIO() as error_stream:
+      try:
+        with suppress_stdout(error_stream):
+          connection = NetCon(self, self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs))
+      except RuntimeError as e:
+        error = error_stream.getvalue()
+        if error.find("must be a point process or NULLobject") != -1:
+          if error.find("arg 1") != -1:
+            raise HocConnectError("Source is not a point process. Transformed type: '{}'".format(type(nrn_source))) from None
+          if error.find("arg 2") != -1:
+            raise HocConnectError("Target is not a point process. Transformed type: '{}'".format(type(nrn_target))) from None
+        raise HocError(error)
     connection.__ref__(self)
     connection.__ref__(target)
     if not hasattr(source, "_connections"):
