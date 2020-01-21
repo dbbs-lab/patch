@@ -131,6 +131,19 @@ class Section(PythonHocObject, connectable):
   def wholetree(self):
     return [Section(self._interpreter, s) for s in self.__neuron__().wholetree()]
 
+  def record(self, x=0.5):
+    if not hasattr(self, "recordings"):
+      self.recordings = {}
+    if not x in self.recordings:
+      recorder = self._interpreter.Vector()
+      recorder.record(self(x)._ref_v)
+      self.recordings[x] = recorder
+
+class Vector(PythonHocObject):
+  def record(self, target):
+    nrn_target = transform_record(target)
+    self.__neuron__().record(nrn_target)
+    self.__ref__(target)
 
 class NetStim(PythonHocObject, connectable):
   def __init__(self, *args, **kwargs):
