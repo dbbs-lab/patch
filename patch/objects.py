@@ -1,4 +1,4 @@
-from .core import transform, is_sequence
+from .core import transform, transform_record, is_sequence
 import types
 
 class PythonHocObject:
@@ -136,7 +136,7 @@ class Section(PythonHocObject, connectable):
       self.recordings = {}
     if not x in self.recordings:
       recorder = self._interpreter.Vector()
-      recorder.record(self(x)._ref_v)
+      recorder.record(self(x))
       self.recordings[x] = recorder
 
 class Vector(PythonHocObject):
@@ -159,6 +159,9 @@ class Segment(PythonHocObject, connectable):
   def __init__(self, *args, **kwargs):
     PythonHocObject.__init__(self, *args, **kwargs)
     connectable.__init__(self)
+
+  def __record__(self):
+    return self.__neuron__()._ref_v
 
 
 class PointProcess(PythonHocObject, connectable):
