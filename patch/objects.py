@@ -138,6 +138,7 @@ class Section(PythonHocObject, connectable):
       recorder = self._interpreter.Vector()
       recorder.record(self(x))
       self.recordings[x] = recorder
+      return recorder
 
 class Vector(PythonHocObject):
   def record(self, target):
