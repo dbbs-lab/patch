@@ -20,5 +20,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[],
-    extras_require={"dev": ["sphinx", "pre-commit", "black"]},
+    extras_require={"dev": ["sphinx", "pre-commit", "black", "sphinxcontrib-contentui"]},
 )
