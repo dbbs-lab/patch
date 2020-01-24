@@ -6,6 +6,10 @@ class NotConnectableError(PatchError):
     pass
 
 
+class NotConnectedError(PatchError):
+    pass
+
+
 class TransformError(PatchError):
     pass
 

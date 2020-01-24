@@ -74,6 +74,9 @@ class Section(PythonHocObject, connectable):
       target.__ref__(self)
     self.__ref__(target)
 
+  def __netcon__(self):
+    return self(0.5).__netcon__()
+
   def __call__(self, *args, **kwargs):
     v = super().__call__(*args, **kwargs)
     if type(v).__name__ != "Segment":  # pragma: no cover
@@ -177,5 +180,5 @@ class PointProcess(PythonHocObject, connectable):
     stimulus = self._interpreter.NetStim()
     for kw, value in kwargs.items():
       setattr(stimulus.__neuron__(), kw, value)
-    connection = self._interpreter.NetCon(stimulus, self)
-    return stimulus, connection
+    self._interpreter.NetCon(stimulus, self)
+    return stimulus
