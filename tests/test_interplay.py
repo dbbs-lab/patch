@@ -1,19 +1,22 @@
 import unittest, sys, os
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import patch
 from patch import p
 from patch.exceptions import *
 
+
 class TestInterplay(unittest.TestCase):
-    '''
+    """
         Test whether mixing h and p together causes issues.
-    '''
+    """
 
     def setUp(self):
         pass
 
     def test_section_connect(self):
         from neuron import h
+
         # Connect 2 Sections
         s = p.Section()
         s2 = p.Section()
@@ -31,6 +34,7 @@ class TestInterplay(unittest.TestCase):
 
     def test_netcon_inter(self):
         from neuron import h
+
         s1 = h.NetStim()
         s2 = h.NetStim()
         s3 = p.NetStim()
@@ -39,4 +43,6 @@ class TestInterplay(unittest.TestCase):
         self.assertRaises(NotConnectableError, p.NetCon, s1, s2)
         self.assertRaises(NotConnectableError, p.NetCon, s3, s2)
         self.assertRaises(NotConnectableError, p.NetCon, s1, s4)
-        self.assertEqual(patch.objects.NetCon, type(p.NetCon(s3, s4)), 'Valid NetCon failed')
+        self.assertEqual(
+            patch.objects.NetCon, type(p.NetCon(s3, s4)), "Valid NetCon failed"
+        )
