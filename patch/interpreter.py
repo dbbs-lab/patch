@@ -82,8 +82,12 @@ class PythonHocInterpreter:
 
     def PointProcess(self, factory, target, *args, **kwargs):
         """
-      Creates a point process from a h.MyMechnism factory. The first arg should be the
-      `Segment` this point process has to be inserted into.
+      Creates a point process from a h.MyMechanism factory.
+
+      :param factory: A point process method from the HocInterpreter.
+      :type factory: function
+      :param target: The Segment this point process has to be inserted into.
+      :type target: :class:`.objects.Segment`
     """
         nrn_target = transform(target)
         point_process = factory(nrn_target, *args, **kwargs)
