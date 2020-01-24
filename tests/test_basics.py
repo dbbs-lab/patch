@@ -38,17 +38,24 @@ class TestPatch(unittest.TestCase):
         self.assertEqual(net_con, patch.objects.NetCon, 'Incorrect NetCon wrapping: ' + str(net_con))
 
     def test_transform(self):
-        from patch.core import transform
+        from patch.core import transform, transform_record, transform_netcon
         from neuron import h
         nrn_section1 = transform(p.Section())
         self.assertEqual("nrn", type(nrn_section1).__module__, 'Transform on a Patch object did not return a NEURON object.')
         self.assertIs(nrn_section1, transform(nrn_section1), 'Transform on a NEURON object did not return the object.')
+        seg = p.Section()(0.5)
+        self.assertIn("pointer to hoc scalar", str(transform_record(seg)), "Recording transform on a Segment did not return a pointer to a scalar.")
+        self.assertIn("pointer to hoc scalar", str(transform_netcon(seg)), "NetCon transform on a Segment did not return a pointer to a scalar.")
+        self.assertIn("pointer to hoc scalar", str(transform_netcon(p.Section())), "NetCon transform on a Section did not return a pointer to a scalar.")
 
+
+class TestSection(unittest.TestCase):
     def test_section_call(self):
         s = p.Section()
         s.nseg = 5
         seg = s(0.5)
         self.assertEqual(patch.objects.Segment, type(seg), 'Section call did not return a Segment')
+        self.assertEqual("<class 'nrn.Segment'>", str(type(seg.__neuron__())), "Section call did not return a NEURON Segment pointer")
 
     def test_section_iter(self):
         s = p.Section()
@@ -60,3 +67,21 @@ class TestPatch(unittest.TestCase):
         self.assertEqual(count, 5, 'Section iteration did not return `nseg` segments.')
         # Test that other HocObjects aren't iterable.
         self.assertRaises(TypeError, iter, p.NetStim())
+
+
+class TestPointProcess(unittest.TestCase):
+    def test_factory(self):
+        s = p.Section()
+        pp = p.PointProcess(p.ExpSyn, s(0.5))
+        self.assertEqual(patch.objects.PointProcess, type(pp), "Point process factory did not return a PointProcess.")
+        self.assertEqual("ExpSyn[0]", str(pp.__neuron__()), "Point process factory did not return a NEURON point process pointer.")
+
+    def test_stimulate(self):
+        s = p.Section()
+        pp = p.PointProcess(p.ExpSyn, s(0.5))
+        stim = pp.stimulate(start=0,number=1)
+        stim._connections[pp].weight[0] = 0.4
+        r = s.record()
+        p.finitialize(-70)
+        p.continuerun(10)
+        self.assertAlmostEqual(list(r)[-1], -68.0, delta=0.1)

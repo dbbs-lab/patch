@@ -1,5 +1,4 @@
 from .core import transform, transform_record, is_sequence
-import types
 
 class PythonHocObject:
   def __init__(self, interpreter, ptr):
@@ -30,8 +29,7 @@ class PythonHocObject:
     # Create an iterator from ourselves.
     ptr = self.__neuron__()
     if type(ptr).__name__ == "Section":
-      # Obviously __iter__ isn't correctly implemented on Sections, must be
-      # "procedural" aswell
+      # Iter on section isn't a full iterator.
       return ptr
     # Relay iteration to the underlying pointer
     try:
@@ -76,6 +74,9 @@ class Section(PythonHocObject, connectable):
       target.__ref__(self)
     self.__ref__(target)
 
+  def __netcon__(self):
+    return self(0.5).__netcon__()
+
   def __call__(self, *args, **kwargs):
     v = super().__call__(*args, **kwargs)
     if type(v).__name__ != "Segment":  # pragma: no cover
@@ -98,8 +99,6 @@ class Section(PythonHocObject, connectable):
 
   def connect_points(self, target, x=0.5):
     segment = self(x)
-    # Add a bound __netcon__ method to the segment
-    segment.__netcon__ = types.MethodType(lambda s: s._ref_v, segment)
     self.push()
     self._interpreter.NetCon(segment, target)
     self._interpreter.pop_section()
@@ -161,6 +160,9 @@ class Segment(PythonHocObject, connectable):
     PythonHocObject.__init__(self, *args, **kwargs)
     connectable.__init__(self)
 
+  def __netcon__(self):
+    return self.__neuron__()._ref_v
+
   def __record__(self):
     return self.__neuron__()._ref_v
 
@@ -173,3 +175,10 @@ class PointProcess(PythonHocObject, connectable):
   def __init__(self, *args, **kwargs):
     PythonHocObject.__init__(self, *args, **kwargs)
     connectable.__init__(self)
+
+  def stimulate(self, **kwargs):
+    stimulus = self._interpreter.NetStim()
+    for kw, value in kwargs.items():
+      setattr(stimulus.__neuron__(), kw, value)
+    self._interpreter.NetCon(stimulus, self)
+    return stimulus
