@@ -43,12 +43,12 @@ class PythonHocInterpreter:
           connection = NetCon(self, self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs))
       except RuntimeError as e:
         error = error_stream.getvalue()
-        if error.find("must be a point process or NULLobject") != -1:
+        if error.find("must be a point process or NULLObject") != -1:
           if error.find("arg 1") != -1:
             raise HocConnectError("Source is not a point process. Transformed type: '{}'".format(type(nrn_source))) from None
           if error.find("arg 2") != -1:
             raise HocConnectError("Target is not a point process. Transformed type: '{}'".format(type(nrn_target))) from None
-        raise HocError(error)
+        raise HocError(error) from None
     connection.__ref__(self)
     connection.__ref__(target)
     if not hasattr(source, "_connections"):
