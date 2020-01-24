@@ -119,8 +119,8 @@ Position in space
 .. container:: left-col
 
     With Patch it's very straightforward to define the 3D path of your Section through
-    space. Call the ``.add_3d`` function with a 2D array of containing the xyz data of
-    your points. Optionally, you can pass another array of diameters.
+    space. Call the ``.add_3d`` function with a 2D array containing the xyz data of your
+    points. Optionally, you can pass another array of diameters.
 
 .. container:: content-tabs right-col
 
