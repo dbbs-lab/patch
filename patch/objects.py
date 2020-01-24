@@ -29,8 +29,7 @@ class PythonHocObject:
     # Create an iterator from ourselves.
     ptr = self.__neuron__()
     if type(ptr).__name__ == "Section":
-      # Obviously __iter__ isn't correctly implemented on Sections, must be
-      # "procedural" aswell
+      # Iter on section isn't a full iterator.
       return ptr
     # Relay iteration to the underlying pointer
     try:
@@ -173,3 +172,10 @@ class PointProcess(PythonHocObject, connectable):
   def __init__(self, *args, **kwargs):
     PythonHocObject.__init__(self, *args, **kwargs)
     connectable.__init__(self)
+
+  def stimulate(self, **kwargs):
+    stimulus = self._interpreter.NetStim()
+    for kw, value in kwargs.items():
+      setattr(stimulus.__neuron__(), kw, value)
+    connection = self._interpreter.NetCon(stimulus, self)
+    return stimulus, connection
