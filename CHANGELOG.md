@@ -1,3 +1,11 @@
+# 1.2
+
+* Added `stimulate` method to point processes. This creates a NetStim connected to it.
+* Added `connection` function in the root module that retrieves a NetCon between 2 objects
+  if they are connected.
+* Added default `__netcon__` and `__record__` behavior to Sections, they will now refer to
+  the Segment at x=0.5.
+
 # 1.1
 
 * Added `__netcon__` and `__record__` magic methods for better default behavior in

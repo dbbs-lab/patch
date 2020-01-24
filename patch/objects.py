@@ -77,6 +77,9 @@ class Section(PythonHocObject, connectable):
   def __netcon__(self):
     return self(0.5).__netcon__()
 
+  def __record__(self):
+    return self(0.5).__netcon__()
+
   def __call__(self, *args, **kwargs):
     v = super().__call__(*args, **kwargs)
     if type(v).__name__ != "Segment":  # pragma: no cover
