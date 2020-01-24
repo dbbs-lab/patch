@@ -1,5 +1,4 @@
 from .core import transform, transform_record, is_sequence
-import types
 
 class PythonHocObject:
   def __init__(self, interpreter, ptr):
@@ -98,8 +97,6 @@ class Section(PythonHocObject, connectable):
 
   def connect_points(self, target, x=0.5):
     segment = self(x)
-    # Add a bound __netcon__ method to the segment
-    segment.__netcon__ = types.MethodType(lambda s: s._ref_v, segment)
     self.push()
     self._interpreter.NetCon(segment, target)
     self._interpreter.pop_section()
@@ -160,6 +157,9 @@ class Segment(PythonHocObject, connectable):
   def __init__(self, *args, **kwargs):
     PythonHocObject.__init__(self, *args, **kwargs)
     connectable.__init__(self)
+
+  def __netcon__(self):
+    return self.__neuron__()._ref_v
 
   def __record__(self):
     return self.__neuron__()._ref_v
