@@ -59,10 +59,11 @@ class PythonHocInterpreter:
     target._connections[source] = connection
     return connection
 
-  def PointProcess(self, factory, *args, **kwargs):
+  def PointProcess(self, factory, target, *args, **kwargs):
     """
       Creates a point process from a h.MyMechnism factory. The first arg should be the
       `Segment` this point process has to be inserted into.
     """
-    point_process = factory(*args, **kwargs)
+    nrn_target = transform(target)
+    point_process = factory(nrn_target, *args, **kwargs)
     return PointProcess(self, point_process)
