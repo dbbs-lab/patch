@@ -5,12 +5,9 @@ import os
 
 __version__ = "1.2.0"
 
-raise Exception(
-    "\n".join(list(map(lambda i: str(i[0]) + " " + str(i[1]), os.environ.items())))
-)
-
-p = PythonHocInterpreter()
-p.load_file("stdrun.hoc")
+if not os.getenv("READTHEDOCS"):
+    p = PythonHocInterpreter()
+    p.load_file("stdrun.hoc")
 
 
 def connection(source, target):
