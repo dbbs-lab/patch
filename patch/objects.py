@@ -1,4 +1,4 @@
-from .core import transform, transform_record, is_sequence
+from .core import transform, transform_record, _is_sequence
 
 
 class PythonHocObject:
@@ -124,7 +124,7 @@ class Section(PythonHocObject, connectable):
     """
         if diameters is None:
             diameters = [self.diam for _ in range(len(points))]
-        if not is_sequence(diameters):
+        if not _is_sequence(diameters):
             diameters = [diameter for _ in range(len(points))]
         self.__neuron__().push()
         for point, diameter in zip(points, diameters):

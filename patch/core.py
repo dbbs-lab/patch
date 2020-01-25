@@ -24,13 +24,13 @@ def transform_record(obj):
     return transform(obj)
 
 
-def is_sequence(obj):
+def _is_sequence(obj):
     t = type(obj)
     return hasattr(t, "__len__") and hasattr(t, "__getitem__")
 
 
 @contextmanager
-def suppress_stdout(stream=None):
+def _suppress_stdout(stream=None):
     """
         Makes NEURON shut the fuck up.
     """
