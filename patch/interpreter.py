@@ -1,5 +1,5 @@
 from .objects import PythonHocObject, NetCon, PointProcess
-from .core import transform, transform_netcon, suppress_stdout
+from .core import transform, transform_netcon, _suppress_stdout
 from .exceptions import *
 import io
 
@@ -42,7 +42,7 @@ class PythonHocInterpreter:
         nrn_target = transform_netcon(target)
         with io.StringIO() as error_stream:
             try:
-                with suppress_stdout(error_stream):
+                with _suppress_stdout(error_stream):
                     connection = NetCon(
                         self, self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs)
                     )

@@ -1,11 +1,13 @@
 from .interpreter import PythonHocInterpreter
 from .exceptions import *
 from .core import transform
+import os
 
 __version__ = "1.2.0"
 
-p = PythonHocInterpreter()
-p.load_file("stdrun.hoc")
+if not os.getenv("READTHEDOCS"):
+    p = PythonHocInterpreter()
+    p.load_file("stdrun.hoc")
 
 
 def connection(source, target):
