@@ -1,5 +1,6 @@
 from .interpreter import PythonHocInterpreter
 from .exceptions import *
+from .core import transform
 
 __version__ = "1.2.0"
 

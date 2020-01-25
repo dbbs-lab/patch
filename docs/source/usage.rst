@@ -37,12 +37,13 @@ either be ``PythonHocObject``'s wrapping their corresponding NEURON object, or
 whatever NEURON returns.
 
 When using just Patch the difference between NEURON and Patch objects is handled
-transparently, but if you wish to mix interpreters you can transform all Patch
-objects back to NEURON objects with ``obj.__neuron__()``.
+transparently, but if you wish to mix interpreters you can transform all Patch objects
+back to NEURON objects with ``obj.__neuron__()`` or the helper function
+``patch.transform``.
 
 .. code-block:: python
 
-   from patch import p
+   from patch import p, transform
    import glia as g
 
    section = p.Section()
@@ -60,4 +61,5 @@ objects back to NEURON objects with ``obj.__neuron__()``.
    # It's fully compatible using __neuron__
    from neuron import h
    nrn_section = h.Section()
+   nrn_section.connect(transform(section))
    nrn_section.connect(section.__neuron__())
