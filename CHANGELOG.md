@@ -1,3 +1,9 @@
+# 1.2.1
+
+* Added ReadTheDocs documentation
+* Added `time` property to the interpreter which returns a singleton recording device of
+  the timesteps in the simulation.
+
 # 1.2
 
 * Added `stimulate` method to point processes. This creates a NetStim connected to it.
