@@ -145,9 +145,9 @@ class Section(PythonHocObject, connectable):
 
 
 class Vector(PythonHocObject):
-    def record(self, target):
+    def record(self, target, *args, **kwargs):
         nrn_target = transform_record(target)
-        self.__neuron__().record(nrn_target)
+        self.__neuron__().record(nrn_target, *args, **kwargs)
         self.__ref__(target)
 
 

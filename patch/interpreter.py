@@ -92,3 +92,12 @@ class PythonHocInterpreter:
         nrn_target = transform(target)
         point_process = factory(nrn_target, *args, **kwargs)
         return PointProcess(self, point_process)
+
+    @property
+    def time(self):
+        if not hasattr(self, "_time"):
+            t = self.Vector()
+            # Quick fix for upstream bug. See https://github.com/neuronsimulator/nrn/issues/416
+            t.record(self._ref_t, 0.1)
+            self._time = t
+        return self._time
