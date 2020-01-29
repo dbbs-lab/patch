@@ -1,4 +1,4 @@
-from .objects import PythonHocObject, NetCon, PointProcess
+from .objects import PythonHocObject, NetCon, PointProcess, VecStim
 from .core import transform, transform_netcon, _suppress_stdout
 from .exceptions import *
 import io
@@ -13,6 +13,7 @@ class PythonHocInterpreter:
         # child classes of the PythonHocObject like h.Section, h.NetStim, h.NetCon
         self.__object_classes = PythonHocObject.__subclasses__().copy()
         self.__requires_wrapping = [cls.__name__ for cls in self.__object_classes]
+        self.__loaded_extensions = []
 
     def __getattr__(self, attr_name):
         # Get the missing attribute from h, if it requires wrapping return a wrapped
@@ -93,11 +94,35 @@ class PythonHocInterpreter:
         point_process = factory(nrn_target, *args, **kwargs)
         return PointProcess(self, point_process)
 
+    def VecStim(self, pattern=None, *args, **kwargs):
+        import glia as g
+
+        mod_name = g.resolve("VecStim")
+        vec_stim = VecStim(self, getattr(self.__h, mod_name)(*args, **kwargs))
+        if pattern is not None:
+            pattern_vector = self.Vector(pattern)
+            vec_stim.play(pattern_vector)
+        return vec_stim
+
     @property
     def time(self):
         if not hasattr(self, "_time"):
             t = self.Vector()
-            # Quick fix for upstream bug. See https://github.com/neuronsimulator/nrn/issues/416
-            t.record(self._ref_t, 0.1)
+            # Fix for upstream NEURON bug. See https://github.com/neuronsimulator/nrn/issues/416
+            try:
+                t.record(self._ref_t)
+            except RuntimeError as e:
+                self.__dud_section = self.Section(name="this_is_here_to_record_time")
+                # Recurse to try again.
+                return self.time
             self._time = t
         return self._time
+
+    def load_extension(self, extension):
+        if extension in self.__loaded_extensions:
+            return
+        from . import get_data_file
+
+        hoc_file = get_data_file("extensions", extension + ".hoc").replace("\\", "/")
+        self.__h.load_file(hoc_file)
+        self.__loaded_extensions.append(extension)
