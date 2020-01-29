@@ -97,7 +97,12 @@ class PythonHocInterpreter:
     def time(self):
         if not hasattr(self, "_time"):
             t = self.Vector()
-            # Quick fix for upstream bug. See https://github.com/neuronsimulator/nrn/issues/416
-            t.record(self._ref_t, 0.1)
+            # Fix for upstream NEURON bug. See https://github.com/neuronsimulator/nrn/issues/416
+            try:
+                t.record(self._ref_t)
+            except RuntimeError as e:
+                self.__dud_section = self.Section(name="this_is_here_to_record_time")
+                # Recurse to try again.
+                return self.time
             self._time = t
         return self._time
