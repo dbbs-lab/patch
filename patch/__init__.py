@@ -10,7 +10,7 @@ if not os.getenv("READTHEDOCS"):
     p.load_file("stdrun.hoc")
 
 
-def connection(source, target):
+def connection(source, target, strict=True):
     if not hasattr(source, "_connections"):
         raise NotConnectableError(
             "Source "
@@ -23,7 +23,10 @@ def connection(source, target):
             + str(target)
             + " is not connectable. It lacks attribute _connections required to form NetCons."
         )
+    reverse = source in target._connections
     if not target in source._connections:
+        if reverse and not strict:
+            return target._connections[source]
         raise NotConnectedError("Source is not connected to target.")
     return source._connections[target]
 
