@@ -20,3 +20,15 @@ class HocError(PatchError):
 
 class HocConnectError(HocError):
     pass
+
+
+class SimulationError(PatchError):
+    pass
+
+
+class UninitializedError(SimulationError):
+    pass
+
+
+class ErrorHandlingError(PatchError):
+    pass
