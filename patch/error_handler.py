@@ -73,7 +73,7 @@ class CatchNetCon(ErrorHandler):
     required = ["nrn_source", "nrn_target"]
 
     def catch(self, error, context):
-        if error.find("must be a point process or NULLObject") != -1:
+        if error.lower().find("must be a point process or nullobject") != -1:
             if error.find("arg 1") != -1:
                 raise HocConnectError(
                     "Source is not a point process. Transformed type: '{}'".format(
