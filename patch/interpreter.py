@@ -103,7 +103,9 @@ class PythonHocInterpreter:
         vec_stim = VecStim(self, getattr(self.__h, mod_name)(*args, **kwargs))
         if pattern is not None:
             pattern_vector = self.Vector(pattern)
-            vec_stim.play(pattern_vector)
+            vec_stim.play(pattern_vector.__neuron__())
+            self._vector = pattern_vector
+            self._pattern = pattern
         return vec_stim
 
     @property

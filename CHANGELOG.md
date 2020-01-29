@@ -1,3 +1,13 @@
+# 1.3.0
+
+* Added extensions:
+  * HOC extensions: hoc files that can be packaged along and loaded.
+  * MOD extensions: A Glia package `patch_extensions` is installed along with patch so
+    that any mod files required to run patch are automatically compiled and loaded.
+* Added `VecStim`, which can stimulate according to arbitrary patterns.
+* Added `pattern` keyword argument to `PointProcess.stimulate` so that a VecStim is
+  created.
+
 # 1.2.1
 
 * Added ReadTheDocs documentation

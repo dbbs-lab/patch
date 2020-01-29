@@ -58,3 +58,5 @@ class TestReferencing(unittest.TestCase):
         self.assertEqual(
             1, len(s3.children()), "Referencing failure, child section garbage collected."
         )
+
+    # TODO: Test Synapses, point processes, NetStim & NetCon
