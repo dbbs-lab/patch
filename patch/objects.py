@@ -164,8 +164,18 @@ class NetStim(PythonHocObject, connectable):
         connectable.__init__(self)
 
 
-class VecStim(PythonHocObject):
-    pass
+class VecStim(PythonHocObject, connectable):
+    def __init__(self, *args, **kwargs):
+        PythonHocObject.__init__(self, *args, **kwargs)
+        connectable.__init__(self)
+
+    @property
+    def vector(self):
+        return self._vector
+
+    @property
+    def pattern(self):
+        return self._pattern.copy()
 
 
 class NetCon(PythonHocObject):
