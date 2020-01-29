@@ -1,4 +1,4 @@
-from .objects import PythonHocObject, NetCon, PointProcess
+from .objects import PythonHocObject, NetCon, PointProcess, VecStim
 from .core import transform, transform_netcon, _suppress_stdout
 from .exceptions import *
 import io
@@ -13,6 +13,7 @@ class PythonHocInterpreter:
         # child classes of the PythonHocObject like h.Section, h.NetStim, h.NetCon
         self.__object_classes = PythonHocObject.__subclasses__().copy()
         self.__requires_wrapping = [cls.__name__ for cls in self.__object_classes]
+        self.__loaded_extensions = []
 
     def __getattr__(self, attr_name):
         # Get the missing attribute from h, if it requires wrapping return a wrapped
@@ -92,6 +93,16 @@ class PythonHocInterpreter:
         nrn_target = transform(target)
         point_process = factory(nrn_target, *args, **kwargs)
         return PointProcess(self, point_process)
+
+    def VecStim(self, pattern=None, *args, **kwargs):
+        import glia as g
+
+        mod_name = g.resolve("VecStim")
+        vec_stim = VecStim(self, getattr(self.__h, mod_name)(*args, **kwargs))
+        if pattern is not None:
+            pattern_vector = self.Vector(pattern)
+            vec_stim.play(pattern_vector)
+        return vec_stim
 
     @property
     def time(self):

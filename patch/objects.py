@@ -157,6 +157,10 @@ class NetStim(PythonHocObject, connectable):
         connectable.__init__(self)
 
 
+class VecStim(PythonHocObject):
+    pass
+
+
 class NetCon(PythonHocObject):
     pass
 
