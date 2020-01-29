@@ -4,7 +4,7 @@ import io, sys
 
 
 @contextmanager
-def _suppress_stdout(stream=None, close=False):
+def _suppress_nrn(stream=None, close=False):
     """
         Makes NEURON shut the fuck up.
     """
@@ -28,7 +28,7 @@ def _suppress_stdout(stream=None, close=False):
 def catch_hoc_error(*args, **context):
     with io.StringIO() as error_stream:
         try:
-            with _suppress_stdout(error_stream):
+            with _suppress_nrn(error_stream):
                 yield
         except RuntimeError as e:
             error = error_stream.getvalue()
