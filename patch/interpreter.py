@@ -14,6 +14,7 @@ class PythonHocInterpreter:
         self.__object_classes = PythonHocObject.__subclasses__().copy()
         self.__requires_wrapping = [cls.__name__ for cls in self.__object_classes]
         self.__loaded_extensions = []
+        self.load_file("stdrun.hoc")
 
     def __getattr__(self, attr_name):
         # Get the missing attribute from h, if it requires wrapping return a wrapped
