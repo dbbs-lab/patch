@@ -22,6 +22,10 @@ class HocConnectError(HocError):
     pass
 
 
+class HocSectionAccessError(HocError):
+    pass
+
+
 class SimulationError(PatchError):
     pass
 

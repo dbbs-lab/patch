@@ -1,7 +1,7 @@
 from .objects import PythonHocObject, NetCon, PointProcess, VecStim
 from .core import transform, transform_netcon
 from .exceptions import *
-from .error_handler import catch_hoc_error, CatchNetCon
+from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess
 
 
 class PythonHocInterpreter:
@@ -97,8 +97,9 @@ class PythonHocInterpreter:
             t = self.Vector()
             # Fix for upstream NEURON bug. See https://github.com/neuronsimulator/nrn/issues/416
             try:
-                t.record(self._ref_t)
-            except RuntimeError as e:
+                with catch_hoc_error(CatchSectionAccess):
+                    t.record(self._ref_t)
+            except HocSectionAccessError as e:
                 self.__dud_section = self.Section(name="this_is_here_to_record_time")
                 # Recurse to try again.
                 return self.time

@@ -92,3 +92,11 @@ class CatchNetCon(ErrorHandler):
                     type(self.nrn_source), type(self.nrn_target)
                 )
             )
+
+
+class CatchSectionAccess(ErrorHandler):
+    required = []
+
+    def catch(self, error, context):
+        if error.find("Section access unspecified") != -1:
+            raise HocSectionAccessError("This operation requires a Section on the stack.")
