@@ -7,7 +7,6 @@ __version__ = "1.3.0"
 
 if not os.getenv("READTHEDOCS"):
     p = PythonHocInterpreter()
-    p.load_file("stdrun.hoc")
 
 
 def connection(source, target, strict=True):
