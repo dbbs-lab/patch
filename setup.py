@@ -29,6 +29,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
-    install_requires=["setuptools"],
+    entry_points={"glia.package": ["patch_extensions = patch_extensions"]},
+    install_requires=["setuptools", "nrn-glia"],
     extras_require={"dev": ["sphinx", "pre-commit", "black", "sphinxcontrib-contentui"]},
 )
