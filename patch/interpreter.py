@@ -90,6 +90,8 @@ class PythonHocInterpreter:
       :param target: The Segment this point process has to be inserted into.
       :type target: :class:`.objects.Segment`
     """
+        if hasattr(target, "__arc__"):
+            target = target(target.__arc__())
         nrn_target = transform(target)
         point_process = factory(nrn_target, *args, **kwargs)
         return PointProcess(self, point_process)
