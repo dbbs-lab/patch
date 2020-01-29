@@ -131,3 +131,24 @@ class PythonHocInterpreter:
         hoc_file = get_data_file("extensions", extension + ".hoc").replace("\\", "/")
         self.__h.load_file(hoc_file)
         self.__loaded_extensions.append(extension)
+
+    def finitialize(self, initial=None):
+        if initial:
+            self.__h.finitialize(initial)
+        else:
+            self.__h.finitialize()
+        self._finitialized = True
+
+    def continuerun(self, time_stop):
+        if not hasattr(self, "_finitialized"):
+            raise UninitializedError(
+                "Cannot start NEURON simulation without first using `p.finitialize`."
+            )
+        self.__h.continuerun(time_stop)
+
+    def run(self):
+        if not hasattr(self, "_finitialized"):
+            raise UninitializedError(
+                "Cannot start NEURON simulation without first using `p.finitialize`."
+            )
+        self.__h.run()
