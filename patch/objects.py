@@ -75,11 +75,14 @@ class Section(PythonHocObject, connectable):
             target.__ref__(self)
         self.__ref__(target)
 
+    def __arc__(self):
+        return 0.5
+
     def __netcon__(self):
-        return self(0.5).__netcon__()
+        return self(self.__arc__()).__netcon__()
 
     def __record__(self):
-        return self(0.5).__netcon__()
+        return self(self.__arc__()).__netcon__()
 
     def __call__(self, *args, **kwargs):
         v = super().__call__(*args, **kwargs)
@@ -101,7 +104,9 @@ class Section(PythonHocObject, connectable):
         self.__neuron__().insert(*args, **kwargs)
         return self
 
-    def connect_points(self, target, x=0.5):
+    def connect_points(self, target, x=None):
+        if x is None:
+            x = self.__arc__()
         segment = self(x)
         self.push()
         self._interpreter.NetCon(segment, target)
@@ -134,7 +139,9 @@ class Section(PythonHocObject, connectable):
     def wholetree(self):
         return [Section(self._interpreter, s) for s in self.__neuron__().wholetree()]
 
-    def record(self, x=0.5):
+    def record(self, x=None):
+        if x is None:
+            x = self.__arc__()
         if not hasattr(self, "recordings"):
             self.recordings = {}
         if not x in self.recordings:
@@ -187,9 +194,14 @@ class PointProcess(PythonHocObject, connectable):
         PythonHocObject.__init__(self, *args, **kwargs)
         connectable.__init__(self)
 
-    def stimulate(self, **kwargs):
-        stimulus = self._interpreter.NetStim()
-        for kw, value in kwargs.items():
-            setattr(stimulus.__neuron__(), kw, value)
+    def stimulate(self, pattern=None, **kwargs):
+        if pattern is None:
+            # No specific pattern given, create NetStim
+            stimulus = self._interpreter.NetStim()
+            for kw, value in kwargs.items():
+                setattr(stimulus.__neuron__(), kw, value)
+        else:
+            # Specific pattern required, create VecStim
+            stimulus = self._interpreter.VecStim(pattern=pattern)
         self._interpreter.NetCon(stimulus, self)
         return stimulus
