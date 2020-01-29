@@ -30,7 +30,7 @@ def connection(source, target, strict=True):
     return source._connections[target]
 
 
-def get_data_file(*dirs):
+def get_data_file(*dirs):  # pragma: nocover
     """
         Retrieve a file from the data directory that is installed together with the
         package.
