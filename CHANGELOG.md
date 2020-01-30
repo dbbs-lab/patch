@@ -1,3 +1,8 @@
+# 1.3.1
+
+* Added better error handling for NEURON errors.
+* Added checks so that `continuerun` and `run` can only be used after `finitialize`
+
 # 1.3.0
 
 * Added extensions:
