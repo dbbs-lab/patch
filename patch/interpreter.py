@@ -15,6 +15,7 @@ class PythonHocInterpreter:
         self.__requires_wrapping = [cls.__name__ for cls in self.__object_classes]
         self.__loaded_extensions = []
         self.load_file("stdrun.hoc")
+        self.runtime = 0
 
     def __getattr__(self, attr_name):
         # Get the missing attribute from h, if it requires wrapping return a wrapped
@@ -120,14 +121,20 @@ class PythonHocInterpreter:
             self.__h.finitialize(initial)
         else:
             self.__h.finitialize()
+        self.runtime = 0
         self._finitialized = True
 
-    def continuerun(self, time_stop):
+    def continuerun(self, time_stop, add=False):
         if not hasattr(self, "_finitialized"):
             raise UninitializedError(
                 "Cannot start NEURON simulation without first using `p.finitialize`."
             )
-        self.__h.continuerun(time_stop)
+        if add:
+            self.__h.continuerun(self.runtime + time_stop)
+            self.runtime += time_stop
+        else:
+            self.__h.continuerun(time_stop)
+            self.runtime = time_stop
 
     def run(self):
         if not hasattr(self, "_finitialized"):
