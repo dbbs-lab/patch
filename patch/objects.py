@@ -204,14 +204,20 @@ class PointProcess(PythonHocObject, connectable):
         PythonHocObject.__init__(self, *args, **kwargs)
         connectable.__init__(self)
 
-    def stimulate(self, pattern=None, **kwargs):
+    def stimulate(self, pattern=None, weight=0.04, delay=0.0, **kwargs):
+        from . import connection
+
         if pattern is None:
             # No specific pattern given, create NetStim
             stimulus = self._interpreter.NetStim()
             for kw, value in kwargs.items():
                 setattr(stimulus.__neuron__(), kw, value)
+
         else:
             # Specific pattern required, create VecStim
             stimulus = self._interpreter.VecStim(pattern=pattern)
         self._interpreter.NetCon(stimulus, self)
+        c = connection(stimulus, self)
+        c.weight[0] = weight
+        c.delay = delay
         return stimulus
