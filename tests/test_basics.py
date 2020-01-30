@@ -129,9 +129,8 @@ class TestPointProcess(unittest.TestCase):
             type(pp),
             "Point process factory did not return a PointProcess.",
         )
-        self.assertEqual(
-            "ExpSyn[0]",
-            str(pp.__neuron__()),
+        self.assertTrue(
+            str(pp.__neuron__()).find("ExpSyn[") != -1,
             "Point process factory did not return a NEURON point process pointer.",
         )
 
