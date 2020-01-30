@@ -1,7 +1,7 @@
 from .objects import PythonHocObject, NetCon, PointProcess, VecStim
-from .core import transform, transform_netcon, _suppress_stdout
+from .core import transform, transform_netcon
 from .exceptions import *
-import io
+from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess
 
 
 class PythonHocInterpreter:
@@ -42,28 +42,10 @@ class PythonHocInterpreter:
     def NetCon(self, source, target, *args, **kwargs):
         nrn_source = transform_netcon(source)
         nrn_target = transform_netcon(target)
-        with io.StringIO() as error_stream:
-            try:
-                with _suppress_stdout(error_stream):
-                    connection = NetCon(
-                        self, self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs)
-                    )
-            except RuntimeError as e:
-                error = error_stream.getvalue()
-                if error.find("must be a point process or NULLObject") != -1:
-                    if error.find("arg 1") != -1:
-                        raise HocConnectError(
-                            "Source is not a point process. Transformed type: '{}'".format(
-                                type(nrn_source)
-                            )
-                        ) from None
-                    if error.find("arg 2") != -1:
-                        raise HocConnectError(
-                            "Target is not a point process. Transformed type: '{}'".format(
-                                type(nrn_target)
-                            )
-                        ) from None
-                raise HocError(error) from None
+        with catch_hoc_error(CatchNetCon, nrn_source=nrn_source, nrn_target=nrn_target):
+            connection = NetCon(
+                self, self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs)
+            )
         connection.__ref__(self)
         connection.__ref__(target)
         if not hasattr(source, "_connections"):
@@ -115,8 +97,9 @@ class PythonHocInterpreter:
             t = self.Vector()
             # Fix for upstream NEURON bug. See https://github.com/neuronsimulator/nrn/issues/416
             try:
-                t.record(self._ref_t)
-            except RuntimeError as e:
+                with catch_hoc_error(CatchSectionAccess):
+                    t.record(self._ref_t)
+            except HocSectionAccessError as e:
                 self.__dud_section = self.Section(name="this_is_here_to_record_time")
                 # Recurse to try again.
                 return self.time
