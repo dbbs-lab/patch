@@ -68,11 +68,25 @@ class PythonHocInterpreter:
             target._connections[source] = connection
         return connection
 
-    def ParallelCon(self, source, gid):
-        nc = self.NetCon(source, None)
-        self.pc.set_gid2node(gid, self.pc.id())
-        self.pc.cell(gid, nc)
-        return nc
+    def ParallelCon(self, a, b):
+        a_int = isinstance(a, int)
+        b_int = isinstance(b, int)
+        if a_int != b_int:
+            if b_int:
+                source = a
+                gid = b
+                nc = self.NetCon(source, None)
+                self.pc.set_gid2node(gid, self.pc.id())
+                self.pc.cell(gid, nc)
+                return nc
+            else:
+                target = transform_netcon(b)
+                gid = a
+                self.pc.gid_connect(gid, target)
+        else:
+            raise ParallelConnectError(
+                "Exactly one of the first or second arguments has to be a GID."
+            )
 
     def ParallelContext(self):
         return self.pc

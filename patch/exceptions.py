@@ -36,3 +36,11 @@ class UninitializedError(SimulationError):
 
 class ErrorHandlingError(PatchError):
     pass
+
+
+class ParallelError(PatchError):
+    pass
+
+
+class ParallelConnectError(PatchError):
+    pass
