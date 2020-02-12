@@ -215,7 +215,6 @@ class PointProcess(PythonHocObject, connectable):
             stimulus = self._interpreter.NetStim()
             for kw, value in kwargs.items():
                 setattr(stimulus.__neuron__(), kw, value)
-
         else:
             # Specific pattern required, create VecStim
             stimulus = self._interpreter.VecStim(pattern=pattern)

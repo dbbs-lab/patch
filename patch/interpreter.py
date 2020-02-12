@@ -58,7 +58,10 @@ class PythonHocInterpreter:
             )
         # Set the weight, delay and threshold independently
         for k, v in setters.items():
-            connection.__dict__[k] = v
+            if k == "weight":
+                connection.weight[0] = v
+            else:
+                connection.__dict__[k] = v
         # Have the NetCon reference source and target
         connection.__ref__(source)
         connection.__ref__(target)
