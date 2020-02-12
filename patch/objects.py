@@ -149,6 +149,7 @@ class Section(PythonHocObject, connectable):
             recorder.record(self(x))
             self.recordings[x] = recorder
             return recorder
+        return self.recordings[x]
 
     def synapse(self, factory, *args, **kwargs):
         return self._interpreter.PointProcess(factory, self, *args, **kwargs)
