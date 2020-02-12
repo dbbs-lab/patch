@@ -219,8 +219,5 @@ class PointProcess(PythonHocObject, connectable):
         else:
             # Specific pattern required, create VecStim
             stimulus = self._interpreter.VecStim(pattern=pattern)
-        self._interpreter.NetCon(stimulus, self)
-        c = connection(stimulus, self)
-        c.weight[0] = weight
-        c.delay = delay
+        self._interpreter.NetCon(stimulus, self, weight=weight, delay=delay)
         return stimulus

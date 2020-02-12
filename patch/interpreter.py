@@ -1,5 +1,5 @@
 from .objects import PythonHocObject, NetCon, PointProcess, VecStim
-from .core import transform, transform_netcon
+from .core import transform, transform_netcon, assert_connectable
 from .exceptions import *
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
 
@@ -45,44 +45,44 @@ class PythonHocInterpreter:
         nrn_target = transform_netcon(target)
         with catch_hoc_error(CatchNetCon, nrn_source=nrn_source, nrn_target=nrn_target):
             connection = NetCon(
-                self, self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs)
+                self, self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs),
             )
-        connection.__ref__(self)
+        # Have the NetCon reference source and target
+        connection.__ref__(source)
         connection.__ref__(target)
-        if not hasattr(source, "_connections"):
-            raise NotConnectableError(
-                "Source "
-                + str(source)
-                + " is not connectable. It lacks attribute _connections required to form NetCons."
-            )
-        source._connections[target] = connection
-        if not hasattr(target, "_connections"):
-            # Allow target of NetCon's to be NoneType for parallel connections.
-            if target is not None:
-                raise NotConnectableError(
-                    "Target "
-                    + str(target)
-                    + " is not connectable. It lacks attribute _connections required to form NetCons."
-                )
-        else:
+        # If target is None, this NetCon is used as a spike detector.
+        if target is not None:
+            # Connect source and target.
+            assert_connectable(source, label="Source")
+            assert_connectable(target, label="Target")
+            source._connections[target] = connection
             target._connections[source] = connection
         return connection
 
-    def ParallelCon(self, a, b):
+    def ParallelCon(self, a, b, *args, **kwargs):
         a_int = isinstance(a, int)
         b_int = isinstance(b, int)
+        gid = a if a_int else b
         if a_int != b_int:
             if b_int:
                 source = a
-                gid = b
-                nc = self.NetCon(source, None)
+                nc = self.NetCon(source, None, *args, **kwargs)
                 self.pc.set_gid2node(gid, self.pc.id())
                 self.pc.cell(gid, nc)
                 return nc
             else:
-                target = transform_netcon(b)
-                gid = a
-                return self.pc.gid_connect(gid, target)
+                target = b
+                nrn_target = transform_netcon(target)
+                nrn_nc = self.pc.gid_connect(gid, nrn_target)
+                # Wrap the gid_connect NetCon
+                nc = NetCon(self, nrn_nc)
+                nc.__ref__(b)
+                b.__ref__(nc)
+                if "delay" in kwargs:
+                    nc.delay = kwargs["delay"]
+                if "weight" in kwargs:
+                    nc.weight[0] = kwargs["weight"]
+                return nc
         else:
             raise ParallelConnectError(
                 "Exactly one of the first or second arguments has to be a GID."
