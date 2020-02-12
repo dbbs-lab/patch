@@ -183,7 +183,16 @@ class VecStim(PythonHocObject, connectable):
 
 
 class NetCon(PythonHocObject):
-    pass
+    def record(self, vector=None):
+        if vector is not None:
+            self._neuron_ptr.record(transform(vector))
+            vector.__ref__(self)
+        else:
+            if not hasattr(self, "recorder"):
+                vector = self._interpreter.Vector()
+                self.recorder = self._neuron_ptr.record(transform(vector))
+                vector.__ref__(self)
+            return self.recorder
 
 
 class Segment(PythonHocObject, connectable):
