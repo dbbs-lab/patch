@@ -51,3 +51,7 @@ class TestErrorHandling(unittest.TestCase):
         t = p.Vector()
         with self.assertRaises(HocConnectError, msg="Didn't catch NetCon error"):
             p.NetCon(s, t)
+
+    def test_suppress(self):
+        with _suppress_nrn():
+            print('ERROR! SUPPRESSION FAILED!')
