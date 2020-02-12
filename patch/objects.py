@@ -82,7 +82,7 @@ class Section(PythonHocObject, connectable):
         return self(self.__arc__()).__netcon__()
 
     def __record__(self):
-        return self(self.__arc__()).__netcon__()
+        return self(self.__arc__()).__record__()
 
     def __call__(self, *args, **kwargs):
         v = super().__call__(*args, **kwargs)
