@@ -97,8 +97,7 @@ class PythonHocInterpreter:
                     nc.delay = kwargs["delay"]
                 if "weight" in kwargs:
                     nc.weight[0] = kwargs["weight"]
-                if "threshold" in kwargs:
-                    nc.threshold = kwargs["threshold"]
+                nc.threshold = kwargs["threshold"] if "threshold" in kwargs else -20.0
                 return nc
         else:
             raise ParallelConnectError(
