@@ -42,7 +42,6 @@ class TestNetworks(unittest.TestCase):
         rs2 = s2.record()
         rs3 = s3.record()
         t = p.time
-        from neuron import h
 
         p.finitialize()
         p.continuerun(10)
