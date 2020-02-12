@@ -190,7 +190,8 @@ class NetCon(PythonHocObject):
         else:
             if not hasattr(self, "recorder"):
                 vector = self._interpreter.Vector()
-                self.recorder = self._neuron_ptr.record(transform(vector))
+                self._neuron_ptr.record(transform(vector))
+                self.recorder = vector
                 vector.__ref__(self)
             return self.recorder
 
