@@ -43,10 +43,22 @@ class PythonHocInterpreter:
     def NetCon(self, source, target, *args, **kwargs):
         nrn_source = transform_netcon(source)
         nrn_target = transform_netcon(target)
+        # Change the NetCon signature so that weight, delay and threshold become
+        # independent optional keyword arguments.
+        setters = {}
+        setter_keys = ["weight", "delay", "threshold"]
+        for key in setter_keys:
+            if key in kwargs:
+                setters[key] = kwargs[key]
+                del kwargs[key]
+        # Execute HOC NetCon and wrap result into `connection`
         with catch_hoc_error(CatchNetCon, nrn_source=nrn_source, nrn_target=nrn_target):
             connection = NetCon(
                 self, self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs),
             )
+        # Set the weight, delay and threshold independently
+        for k, v in setters.items():
+            connection.__dict__[k] = v
         # Have the NetCon reference source and target
         connection.__ref__(source)
         connection.__ref__(target)
@@ -82,6 +94,8 @@ class PythonHocInterpreter:
                     nc.delay = kwargs["delay"]
                 if "weight" in kwargs:
                     nc.weight[0] = kwargs["weight"]
+                if "threshold" in kwargs:
+                    nc.threshold = kwargs["threshold"]
                 return nc
         else:
             raise ParallelConnectError(
