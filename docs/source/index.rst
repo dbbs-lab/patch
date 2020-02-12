@@ -28,6 +28,7 @@ Welcome to Patch's documentation!
 
    usage
    sections
+   connections
    magic
    patch
 
