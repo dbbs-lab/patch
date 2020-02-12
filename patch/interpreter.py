@@ -1,7 +1,7 @@
 from .objects import PythonHocObject, NetCon, PointProcess, VecStim
 from .core import transform, transform_netcon
 from .exceptions import *
-from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess
+from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
 
 
 class PythonHocInterpreter:
@@ -55,15 +55,27 @@ class PythonHocInterpreter:
                 + str(source)
                 + " is not connectable. It lacks attribute _connections required to form NetCons."
             )
-        if not hasattr(target, "_connections"):
-            raise NotConnectableError(
-                "Target "
-                + str(target)
-                + " is not connectable. It lacks attribute _connections required to form NetCons."
-            )
         source._connections[target] = connection
-        target._connections[source] = connection
+        if not hasattr(target, "_connections"):
+            # Allow target of NetCon's to be NoneType for parallel connections.
+            if target is not None:
+                raise NotConnectableError(
+                    "Target "
+                    + str(target)
+                    + " is not connectable. It lacks attribute _connections required to form NetCons."
+                )
+        else:
+            target._connections[source] = connection
         return connection
+
+    def ParallelCon(self, source, gid):
+        nc = self.NetCon(source, None)
+        self.pc.set_gid2node(gid, self.pc.id())
+        self.pc.cell(gid, nc)
+        return nc
+
+    def ParallelContext(self):
+        return self.pc
 
     def PointProcess(self, factory, target, *args, **kwargs):
         """
@@ -142,3 +154,18 @@ class PythonHocInterpreter:
                 "Cannot start NEURON simulation without first using `p.finitialize`."
             )
         self.__h.run()
+
+    def _init_pc(self):
+        if not hasattr(self, "_PythonHocInterpreter__pc"):
+            self.__h.nrnmpi_init()
+            self.__pc = ParallelContext(self, self.__h.ParallelContext())
+
+    @property
+    def pc(self):
+        self._init_pc()
+        return self.__pc
+
+
+class ParallelContext(PythonHocObject):
+    def cell(self, gid, nc):
+        self.__neuron__().cell(gid, transform(nc))
