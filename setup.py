@@ -24,7 +24,7 @@ setuptools.setup(
     license="MIT",
     packages=setuptools.find_packages(),
     include_package_data=True,
-    package_data={"patch": data_files,},
+    package_data={"patch": data_files, "patch_extensions": [os.path.join("mod","*.mod")]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
