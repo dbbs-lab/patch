@@ -82,7 +82,7 @@ class PythonHocInterpreter:
             else:
                 target = transform_netcon(b)
                 gid = a
-                self.pc.gid_connect(gid, target)
+                return self.pc.gid_connect(gid, target)
         else:
             raise ParallelConnectError(
                 "Exactly one of the first or second arguments has to be a GID."
