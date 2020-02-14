@@ -30,6 +30,7 @@ Welcome to Patch's documentation!
    sections
    magic
    patch
+   candy_guide
 
 Installation
 ------------
@@ -37,6 +38,14 @@ Installation
 Patch can be installed using::
 
    pip install nrn-patch
+
+Syntactic sugar & quality of life
+---------------------------------
+
+This wrapper aims to make NEURON more robust and user-friendly, by patching common
+gotcha's and introducing sugar and quality of life improvements. For a detailed overview
+of niceties that will keep you sane instead of hunting down obscure bugs, check out the
+:doc:`candy_guide`.
 
 Known unpatched holes
 ---------------------
