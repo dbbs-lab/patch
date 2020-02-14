@@ -47,7 +47,8 @@ Sections & Segments
   plt.plot(list(s.recordings[0.5]), list(p.time))
 
 * Sections can connect themselves to a PointProcess target with ``.connect_points``, which
-  handles NetCon stack access transparently:
+  handles NetCon stack access transparently. This allows for example for easy creation of
+  synaptic contacts between a Section and a target synapse:
 
 .. code-block:: python
 
