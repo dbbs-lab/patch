@@ -39,3 +39,6 @@ def assert_connectable(obj, label=None):
             + str(obj)
             + " is not connectable. It lacks attribute _connections required to form NetCons."
         )
+
+def is_section(obj):
+    return transform(obj).__class__.__name__ == 'Section'

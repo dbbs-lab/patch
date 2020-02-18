@@ -1,5 +1,5 @@
 from .objects import PythonHocObject, NetCon, PointProcess, VecStim
-from .core import transform, transform_netcon, assert_connectable
+from .core import transform, transform_netcon, assert_connectable, is_section
 from .exceptions import *
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
 
@@ -51,6 +51,8 @@ class PythonHocInterpreter:
             if key in kwargs:
                 setters[key] = kwargs[key]
                 del kwargs[key]
+        if is_section(source):
+            kwargs["sec"] = transform(source)
         # Execute HOC NetCon and wrap result into `connection`
         with catch_hoc_error(CatchNetCon, nrn_source=nrn_source, nrn_target=nrn_target):
             connection = NetCon(
