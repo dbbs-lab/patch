@@ -6,6 +6,8 @@ from patch import p
 from neuron import h
 from patch.exceptions import *
 from patch.error_handler import *
+import patch.error_handler
+print(dir(patch.error_handler))
 
 
 class TestErrorHandling(unittest.TestCase):
