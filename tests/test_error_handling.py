@@ -6,9 +6,7 @@ from patch import p
 from neuron import h
 from patch.exceptions import *
 from patch.error_handler import *
-import patch.error_handler
-print("_suppress_nrn" in globals(), globals())
-print(dir(patch.error_handler))
+from patch.error_handler import _suppress_nrn
 
 
 class TestErrorHandling(unittest.TestCase):
