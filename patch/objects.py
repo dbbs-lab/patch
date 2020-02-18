@@ -84,11 +84,17 @@ class Section(PythonHocObject, connectable):
     def __record__(self):
         return self(self.__arc__()).__record__()
 
-    def __call__(self, *args, **kwargs):
-        v = super().__call__(*args, **kwargs)
+    def __call__(self, x, ephemeral=False, *args, **kwargs):
+        v = super().__call__(x, *args, **kwargs)
         if type(v).__name__ != "Segment":  # pragma: no cover
             raise TypeError("Section call did not return a Segment.")
-        return Segment(self._interpreter, v)
+        seg = Segment(self._interpreter, v, self)
+        if not ephemeral:
+            # By default store references to segments, but allow for them to be
+            # garbage collected if `ephemeral=True`
+            seg.__ref__(self)
+            self.__ref__(seg)
+        return seg
 
     def __iter__(self, *args, **kwargs):
         iter = super().__iter__(*args, **kwargs)
@@ -197,9 +203,10 @@ class NetCon(PythonHocObject):
 
 
 class Segment(PythonHocObject, connectable):
-    def __init__(self, *args, **kwargs):
-        PythonHocObject.__init__(self, *args, **kwargs)
+    def __init__(self, interpreter, ptr, section, **kwargs):
+        PythonHocObject.__init__(self, interpreter, ptr, **kwargs)
         connectable.__init__(self)
+        self.section = section
 
     def __netcon__(self):
         return self.__neuron__()._ref_v
