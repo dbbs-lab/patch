@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from .exceptions import *
-import io, sys
+import io, sys, os
 
 
 @contextmanager

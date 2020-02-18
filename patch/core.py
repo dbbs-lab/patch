@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from .exceptions import *
 import os, sys
 
 
@@ -27,3 +28,14 @@ def transform_record(obj):
 def _is_sequence(obj):
     t = type(obj)
     return hasattr(t, "__len__") and hasattr(t, "__getitem__")
+
+
+def assert_connectable(obj, label=None):
+    if not hasattr(obj, "_connections"):
+        raise NotConnectableError(
+            label + " "
+            if label is not None
+            else ""
+            + str(obj)
+            + " is not connectable. It lacks attribute _connections required to form NetCons."
+        )

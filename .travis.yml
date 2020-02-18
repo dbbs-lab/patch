@@ -5,11 +5,10 @@ jobs:
     - name: "Python 3.7.0 on Xenial Linux"
       python: 3.7
       before_install:
+        - sudo apt-get install -y openmpi-bin
         - wget https://neuron.yale.edu/ftp/neuron/versions/v7.7/nrn-7.7.x86_64-linux.deb
         - sudo dpkg -i nrn-7.7.x86_64-linux.deb
-        - ls /usr/local/nrn/lib/python
         - export PYTHONPATH=$PYTHONPATH:/usr/local/nrn/lib/python
-        - echo $PYTHONPATH
 install:
   - pip3 install --upgrade pip
   - pip3 install -r requirements.txt

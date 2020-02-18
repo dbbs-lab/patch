@@ -1,4 +1,5 @@
 import unittest, sys, os
+from random import random
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import patch
@@ -26,7 +27,6 @@ class TestNetworks(unittest.TestCase):
         self.assertRaises(NotConnectableError, connection, s, p.Vector())
 
     def test_stimulate(self):
-        from random import random
 
         s1 = p.Section()
         s2 = p.Section()

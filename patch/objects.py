@@ -149,6 +149,10 @@ class Section(PythonHocObject, connectable):
             recorder.record(self(x))
             self.recordings[x] = recorder
             return recorder
+        return self.recordings[x]
+
+    def synapse(self, factory, *args, **kwargs):
+        return self._interpreter.PointProcess(factory, self, *args, **kwargs)
 
 
 class Vector(PythonHocObject):
@@ -179,7 +183,17 @@ class VecStim(PythonHocObject, connectable):
 
 
 class NetCon(PythonHocObject):
-    pass
+    def record(self, vector=None):
+        if vector is not None:
+            self._neuron_ptr.record(transform(vector))
+            vector.__ref__(self)
+        else:
+            if not hasattr(self, "recorder"):
+                vector = self._interpreter.Vector()
+                self._neuron_ptr.record(transform(vector))
+                self.recorder = vector
+                vector.__ref__(self)
+            return self.recorder
 
 
 class Segment(PythonHocObject, connectable):
@@ -212,12 +226,8 @@ class PointProcess(PythonHocObject, connectable):
             stimulus = self._interpreter.NetStim()
             for kw, value in kwargs.items():
                 setattr(stimulus.__neuron__(), kw, value)
-
         else:
             # Specific pattern required, create VecStim
             stimulus = self._interpreter.VecStim(pattern=pattern)
-        self._interpreter.NetCon(stimulus, self)
-        c = connection(stimulus, self)
-        c.weight[0] = weight
-        c.delay = delay
+        self._interpreter.NetCon(stimulus, self, weight=weight, delay=delay)
         return stimulus

@@ -1,7 +1,7 @@
 from .objects import PythonHocObject, NetCon, PointProcess, VecStim
-from .core import transform, transform_netcon
+from .core import transform, transform_netcon, assert_connectable
 from .exceptions import *
-from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess
+from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
 
 
 class PythonHocInterpreter:
@@ -43,27 +43,76 @@ class PythonHocInterpreter:
     def NetCon(self, source, target, *args, **kwargs):
         nrn_source = transform_netcon(source)
         nrn_target = transform_netcon(target)
+        # Change the NetCon signature so that weight, delay and threshold become
+        # independent optional keyword arguments.
+        setters = {}
+        setter_keys = ["weight", "delay", "threshold"]
+        for key in setter_keys:
+            if key in kwargs:
+                setters[key] = kwargs[key]
+                del kwargs[key]
+        # Execute HOC NetCon and wrap result into `connection`
         with catch_hoc_error(CatchNetCon, nrn_source=nrn_source, nrn_target=nrn_target):
             connection = NetCon(
-                self, self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs)
+                self, self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs),
             )
-        connection.__ref__(self)
+        # Set the weight, delay and threshold independently
+        for k, v in setters.items():
+            if k == "weight":
+                connection.weight[0] = v
+            else:
+                connection.__dict__[k] = v
+        # Have the NetCon reference source and target
+        connection.__ref__(source)
         connection.__ref__(target)
-        if not hasattr(source, "_connections"):
-            raise NotConnectableError(
-                "Source "
-                + str(source)
-                + " is not connectable. It lacks attribute _connections required to form NetCons."
-            )
-        if not hasattr(target, "_connections"):
-            raise NotConnectableError(
-                "Target "
-                + str(target)
-                + " is not connectable. It lacks attribute _connections required to form NetCons."
-            )
-        source._connections[target] = connection
-        target._connections[source] = connection
+        # If target is None, this NetCon is used as a spike detector.
+        if target is not None:
+            # Connect source and target.
+            assert_connectable(source, label="Source")
+            assert_connectable(target, label="Target")
+            source._connections[target] = connection
+            target._connections[source] = connection
         return connection
+
+    def ParallelCon(self, a, b, *args, **kwargs):
+        a_int = isinstance(a, int)
+        b_int = isinstance(b, int)
+        gid = a if a_int else b
+        if a_int != b_int:
+            if b_int:
+                source = a
+                # Create a second NetCon, with explicit thresholds, as a workaround for an
+                # esoteric NEURON spike detection bug.
+                nc_nopar = self.NetCon(source, None)
+                threshold = -20.0
+                if "threshold" in kwargs:
+                    threshold = kwargs["threshold"]
+                nc_nopar.threshold = threshold
+                nc = self.NetCon(source, None, *args, **kwargs)
+                self.pc.set_gid2node(gid, self.pc.id())
+                self.pc.cell(gid, nc)
+                return nc
+            else:
+                target = b
+                nrn_target = transform_netcon(target)
+                nrn_nc = self.pc.gid_connect(gid, nrn_target)
+                # Wrap the gid_connect NetCon
+                nc = NetCon(self, nrn_nc)
+                nc.__ref__(b)
+                b.__ref__(nc)
+                if "delay" in kwargs:
+                    nc.delay = kwargs["delay"]
+                if "weight" in kwargs:
+                    nc.weight[0] = kwargs["weight"]
+                nc.threshold = kwargs["threshold"] if "threshold" in kwargs else -20.0
+                return nc
+        else:
+            raise ParallelConnectError(
+                "Exactly one of the first or second arguments has to be a GID."
+            )
+
+    def ParallelContext(self):
+        return self.pc
 
     def PointProcess(self, factory, target, *args, **kwargs):
         """
@@ -75,10 +124,16 @@ class PythonHocInterpreter:
       :type target: :class:`.objects.Segment`
     """
         if hasattr(target, "__arc__"):
+            og_target = target
             target = target(target.__arc__())
+            og_target.__ref__(target)
+            target.__ref__(og_target)
         nrn_target = transform(target)
         point_process = factory(nrn_target, *args, **kwargs)
-        return PointProcess(self, point_process)
+        pp = PointProcess(self, point_process)
+        target.__ref__(pp)
+        pp.__ref__(target)
+        return pp
 
     def VecStim(self, pattern=None, *args, **kwargs):
         import glia as g
@@ -142,3 +197,18 @@ class PythonHocInterpreter:
                 "Cannot start NEURON simulation without first using `p.finitialize`."
             )
         self.__h.run()
+
+    def _init_pc(self):
+        if not hasattr(self, "_PythonHocInterpreter__pc"):
+            self.__h.nrnmpi_init()
+            self.__pc = ParallelContext(self, self.__h.ParallelContext())
+
+    @property
+    def pc(self):
+        self._init_pc()
+        return self.__pc
+
+
+class ParallelContext(PythonHocObject):
+    def cell(self, gid, nc):
+        self.__neuron__().cell(gid, transform(nc))
