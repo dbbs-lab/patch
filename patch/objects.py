@@ -101,7 +101,7 @@ class Section(PythonHocObject, connectable):
         for v in iter:
             if type(v).__name__ != "Segment":  # pragma: no cover
                 raise TypeError("Section iteration did not return a Segment.")
-            yield Segment(self._interpreter, v)
+            yield Segment(self._interpreter, v, self)
 
     def insert(self, *args, **kwargs):
         # Catch nrn.Section return value, always seems to be self.
