@@ -76,7 +76,7 @@ class PythonHocInterpreter:
             target._connections[source] = connection
         return connection
 
-    def ParallelCon(self, a, b, *args, **kwargs):
+    def ParallelCon(self, a, b, output=False, *args, **kwargs):
         a_int = isinstance(a, int)
         b_int = isinstance(b, int)
         gid = a if a_int else b
@@ -93,6 +93,8 @@ class PythonHocInterpreter:
                 nc = self.NetCon(source, None, *args, **kwargs)
                 self.pc.set_gid2node(gid, self.pc.id())
                 self.pc.cell(gid, nc)
+                if output:
+                    self.pc.outputcell(gid)
                 return nc
             else:
                 target = b
