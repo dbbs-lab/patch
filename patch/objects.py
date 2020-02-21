@@ -38,6 +38,10 @@ class PythonHocObject:
         except TypeError as _:
             raise
 
+    def __len__(self):
+        # Relay length to pointer
+        return len(self.__neuron__())
+
     def __neuron__(self):
         # Magic method that allows duck typing of this object as something that
         # needs to be represented differently when passed to NEURON.
