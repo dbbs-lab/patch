@@ -176,7 +176,7 @@ class PythonHocInterpreter:
         self.__loaded_extensions.append(extension)
 
     def finitialize(self, initial=None):
-        if initial:
+        if initial is not None:
             self.__h.finitialize(initial)
         else:
             self.__h.finitialize()
