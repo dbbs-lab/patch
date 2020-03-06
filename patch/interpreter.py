@@ -1,5 +1,5 @@
 from .objects import PythonHocObject, NetCon, PointProcess, VecStim
-from .core import transform, transform_netcon, assert_connectable
+from .core import transform, transform_netcon, assert_connectable, is_section
 from .exceptions import *
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
 
@@ -51,6 +51,8 @@ class PythonHocInterpreter:
             if key in kwargs:
                 setters[key] = kwargs[key]
                 del kwargs[key]
+        if is_section(source):
+            kwargs["sec"] = transform(source)
         # Execute HOC NetCon and wrap result into `connection`
         with catch_hoc_error(CatchNetCon, nrn_source=nrn_source, nrn_target=nrn_target):
             connection = NetCon(
@@ -74,7 +76,7 @@ class PythonHocInterpreter:
             target._connections[source] = connection
         return connection
 
-    def ParallelCon(self, a, b, *args, **kwargs):
+    def ParallelCon(self, a, b, output=False, *args, **kwargs):
         a_int = isinstance(a, int)
         b_int = isinstance(b, int)
         gid = a if a_int else b
@@ -91,6 +93,8 @@ class PythonHocInterpreter:
                 nc = self.NetCon(source, None, *args, **kwargs)
                 self.pc.set_gid2node(gid, self.pc.id())
                 self.pc.cell(gid, nc)
+                if output:
+                    self.pc.outputcell(gid)
                 return nc
             else:
                 target = b
@@ -172,7 +176,7 @@ class PythonHocInterpreter:
         self.__loaded_extensions.append(extension)
 
     def finitialize(self, initial=None):
-        if initial:
+        if initial is not None:
             self.__h.finitialize(initial)
         else:
             self.__h.finitialize()
