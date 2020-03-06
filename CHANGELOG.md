@@ -1,3 +1,7 @@
+# 1.4
+
+* Added `ParallelCon` for parallel simulations.
+
 # 1.3.2
 
 * Fixed a bug with the previous distribution where the VecStim mod file was missing.
