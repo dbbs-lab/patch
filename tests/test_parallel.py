@@ -13,8 +13,8 @@ class TestSingleHostParallel(unittest.TestCase):
     """
 
     def test_pc_singleton(self):
-        pc = p.pc
-        pc2 = p.pc
+        pc = p.parallel
+        pc2 = p.parallel
         self.assertEqual(pc, pc2)
         self.assertEqual(pc.id(), 0)
 
@@ -28,7 +28,9 @@ class TestSingleHostParallel(unittest.TestCase):
         p.ParallelCon(1, syn)
 
 
-@unittest.skipIf(p.pc.nhost() == 1, "Cannot test parallel networks on a single MPI node.")
+@unittest.skipIf(
+    p.parallel.nhost() == 1, "Cannot test parallel networks on a single MPI node."
+)
 class TestParallelNetworks(unittest.TestCase):
     """
         Test true functioning of parallel networks on multiple MPI nodes.

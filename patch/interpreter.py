@@ -91,15 +91,15 @@ class PythonHocInterpreter:
                     threshold = kwargs["threshold"]
                 nc_nopar.threshold = threshold
                 nc = self.NetCon(source, None, *args, **kwargs)
-                self.pc.set_gid2node(gid, self.pc.id())
-                self.pc.cell(gid, nc)
+                self.parallel.set_gid2node(gid, self.parallel.id())
+                self.parallel.cell(gid, nc)
                 if output:
-                    self.pc.outputcell(gid)
+                    self.parallel.outputcell(gid)
                 return nc
             else:
                 target = b
                 nrn_target = transform_netcon(target)
-                nrn_nc = self.pc.gid_connect(gid, nrn_target)
+                nrn_nc = self.parallel.gid_connect(gid, nrn_target)
                 # Wrap the gid_connect NetCon
                 nc = NetCon(self, nrn_nc)
                 nc.__ref__(b)
@@ -116,7 +116,7 @@ class PythonHocInterpreter:
             )
 
     def ParallelContext(self):
-        return self.pc
+        return self.parallel
 
     def PointProcess(self, factory, target, *args, **kwargs):
         """
@@ -204,11 +204,21 @@ class PythonHocInterpreter:
 
     def _init_pc(self):
         if not hasattr(self, "_PythonHocInterpreter__pc"):
-            self.__h.nrnmpi_init()
+            try:
+                self.__h.nrnmpi_init()
+            except AttributeError:
+                import warnings, neuron
+
+                warnings.warn(
+                    "NEURON 7.7+ is required for parallel simulations."
+                    + " You're using version {}, the simulation might be duplicated on each node.".format(
+                        neuron.version
+                    )
+                )
             self.__pc = ParallelContext(self, self.__h.ParallelContext())
 
     @property
-    def pc(self):
+    def parallel(self):
         self._init_pc()
         return self.__pc
 
