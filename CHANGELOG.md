@@ -1,3 +1,8 @@
+# 2.0
+
+* Renamed `p.pc` to `p.parallel`
+* Throw a warning when `h.nrnmpi_init` is missing and `p.parallel` is used.
+
 # 1.4
 
 * Added `ParallelCon` for parallel simulations.
