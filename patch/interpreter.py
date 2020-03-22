@@ -207,14 +207,17 @@ class PythonHocInterpreter:
             try:
                 self.__h.nrnmpi_init()
             except AttributeError:
-                import warnings, neuron
+                from mpi4py import MPI
 
-                warnings.warn(
-                    "NEURON 7.7+ is required for parallel simulations."
-                    + " You're using version {}, the simulation might be duplicated on each node.".format(
-                        neuron.version
+                # Check whether MPI and NEURON agree on the ParallelContext.
+                # If not, make sure to help the user rectify this problem.
+                if MPI.COMM_WORLD.size != self.__h.ParallelContext().nhost():
+                    raise RuntimeError(
+                        "MPI could not be initialized. You're using NEURON {},"
+                        + " please upgrade to NEURON 7.7+"
+                        + " or make sure that you import `mpi4py` before importing"
+                        + " either NEURON or Patch."
                     )
-                )
             self.__pc = ParallelContext(self, self.__h.ParallelContext())
 
     @property

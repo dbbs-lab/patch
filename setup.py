@@ -24,12 +24,15 @@ setuptools.setup(
     license="MIT",
     packages=setuptools.find_packages(),
     include_package_data=True,
-    package_data={"patch": data_files, "patch_extensions": [os.path.join("mod","*.mod")]},
+    package_data={
+        "patch": data_files,
+        "patch_extensions": [os.path.join("mod", "*.mod")],
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
     entry_points={"glia.package": ["patch_extensions = patch_extensions"]},
-    install_requires=["setuptools", "nrn-glia"],
+    install_requires=["setuptools", "nrn-glia", "mpi4py"],
     extras_require={"dev": ["sphinx", "pre-commit", "black", "sphinxcontrib-contentui"]},
 )

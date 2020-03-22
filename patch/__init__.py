@@ -3,7 +3,7 @@ from .exceptions import *
 from .core import transform
 import os, pkg_resources
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 
 if not os.getenv("READTHEDOCS"):
     p = PythonHocInterpreter()

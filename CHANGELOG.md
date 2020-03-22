@@ -1,3 +1,7 @@
+# 2.0.1
+
+* Improved missing `nrnmpi_init` handling.
+
 # 2.0
 
 * Renamed `p.pc` to `p.parallel`
