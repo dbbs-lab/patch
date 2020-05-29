@@ -1,3 +1,8 @@
+# 2.0.2
+
+* Created a module class for the root module with p as a property so that neuron isn't
+  imported on patch import, until patch.p is accessed.
+
 # 2.0.1
 
 * Improved missing `nrnmpi_init` handling.

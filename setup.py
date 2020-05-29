@@ -1,8 +1,14 @@
 import setuptools, os, sys
-import patch
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
+# Get the version from the patch module without importing it.
+with open(os.path.join(os.path.dirname(__file__), "patch", "__init__.py"), "r") as f:
+    for line in f:
+        if "__version__ = " in line:
+            exec(line)
+            break
 
 # Collect all files recursively from the data folder
 data_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), "patch", "data"))
@@ -14,7 +20,7 @@ for (dirpath, dirnames, filenames) in os.walk(data_folder):
 
 setuptools.setup(
     name="nrn-patch",
-    version=patch.__version__,
+    version=__version__,
     author="Robin De Schepper",
     author_email="robingilbert.deschepper@unipv.it",
     description="A Pythonic, object-oriented, monkey patch for NEURON",
