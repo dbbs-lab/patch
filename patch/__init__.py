@@ -15,7 +15,7 @@ class PythonHocModule(types.ModuleType):
     def p(self):
         global _p
         if _p is None:
-            _p = PythonHocInterpreter()
+            _p = PythonHocModule.PythonHocInterpreter()
         else:
             return _p
 
