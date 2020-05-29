@@ -16,8 +16,7 @@ class PythonHocModule(types.ModuleType):
         global _p
         if _p is None:
             _p = PythonHocModule.PythonHocInterpreter()
-        else:
-            return _p
+        return _p
 
     def connection(self, source, target, strict=True):
         if not hasattr(source, "_connections"):
