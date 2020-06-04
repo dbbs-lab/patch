@@ -18,6 +18,8 @@ for (dirpath, dirnames, filenames) in os.walk(data_folder):
     if len(filenames) > 0:
         data_files.append(os.path.join(rel_folder, "*"))
 
+print("ola", setuptools.find_packages())
+
 setuptools.setup(
     name="nrn-patch",
     version=__version__,
@@ -39,6 +41,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     entry_points={"glia.package": ["patch_extensions = patch_extensions"]},
-    install_requires=["setuptools", "nrn-glia>=0.3.3", "mpi4py"],
+    install_requires=["setuptools", "nrn-glia>=0.3.4", "mpi4py"],
     extras_require={"dev": ["sphinx", "pre-commit", "black", "sphinxcontrib-contentui"]},
 )

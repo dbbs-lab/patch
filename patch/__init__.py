@@ -10,7 +10,7 @@ class PythonHocModule(types.ModuleType):
     from .core import transform
     from . import objects, interpreter, exceptions, error_handler, core
 
-    __version__ = "2.0.3"
+    __version__ = "2.0.4"
 
     @property
     def p(self):
