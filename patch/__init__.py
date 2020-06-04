@@ -1,5 +1,7 @@
+from mpi4py import MPI
 from .exceptions import *
 import os, sys, pkg_resources, types
+from .core import transform
 
 
 _p = None
@@ -7,8 +9,9 @@ _p = None
 
 class PythonHocModule(types.ModuleType):
     from .interpreter import PythonHocInterpreter
-    from .core import transform
     from . import objects, interpreter, exceptions, error_handler, core
+
+    transform = staticmethod(transform)
 
     __version__ = "2.0.4"
 

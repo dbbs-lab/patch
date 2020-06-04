@@ -209,6 +209,7 @@ class PythonHocInterpreter:
             # When it is fixed we can remove mpi4py as a dependency.
             from mpi4py import MPI
 
+            print(MPI.COMM_WORLD.size, self.__h.ParallelContext().nhost())
             # Check whether MPI and NEURON agree on the ParallelContext.
             # If not, make sure to help the user rectify this problem.
             if MPI.COMM_WORLD.size != self.__h.ParallelContext().nhost():
@@ -228,4 +229,50 @@ class PythonHocInterpreter:
 
 class ParallelContext(PythonHocObject):
     def cell(self, gid, nc):
-        self.__neuron__().cell(gid, transform(nc))
+        transform(self).cell(gid, transform(nc))
+
+    def broadcast(self, data, root=0):
+        """
+            Broadcast either a Vector or arbitrary picklable data. If ``data`` is a
+            Vector, the Vectors are resized and filled with the data from the Vector in
+            the ``root`` node. If ``data`` is not a Vector, it is pickled, transmitted and
+            returned from this function to all nodes.
+
+            :param data: The data to broadcast to the nodes.
+            :type data: :class:`Vector <.objects.Vector>` or any picklable object.
+            :param root: The id of the node that is broadcasting the data.
+            :type root: int
+            :returns: None (Vectors filled) or the transmitted data
+            :raises: BroadcastError if ``neuron.hoc.HocObjects`` that aren't Vectors are
+              transmitted
+        """
+        import neuron
+
+        data_ptr = transform(data)
+        # Is anyone broadcasting a HocObject?
+        if isinstance(data_ptr, neuron.hoc.HocObject):
+            # Comparing dir is used as a silly equality check because all NEURON object
+            # have class 'neuron.hoc.HocObject'
+            if dir(data_ptr) == dir(neuron.h.Vector()):
+                # If this node is broadcasting a Vector, then proceed to traditional
+                # broadcasting. If all nodes are broadcasting a Vector traditional
+                # broadcasting will occur, otherwise a BroadcastError is thrown.
+                transform(self).broadcast(data_ptr, root=root)
+            else:
+                raise BroadcastError(
+                    "NEURON HocObjects cannot be broadcasted, they need to be created on their own nodes."
+                )
+        else:
+            # If noone is sending a HocObject we proceed with picklable data broadcasting
+            return self._broadcast(data, root=root)
+
+    def _broadcast(self, data, root=0):
+        import pickle
+
+        if self.id() == root:
+            v = self._interpreter.Vector(list(pickle.dumps(data)))
+        else:
+            v = self._interpreter.Vector()
+        v = transform(v)
+        transform(self).broadcast(v, root)
+        return pickle.loads(bytes([int(d) for d in v]))

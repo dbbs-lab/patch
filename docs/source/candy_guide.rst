@@ -25,7 +25,8 @@ Sections & Segments
 .. code-block:: python
 
   s = p.Section()
-  p.ExpSyn(s) # syn = h.ExpSyn(s(0.5))
+  syn = p.ExpSyn(s)
+  # syn = h.ExpSyn(s(0.5))
 
 * Whenever a Section/Segment is recorded or connected and a NEURON scalar is expected
   ``_ref_v`` is used:
@@ -54,4 +55,41 @@ Sections & Segments
 
   s = p.Section()
   target_syn = p.Section().synapse(p.ExpSyn)
-  s.connect_points(target_syn) # No more s.push() and h.pop_section() required for NetCon.
+  # No more s.push() and h.pop_section() required for NetCon.
+  s.connect_points(target_syn)
+
+=================
+Parallel networks
+=================
+
+When you get to the level of the network it would be nice if you could describe your
+models in a more structured way so be sure to check out Arborize for just that.
+
+If you want to stay vanilla Patch still has you covered; it comes with out-of-the-box
+parallelization. Introducing the transmitter-receiver pattern:
+
+.. code-block:: python
+  if p.parallel.id() == 0:
+    transmitter = ParallelCon(obj1, gid)
+  if p.parallel.id() == 1:
+    receiver = ParallelCon(gid, obj2)
+
+Just these 2 commands will create a transmitter on node 0 that broadcasts the spikes of
+``obj1`` with the specified GID and a receiver on node 1 for ``obj2`` that listens to
+spikes with that GID.
+
+That's it. You are now spiking in parallel!
+
+Arbitrary data broadcasting
+===========================
+
+MPI has a great feature, it allows broadcasting data to other nodes. In NEURON this is
+restricted to just Vectors. Patch gives you back the freedom to transmit arbitrary data.
+Anything that can be pickled can be transmitted:
+
+.. code-block:: python
+
+  data = None # It's important to declare your var on all nodes to avoid NameErrors
+  if p.parallel.id() == 12:
+    data = np.random.randint((12,12,12))
+  received = p.parallel.broadcast(data, root=12)
