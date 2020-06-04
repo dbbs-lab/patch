@@ -209,7 +209,6 @@ class PythonHocInterpreter:
             # When it is fixed we can remove mpi4py as a dependency.
             from mpi4py import MPI
 
-            print(MPI.COMM_WORLD.size, self.__h.ParallelContext().nhost())
             # Check whether MPI and NEURON agree on the ParallelContext.
             # If not, make sure to help the user rectify this problem.
             if MPI.COMM_WORLD.size != self.__h.ParallelContext().nhost():
@@ -259,6 +258,8 @@ class ParallelContext(PythonHocObject):
                 # broadcasting will occur, otherwise a BroadcastError is thrown.
                 transform(self).broadcast(data_ptr, root=root)
             else:
+                # Send an empty vector so the other nodes don't hang.
+                transform(self).broadcast(transform(self._interpreter.Vector()), root)
                 raise BroadcastError(
                     "NEURON HocObjects cannot be broadcasted, they need to be created on their own nodes."
                 )
@@ -270,9 +271,19 @@ class ParallelContext(PythonHocObject):
         import pickle
 
         if self.id() == root:
-            v = self._interpreter.Vector(list(pickle.dumps(data)))
+            try:
+                v = self._interpreter.Vector(list(pickle.dumps(data)))
+            except AttributeError as e:
+                # Send an empty vector so the other nodes don't hang.
+                transform(self).broadcast(transform(self._interpreter.Vector()), root)
+                raise BroadcastError(str(e)) from None
         else:
             v = self._interpreter.Vector()
         v = transform(v)
         transform(self).broadcast(v, root)
-        return pickle.loads(bytes([int(d) for d in v]))
+        try:
+            return pickle.loads(bytes([int(d) for d in v]))
+        except EOFError:
+            raise BroadcastError(
+                "Root node did not transmit. Look for root node error."
+            ) from None
