@@ -1,3 +1,14 @@
+# 2.0.3
+
+* Another iteration of NEURON vs MPI: Completely rely on `mpi4py` until
+  https://github.com/neuronsimulator/nrn/issues/581 is addressed and `h.nrnmpi_init()`
+  can safely be called.
+
+# 2.0.2
+
+* Created a module class for the root module with p as a property so that neuron isn't
+  imported on patch import, until patch.p is accessed.
+
 # 2.0.1
 
 * Improved missing `nrnmpi_init` handling.

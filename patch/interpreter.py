@@ -204,20 +204,20 @@ class PythonHocInterpreter:
 
     def _init_pc(self):
         if not hasattr(self, "_PythonHocInterpreter__pc"):
-            try:
-                self.__h.nrnmpi_init()
-            except AttributeError:
-                from mpi4py import MPI
+            # Completely rely on mpi4py to initialize MPI. See
+            # https://github.com/neuronsimulator/nrn/issues/581
+            # When it is fixed we can remove mpi4py as a dependency.
+            from mpi4py import MPI
 
-                # Check whether MPI and NEURON agree on the ParallelContext.
-                # If not, make sure to help the user rectify this problem.
-                if MPI.COMM_WORLD.size != self.__h.ParallelContext().nhost():
-                    raise RuntimeError(
-                        "MPI could not be initialized. You're using NEURON {},"
-                        + " please upgrade to NEURON 7.7+"
-                        + " or make sure that you import `mpi4py` before importing"
-                        + " either NEURON or Patch."
-                    )
+            # Check whether MPI and NEURON agree on the ParallelContext.
+            # If not, make sure to help the user rectify this problem.
+            if MPI.COMM_WORLD.size != self.__h.ParallelContext().nhost():
+                raise RuntimeError(
+                    "MPI could not be initialized. You're using NEURON {},"
+                    + " please upgrade to NEURON 7.7+"
+                    + " or make sure that you import `mpi4py` before importing"
+                    + " either NEURON or Patch."
+                )
             self.__pc = ParallelContext(self, self.__h.ParallelContext())
 
     @property
