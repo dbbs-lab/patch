@@ -9,7 +9,7 @@ class PythonHocModule(types.ModuleType):
     from .interpreter import PythonHocInterpreter
     from .core import transform
 
-    __version__ = "2.0.2"
+    __version__ = "2.0.3"
 
     @property
     def p(self):

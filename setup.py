@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 with open(os.path.join(os.path.dirname(__file__), "patch", "__init__.py"), "r") as f:
     for line in f:
         if "__version__ = " in line:
-            exec(line)
+            exec(line.strip())
             break
 
 # Collect all files recursively from the data folder
