@@ -8,6 +8,7 @@ _p = None
 class PythonHocModule(types.ModuleType):
     from .interpreter import PythonHocInterpreter
     from .core import transform
+    from . import objects, interpreter, exceptions, error_handler, core
 
     __version__ = "2.0.3"
 
