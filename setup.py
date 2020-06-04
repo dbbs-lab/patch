@@ -39,6 +39,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     entry_points={"glia.package": ["patch_extensions = patch_extensions"]},
-    install_requires=["setuptools", "nrn-glia>=0.3.2", "mpi4py"],
+    install_requires=["setuptools", "nrn-glia>=0.3.3", "mpi4py"],
     extras_require={"dev": ["sphinx", "pre-commit", "black", "sphinxcontrib-contentui"]},
 )
