@@ -69,6 +69,7 @@ If you want to stay vanilla Patch still has you covered; it comes with out-of-th
 parallelization. Introducing the transmitter-receiver pattern:
 
 .. code-block:: python
+
   if p.parallel.id() == 0:
     transmitter = ParallelCon(obj1, gid)
   if p.parallel.id() == 1:
