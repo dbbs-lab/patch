@@ -1,5 +1,7 @@
+from mpi4py import MPI
 from .exceptions import *
 import os, sys, pkg_resources, types
+from .core import transform
 
 
 _p = None
@@ -7,8 +9,9 @@ _p = None
 
 class PythonHocModule(types.ModuleType):
     from .interpreter import PythonHocInterpreter
-    from .core import transform
     from . import objects, interpreter, exceptions, error_handler, core
+
+    transform = staticmethod(transform)
 
     __version__ = "2.0.4"
 
@@ -39,7 +42,7 @@ class PythonHocModule(types.ModuleType):
             raise NotConnectedError("Source is not connected to target.")
         return source._connections[target]
 
-    def get_data_file(*dirs):  # pragma: nocover
+    def get_data_file(self, *dirs):  # pragma: nocover
         """
             Retrieve a file from the data directory that is installed together with the
             package.

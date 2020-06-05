@@ -44,3 +44,7 @@ class ParallelError(PatchError):
 
 class ParallelConnectError(PatchError):
     pass
+
+
+class BroadcastError(ParallelError):
+    pass

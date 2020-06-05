@@ -76,7 +76,7 @@ class PythonHocInterpreter:
             target._connections[source] = connection
         return connection
 
-    def ParallelCon(self, a, b, output=False, *args, **kwargs):
+    def ParallelCon(self, a, b, output=True, *args, **kwargs):
         a_int = isinstance(a, int)
         b_int = isinstance(b, int)
         gid = a if a_int else b
@@ -166,7 +166,7 @@ class PythonHocInterpreter:
             self._time = t
         return self._time
 
-    def load_extension(self, extension):
+    def load_extension(self, extension):  # pragma: nocover
         if extension in self.__loaded_extensions:
             return
         from . import get_data_file
@@ -184,7 +184,7 @@ class PythonHocInterpreter:
         self._finitialized = True
 
     def continuerun(self, time_stop, add=False):
-        if not hasattr(self, "_finitialized"):
+        if not hasattr(self, "_finitialized"):  # pragma: nocover
             raise UninitializedError(
                 "Cannot start NEURON simulation without first using `p.finitialize`."
             )
@@ -196,7 +196,7 @@ class PythonHocInterpreter:
             self.runtime = time_stop
 
     def run(self):
-        if not hasattr(self, "_finitialized"):
+        if not hasattr(self, "_finitialized"):  # pragma: nocover
             raise UninitializedError(
                 "Cannot start NEURON simulation without first using `p.finitialize`."
             )
@@ -228,4 +228,62 @@ class PythonHocInterpreter:
 
 class ParallelContext(PythonHocObject):
     def cell(self, gid, nc):
-        self.__neuron__().cell(gid, transform(nc))
+        transform(self).cell(gid, transform(nc))
+
+    def broadcast(self, data, root=0):
+        """
+            Broadcast either a Vector or arbitrary picklable data. If ``data`` is a
+            Vector, the Vectors are resized and filled with the data from the Vector in
+            the ``root`` node. If ``data`` is not a Vector, it is pickled, transmitted and
+            returned from this function to all nodes.
+
+            :param data: The data to broadcast to the nodes.
+            :type data: :class:`Vector <.objects.Vector>` or any picklable object.
+            :param root: The id of the node that is broadcasting the data.
+            :type root: int
+            :returns: None (Vectors filled) or the transmitted data
+            :raises: BroadcastError if ``neuron.hoc.HocObjects`` that aren't Vectors are
+              transmitted
+        """
+        import neuron
+
+        data_ptr = transform(data)
+        # Is anyone broadcasting a HocObject?
+        if isinstance(data_ptr, neuron.hoc.HocObject):
+            # Comparing dir is used as a silly equality check because all NEURON object
+            # have class 'neuron.hoc.HocObject'
+            if dir(data_ptr) == dir(neuron.h.Vector()):
+                # If this node is broadcasting a Vector, then proceed to traditional
+                # broadcasting. If all nodes are broadcasting a Vector traditional
+                # broadcasting will occur, otherwise a BroadcastError is thrown.
+                transform(self).broadcast(data_ptr, root=root)
+            else:
+                # Send an empty vector so the other nodes don't hang.
+                transform(self).broadcast(transform(self._interpreter.Vector()), root)
+                raise BroadcastError(
+                    "NEURON HocObjects cannot be broadcasted, they need to be created on their own nodes."
+                )
+        else:
+            # If noone is sending a HocObject we proceed with picklable data broadcasting
+            return self._broadcast(data, root=root)
+
+    def _broadcast(self, data, root=0):
+        import pickle
+
+        if self.id() == root:
+            try:
+                v = self._interpreter.Vector(list(pickle.dumps(data)))
+            except AttributeError as e:
+                # Send an empty vector so the other nodes don't hang.
+                transform(self).broadcast(transform(self._interpreter.Vector()), root)
+                raise BroadcastError(str(e)) from None
+        else:
+            v = self._interpreter.Vector()
+        v = transform(v)
+        transform(self).broadcast(v, root)
+        try:
+            return pickle.loads(bytes([int(d) for d in v]))
+        except EOFError:
+            raise BroadcastError(
+                "Root node did not transmit. Look for root node error."
+            ) from None
