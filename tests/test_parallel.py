@@ -39,6 +39,9 @@ class TestParallelNetworks(unittest.TestCase):
         Test true functioning of parallel networks on multiple MPI nodes.
     """
 
+    def test_parallel_prop(self):
+        self.assertEqual(p.parallel, p.ParallelContext(), "PC should be a singleton")
+
     def test_parallel_con(self):
         pass
 

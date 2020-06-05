@@ -76,7 +76,7 @@ class PythonHocInterpreter:
             target._connections[source] = connection
         return connection
 
-    def ParallelCon(self, a, b, output=False, *args, **kwargs):
+    def ParallelCon(self, a, b, output=True, *args, **kwargs):
         a_int = isinstance(a, int)
         b_int = isinstance(b, int)
         gid = a if a_int else b
@@ -166,7 +166,7 @@ class PythonHocInterpreter:
             self._time = t
         return self._time
 
-    def load_extension(self, extension):
+    def load_extension(self, extension):  # pragma: nocover
         if extension in self.__loaded_extensions:
             return
         from . import get_data_file
@@ -184,7 +184,7 @@ class PythonHocInterpreter:
         self._finitialized = True
 
     def continuerun(self, time_stop, add=False):
-        if not hasattr(self, "_finitialized"):
+        if not hasattr(self, "_finitialized"):  # pragma: nocover
             raise UninitializedError(
                 "Cannot start NEURON simulation without first using `p.finitialize`."
             )
@@ -196,7 +196,7 @@ class PythonHocInterpreter:
             self.runtime = time_stop
 
     def run(self):
-        if not hasattr(self, "_finitialized"):
+        if not hasattr(self, "_finitialized"):  # pragma: nocover
             raise UninitializedError(
                 "Cannot start NEURON simulation without first using `p.finitialize`."
             )

@@ -104,6 +104,41 @@ class TestSection(unittest.TestCase):
             "Section call did not return a NEURON Segment pointer",
         )
 
+    def test_section_attr(self):
+        transform = patch.transform
+        s = p.Section()
+        s.set_dimensions(10, 10)
+        self.assertEqual(s.L, 10, "Dimension setter failed.")
+        self.assertEqual(s.diam, 10, "Dimension setter failed.")
+        s.add_3d([[0.0, 0.0, 0.0]])
+        self.assertEqual(
+            (s.x3d(0), s.y3d(0), s.z3d(0), s.diam3d(0)),
+            (0.0, 0.0, 0.0, 10.0),
+            "Add 3D no diam spec failed",
+        )
+        s.pt3dclear()
+        s.add_3d([[0.0, 2.0, 0.0], [4.0, 3.0, 2.0]], 4)
+        self.assertEqual(
+            (s.x3d(0), s.y3d(0), s.z3d(1), s.diam3d(0)),
+            (0.0, 2.0, 2.0, 4.0),
+            "Add 3D diam spec failed",
+        )
+        s.connect(p.Section())
+        s.connect(p.Section())
+        s.connect(p.Section())
+        self.assertEqual(
+            list(map(transform, s.wholetree())),
+            transform(s).wholetree(),
+            "Wholetree diff",
+        )
+
+    def test_record_access(self):
+        s = p.Section()
+        r = s.record(0.5)
+        r2 = s.record(0.7)
+        self.assertNotEqual(r, r2, "Recorders at 0.5 and 0.7 should not be equal")
+        self.assertEqual(r, s.record(0.5), "Recorders at 0.5 should be equal")
+
     def test_section_iter(self):
         s = p.Section()
         s.nseg = 5

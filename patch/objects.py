@@ -119,8 +119,9 @@ class Section(PythonHocObject, connectable):
             x = self.__arc__()
         segment = self(x)
         self.push()
-        self._interpreter.NetCon(segment, target)
+        nc = self._interpreter.NetCon(segment, target)
         self._interpreter.pop_section()
+        return nc
 
     def set_dimensions(self, length, diameter):
         self.L = length
@@ -140,7 +141,7 @@ class Section(PythonHocObject, connectable):
         if diameters is None:
             diameters = [self.diam for _ in range(len(points))]
         if not _is_sequence(diameters):
-            diameters = [diameter for _ in range(len(points))]
+            diameters = [diameters for _ in range(len(points))]
         self.__neuron__().push()
         for point, diameter in zip(points, diameters):
             self._interpreter.pt3dadd(*point, diameter)

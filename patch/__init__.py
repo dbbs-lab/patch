@@ -42,7 +42,7 @@ class PythonHocModule(types.ModuleType):
             raise NotConnectedError("Source is not connected to target.")
         return source._connections[target]
 
-    def get_data_file(*dirs):  # pragma: nocover
+    def get_data_file(self, *dirs):  # pragma: nocover
         """
             Retrieve a file from the data directory that is installed together with the
             package.
