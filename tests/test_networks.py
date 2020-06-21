@@ -71,20 +71,12 @@ class TestNetworks(unittest.TestCase):
         nc.record(v)
         v2 = nc.record()
         v3 = nc.record()
-        self.assertEqual(v2, v3, "NetCon recorder should be a singleton.")
 
         p.finitialize()
         p.continuerun(10)
 
-        import plotly.graph_objs as go
-
-        go.Figure(
-            [
-                # go.Scatter(x=list(t), y=list(r), mode="lines"),
-                go.Scatter(x=list(t), y=list(r2), mode="lines")
-            ]
-        ).show()
-
+        self.assertEqual(v, v2, "NetCon recorder should be a singleton.")
+        self.assertEqual(v2, v3, "NetCon recorder should be a singleton.")
         self.assertNotEqual(len(v), 0, "NetCon recorder should record a spike.")
         self.assertEqual(
             len(v), len(v2), "Different NetCon recorders should record same spikes."

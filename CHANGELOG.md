@@ -1,3 +1,9 @@
+# 2.1.0
+
+* Added arbitrary data MPI broadcasting.
+* Improvements to `NetCon` kwarg handling.
+* Improvements to `NetCon.record`.
+
 # 2.0.3
 
 * Another iteration of NEURON vs MPI: Completely rely on `mpi4py` until

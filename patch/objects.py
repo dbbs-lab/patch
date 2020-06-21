@@ -114,12 +114,12 @@ class Section(PythonHocObject, connectable):
         self.__neuron__().insert(*args, **kwargs)
         return self
 
-    def connect_points(self, target, x=None):
+    def connect_points(self, target, x=None, **kwargs):
         if x is None:
             x = self.__arc__()
         segment = self(x)
         self.push()
-        nc = self._interpreter.NetCon(segment, target)
+        nc = self._interpreter.NetCon(segment, target, **kwargs)
         self._interpreter.pop_section()
         return nc
 
@@ -197,13 +197,16 @@ class NetCon(PythonHocObject):
     def record(self, vector=None):
         if vector is not None:
             self._neuron_ptr.record(transform(vector))
-            vector.__ref__(self)
+            self.recorder = vector
+            if hasattr(vector, "__ref__"):
+                vector.__ref__(self)
         else:
             if not hasattr(self, "recorder"):
                 vector = self._interpreter.Vector()
                 self._neuron_ptr.record(transform(vector))
                 self.recorder = vector
-                vector.__ref__(self)
+                if hasattr(vector, "__ref__"):
+                    vector.__ref__(self)
             return self.recorder
 
 
