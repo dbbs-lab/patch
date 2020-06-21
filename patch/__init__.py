@@ -13,7 +13,7 @@ class PythonHocModule(types.ModuleType):
 
     transform = staticmethod(transform)
 
-    __version__ = "2.0.4"
+    __version__ = "2.1.0"
 
     @property
     def p(self):

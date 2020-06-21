@@ -18,8 +18,6 @@ for (dirpath, dirnames, filenames) in os.walk(data_folder):
     if len(filenames) > 0:
         data_files.append(os.path.join(rel_folder, "*"))
 
-print("ola", setuptools.find_packages())
-
 setuptools.setup(
     name="nrn-patch",
     version=__version__,

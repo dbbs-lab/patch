@@ -56,3 +56,28 @@ class TestNetworks(unittest.TestCase):
                 break
         equal = False
         self.assertFalse(equal, "Random and periodic VecStim yielded identical results.")
+
+    def test_netcon_record(self):
+        s1 = p.Section()
+        se = p.PointProcess(p.ExpSyn, s1)
+        ns = se.stimulate(start=1, number=3, interval=1, weight=100)
+        r = s1.record()
+        s2 = p.Section()
+        r2 = s2.record()
+        syn = p.PointProcess(p.ExpSyn, s2)
+        nc = s1.connect_points(syn)
+        v = p.Vector()
+        t = p.time
+        nc.record(v)
+        v2 = nc.record()
+        v3 = nc.record()
+
+        p.finitialize()
+        p.continuerun(10)
+
+        self.assertEqual(v, v2, "NetCon recorder should be a singleton.")
+        self.assertEqual(v2, v3, "NetCon recorder should be a singleton.")
+        self.assertNotEqual(len(v), 0, "NetCon recorder should record a spike.")
+        self.assertEqual(
+            len(v), len(v2), "Different NetCon recorders should record same spikes."
+        )

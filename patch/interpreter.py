@@ -46,11 +46,14 @@ class PythonHocInterpreter:
         # Change the NetCon signature so that weight, delay and threshold become
         # independent optional keyword arguments.
         setters = {}
+        # Set sensible defaults: NetCons appear not to work sometimes if they're not set.
+        defaults = {"weight": 0.1, "delay": 0, "threshold": -20}
         setter_keys = ["weight", "delay", "threshold"]
         for key in setter_keys:
-            if key in kwargs:
-                setters[key] = kwargs[key]
-                del kwargs[key]
+            if key not in kwargs:
+                kwargs[key] = defaults[key]
+            setters[key] = kwargs[key]
+            del kwargs[key]
         if is_section(source):
             kwargs["sec"] = transform(source)
         # Execute HOC NetCon and wrap result into `connection`
@@ -63,7 +66,7 @@ class PythonHocInterpreter:
             if k == "weight":
                 connection.weight[0] = v
             else:
-                connection.__dict__[k] = v
+                setattr(connection, k, v)
         # Have the NetCon reference source and target
         connection.__ref__(source)
         connection.__ref__(target)
@@ -120,13 +123,13 @@ class PythonHocInterpreter:
 
     def PointProcess(self, factory, target, *args, **kwargs):
         """
-      Creates a point process from a h.MyMechanism factory.
+          Creates a point process from a h.MyMechanism factory.
 
-      :param factory: A point process method from the HocInterpreter.
-      :type factory: function
-      :param target: The Segment this point process has to be inserted into.
-      :type target: :class:`.objects.Segment`
-    """
+          :param factory: A point process method from the HocInterpreter.
+          :type factory: function
+          :param target: The Segment this point process has to be inserted into.
+          :type target: :class:`.objects.Segment`
+        """
         if hasattr(target, "__arc__"):
             og_target = target
             target = target(target.__arc__())
