@@ -1,3 +1,7 @@
+# 2.1.1
+
+* Re-release of 2.1.0 (sync with PyPI)
+
 # 2.1.0
 
 * Added arbitrary data MPI broadcasting.
