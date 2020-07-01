@@ -88,14 +88,15 @@ class TestPatch(unittest.TestCase):
             str(transform_netcon(p.Section())),
             "NetCon transform on a Section did not return a pointer to a scalar.",
         )
+        section = p.Section()
         self.assertEqual(
-            transform(nrn_section1(0.5)),
-            transform_arc(nrn_section1),
+            transform(section(0.5)),
+            transform_arc(section),
             "Default arc transform did not yield default segment",
         )
         self.assertEqual(
-            transform(nrn_section1(0.5)),
-            transform_arc(nrn_section1),
+            transform(section(0.5)),
+            transform_arc(section),
             "Default arc transform did not yield default segment",
         )
         self.assertEqual(
