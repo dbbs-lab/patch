@@ -170,6 +170,16 @@ class TestSection(unittest.TestCase):
         # Test that other HocObjects aren't iterable.
         self.assertRaises(TypeError, iter, p.NetStim())
 
+    def test_section_cas_push_pop(self):
+        s = p.Section()
+        s2 = p.Section()
+        s.push()
+        self.assertEqual(s, p.cas(), "Push should put section on stack")
+        with s2.push():
+            self.assertEqual(s2, p.cas(), "Context push should put section on stack")
+        self.assertEqual(s, p.cas(), "Context exit should remove section from stack")
+        self.assertRaises(RuntimeError, s2.pop)
+
 
 class TestPointProcess(unittest.TestCase):
     def test_factory(self):
