@@ -58,7 +58,7 @@ class TestPatch(unittest.TestCase):
         )
 
     def test_transform(self):
-        from patch.core import transform, transform_record, transform_netcon
+        from patch import transform, transform_record, transform_netcon, transform_arc
         from neuron import h
 
         nrn_section1 = transform(p.Section())
@@ -87,6 +87,22 @@ class TestPatch(unittest.TestCase):
             "pointer to hoc scalar",
             str(transform_netcon(p.Section())),
             "NetCon transform on a Section did not return a pointer to a scalar.",
+        )
+        section = p.Section()
+        self.assertEqual(
+            transform(section(0.5)),
+            transform_arc(section),
+            "Default arc transform did not yield default segment",
+        )
+        self.assertEqual(
+            transform(section(0.5)),
+            transform_arc(section),
+            "Default arc transform did not yield default segment",
+        )
+        self.assertEqual(
+            transform(1),
+            transform_arc(1),
+            "Transform arc on non-arced object should yield transform of the object",
         )
 
 

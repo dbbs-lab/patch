@@ -1,7 +1,7 @@
 from mpi4py import MPI
 from .exceptions import *
 import os, sys, pkg_resources, types
-from .core import transform
+from .core import transform, transform_arc, transform_netcon, transform_record
 
 
 _p = None
@@ -12,6 +12,9 @@ class PythonHocModule(types.ModuleType):
     from . import objects, interpreter, exceptions, error_handler, core
 
     transform = staticmethod(transform)
+    transform_netcon = staticmethod(transform_netcon)
+    transform_record = staticmethod(transform_record)
+    transform_arc = staticmethod(transform_arc)
 
     __version__ = "2.1.1"
 
