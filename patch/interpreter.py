@@ -205,6 +205,9 @@ class PythonHocInterpreter:
             )
         self.__h.run()
 
+    def cas(self):
+        return Section(self, self.__h.cas())
+
     def _init_pc(self):
         if not hasattr(self, "_PythonHocInterpreter__pc"):
             # Completely rely on mpi4py to initialize MPI. See
