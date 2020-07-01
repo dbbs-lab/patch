@@ -42,6 +42,9 @@ class PythonHocObject:
         # Relay length to pointer
         return len(self.__neuron__())
 
+    def __eq__(self, other):
+        return transform(self) is transform(other)
+
     def __neuron__(self):
         # Magic method that allows duck typing of this object as something that
         # needs to be represented differently when passed to NEURON.
