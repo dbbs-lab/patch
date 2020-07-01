@@ -172,7 +172,7 @@ class Section(PythonHocObject, connectable):
     def synapse(self, factory, *args, **kwargs):
         return self._interpreter.PointProcess(factory, self, *args, **kwargs)
 
-    def iclamp(self, x=0.5, delay=0, duration=1000, amplitude=0):
+    def iclamp(self, x=0.5, delay=0, duration=100, amplitude=0):
         clamp = self._interpreter.IClamp(x=x, sec=self)
         clamp.delay = delay
         clamp.dur = duration
