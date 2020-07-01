@@ -172,6 +172,19 @@ class Section(PythonHocObject, connectable):
     def synapse(self, factory, *args, **kwargs):
         return self._interpreter.PointProcess(factory, self, *args, **kwargs)
 
+    def iclamp(self, x=0.5, delay=0, duration=1000, amplitude=0):
+        clamp = self._interpreter.IClamp(x=x, sec=self)
+        clamp.delay = delay
+        clamp.dur = duration
+        if _is_sequence(amplitude):
+            # If its a sequence play it as a vector into the clamp
+            v = self._interpreter.Vector(amplitude)
+            v.play(clamp.amp)
+            clamp.__ref__(v)
+        else:
+            clamp.amp = amplitude
+        return clamp
+
     def push(self):
         transform(self).push()
 
