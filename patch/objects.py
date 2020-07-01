@@ -172,12 +172,36 @@ class Section(PythonHocObject, connectable):
     def synapse(self, factory, *args, **kwargs):
         return self._interpreter.PointProcess(factory, self, *args, **kwargs)
 
+    def push(self):
+        transform(self).push()
+
+        class SectionStackContextManager:
+            def __enter__(this):
+                pass
+
+            def __exit__(*args):
+                self.pop()
+
+        return SectionStackContextManager()
+
+    def pop(self):
+        if self == self._interpreter.cas():
+            self._interpreter.pop_section()
+        else:
+            raise RuntimeError(
+                "Cannot pop this section as it is not on top of the section stack"
+            )
+
 
 class Vector(PythonHocObject):
     def record(self, target, *args, **kwargs):
         nrn_target = transform_record(target)
         self.__neuron__().record(nrn_target, *args, **kwargs)
         self.__ref__(target)
+
+
+class IClamp(PythonHocObject):
+    pass
 
 
 class NetStim(PythonHocObject, connectable):
