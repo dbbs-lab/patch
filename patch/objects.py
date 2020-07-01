@@ -45,6 +45,10 @@ class PythonHocObject:
     def __eq__(self, other):
         return transform(self) is transform(other)
 
+    def __repr__(self):
+        ostr = object.__str__(self)
+        return ostr[: ostr.rindex("at")] + "pointing to '" + str(self.__neuron__()) + "'>"
+
     def __neuron__(self):
         # Magic method that allows duck typing of this object as something that
         # needs to be represented differently when passed to NEURON.
