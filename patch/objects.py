@@ -181,9 +181,12 @@ class Section(PythonHocObject, connectable):
         clamp.dur = duration
         if _is_sequence(amplitude):
             # If its a sequence play it as a vector into the clamp
-            v = self._interpreter.Vector(amplitude)
-            v.play(clamp.amp)
+            dt = self._interpreter.dt
+            t = self._interpreter.Vector([delay + dt * i for i in range(len(amplitude))])
+            v = self._interpreter.Vector(amplitude, t)
+            v.play(clamp._ref_amp, t.__neuron__())
             clamp.__ref__(v)
+            clamp.__ref__(t)
         else:
             clamp.amp = amplitude
         return clamp

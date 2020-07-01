@@ -14,7 +14,6 @@ class TestClamps(unittest.TestCase):
     def setUp(self):
         pass
 
-    @unittest.expectedFailure
     def test_iclamp(self):
         s0 = p.Section()
         s0.record()
@@ -59,15 +58,7 @@ class TestClamps(unittest.TestCase):
             "Half of injected charge not smaller than full charge",
         )
         self.assertGreater(
-            max(s0.recordings[0.5]),
-            max(s4.recordings[0.5]),
+            min(s0.recordings[0.5]),
+            min(s4.recordings[0.5]),
             "No negative injected current detected",
         )
-
-        # from plotly import graph_objs as go
-        # go.Figure(
-        #     [
-        #         go.Scatter(x=list(p.time), y=list(s.recordings[0.5]), name="s" + str(i + 1))
-        #         for i, s in enumerate([s1,s2,s3,s4])
-        #     ]
-        # ).show()

@@ -54,16 +54,34 @@ Sections & Segments
 .. code-block:: python
 
   s = p.Section()
-  target_syn = p.Section().synapse(p.ExpSyn)
-  # No more s.push() and h.pop_section() required for NetCon.
-  s.connect_points(target_syn)
+  target_syn = p.Section().synapse(p.ExpSyn) # Creates an ExpSyn synapse
+  s.connect_points(target_syn) # Creates a NetCon between s(0.5)._ref_v and target_syn
+
+* Create a current clamp in a Section and configure it with keyword arguments:
+
+.. code-block:: python
+
+  clamp = p.Section().iclamp(amp=10, delay=0, duration=100)
+  # Pass an array to inject a varying current per timestep starting from the delay.
+  clamp2 = p.Section().iclamp(amp=[i for i in range(1000)], delay=100)
+
+* You can place Sections on the stack with ``.push()``, ``.pop()`` or a context manager:
+
+.. code-block:: python
+
+  s = p.Section()
+  s.push()
+  s.pop()
+  with s.push():
+    s_clamp = p.IClamp()
+  # `s` is automatically popped from the stack when the context is exited.
 
 =================
 Parallel networks
 =================
 
 When you get to the level of the network it would be nice if you could describe your
-models in a more structured way so be sure to check out Arborize for just that.
+cells in a more structured way so be sure to check out Arborize for just that.
 
 If you want to stay vanilla Patch still has you covered; it comes with out-of-the-box
 parallelization. Introducing the transmitter-receiver pattern:
