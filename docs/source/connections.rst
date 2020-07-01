@@ -94,6 +94,7 @@ In parallel simulations
             nc = h.NetCon(s(0.5)._ref_v, None)
             pc.set_gid2node(gid, pc.id())
             pc.cell(gid, nc)
+            pc.outputcell(gid)
 
         Connecting the spikes of GID 1 to a synapse:
 
