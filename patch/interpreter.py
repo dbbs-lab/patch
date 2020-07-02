@@ -19,6 +19,7 @@ class PythonHocInterpreter:
         # child classes of the PythonHocObject like h.Section, h.NetStim, h.NetCon
         self.__object_classes = PythonHocObject.__subclasses__().copy()
         self.__requires_wrapping = [cls.__name__ for cls in self.__object_classes]
+        self._wrap_point_processes()
         self.__loaded_extensions = []
         self.load_file("stdrun.hoc")
         self.runtime = 0
@@ -37,6 +38,10 @@ class PythonHocInterpreter:
             setattr(self.__h, attr, value)
         else:
             self.__dict__[attr] = value
+
+    def nrn_load_dll(self, path):
+        self.__h.nrn_load_dll(path)
+        self._wrap_point_processes()
 
     def wrap(self, factory, name):
         def wrapper(*args, **kwargs):
@@ -245,6 +250,32 @@ class PythonHocInterpreter:
         self._init_pc()
         return self.__pc
 
+    def _wrap_point_processes(self):
+        # Filter out all the point processes in the interpreter
+        point_processes = [k for k in dir(self.__h) if is_point_process(k)]
+        try:
+            # The first time we check this, the __point_processes attribute doesn't
+            # exist so we go to the except clause, this is a poor man's "hasattr".
+            old_point_processes = self.__point_processes
+        except:
+            old_point_processes = []
+        # Check if there are any new things to wrap.
+        to_wrap = list(set(point_processes) - set(old_point_processes))
+        for point_process in to_wrap:
+            # For each point process check if a function already exists, if not, wrap the
+            # HocInterpreter factory function.
+            if not hasattr(self, point_process):
+                setattr(self, point_process, self._wrap_point_process(point_process))
+        self.__point_processes = point_processes
+
+    def _wrap_point_process(self, point_process):
+        factory = getattr(self.__h, point_process)
+
+        def wrapper(self, target, *args, **kwargs):
+            return self.PointProcess(factory, target, *args, **kwargs)
+
+        return wrapper
+
 
 class ParallelContext(PythonHocObject):
     def cell(self, gid, nc):
@@ -293,8 +324,8 @@ class ParallelContext(PythonHocObject):
         if self.id() == root:
             try:
                 v = self._interpreter.Vector(list(pickle.dumps(data)))
-            except AttributeError as e:
-                # Send an empty vector so the other nodes don't hang.
+            except Exception as e:
+                # Send an empty vector so the other nodes don't hang waiting for a broadcast.
                 transform(self).broadcast(transform(self._interpreter.Vector()), root)
                 raise BroadcastError(str(e)) from None
         else:
