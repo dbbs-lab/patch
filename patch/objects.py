@@ -42,6 +42,16 @@ class PythonHocObject:
         # Relay length to pointer
         return len(self.__neuron__())
 
+    def __eq__(self, other):
+        return transform(self) is transform(other)
+
+    def __repr__(self):
+        ostr = object.__repr__(self)
+        return ostr[: ostr.rindex("at")] + "pointing to '" + str(self.__neuron__()) + "'>"
+
+    def __hash__(self):
+        return object.__hash__(self)
+
     def __neuron__(self):
         # Magic method that allows duck typing of this object as something that
         # needs to be represented differently when passed to NEURON.
@@ -165,12 +175,52 @@ class Section(PythonHocObject, connectable):
     def synapse(self, factory, *args, **kwargs):
         return self._interpreter.PointProcess(factory, self, *args, **kwargs)
 
+    def iclamp(self, x=0.5, delay=0, duration=100, amplitude=0):
+        clamp = self._interpreter.IClamp(x=x, sec=self)
+        clamp.delay = delay
+        clamp.dur = duration
+        if _is_sequence(amplitude):
+            # If its a sequence play it as a vector into the clamp
+            dt = self._interpreter.dt
+            t = self._interpreter.Vector([delay + dt * i for i in range(len(amplitude))])
+            v = self._interpreter.Vector(amplitude, t)
+            v.play(clamp._ref_amp, t.__neuron__())
+            clamp.__ref__(v)
+            clamp.__ref__(t)
+        else:
+            clamp.amp = amplitude
+        return clamp
+
+    def push(self):
+        transform(self).push()
+
+        class SectionStackContextManager:
+            def __enter__(this):
+                pass
+
+            def __exit__(*args):
+                self.pop()
+
+        return SectionStackContextManager()
+
+    def pop(self):
+        if self == self._interpreter.cas():
+            self._interpreter.pop_section()
+        else:
+            raise RuntimeError(
+                "Cannot pop this section as it is not on top of the section stack"
+            )
+
 
 class Vector(PythonHocObject):
     def record(self, target, *args, **kwargs):
         nrn_target = transform_record(target)
         self.__neuron__().record(nrn_target, *args, **kwargs)
         self.__ref__(target)
+
+
+class IClamp(PythonHocObject):
+    pass
 
 
 class NetStim(PythonHocObject, connectable):

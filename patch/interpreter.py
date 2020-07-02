@@ -1,5 +1,11 @@
-from .objects import PythonHocObject, NetCon, PointProcess, VecStim
-from .core import transform, transform_netcon, assert_connectable, is_section
+from .objects import PythonHocObject, NetCon, PointProcess, VecStim, Section, IClamp
+from .core import (
+    transform,
+    transform_netcon,
+    assert_connectable,
+    is_section,
+    transform_arc,
+)
 from .exceptions import *
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
 
@@ -154,6 +160,14 @@ class PythonHocInterpreter:
             self._pattern = pattern
         return vec_stim
 
+    def IClamp(self, x=0.5, sec=None):
+        sec = sec if sec is not None else self.cas()
+        clamp = IClamp(self, self.__h.IClamp(x, sec=transform(sec)))
+        clamp.__ref__(sec)
+        if hasattr(sec, "__ref__"):
+            sec.__ref__(clamp)
+        return clamp
+
     @property
     def time(self):
         if not hasattr(self, "_time"):
@@ -204,6 +218,9 @@ class PythonHocInterpreter:
                 "Cannot start NEURON simulation without first using `p.finitialize`."
             )
         self.__h.run()
+
+    def cas(self):
+        return Section(self, self.__h.cas())
 
     def _init_pc(self):
         if not hasattr(self, "_PythonHocInterpreter__pc"):
