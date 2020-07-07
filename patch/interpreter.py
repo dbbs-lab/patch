@@ -92,13 +92,6 @@ class PythonHocInterpreter:
         if a_int != b_int:
             if b_int:
                 source = a
-                # Create a second NetCon, with explicit thresholds, as a workaround for an
-                # esoteric NEURON spike detection bug.
-                nc_nopar = self.NetCon(source, None)
-                threshold = -20.0
-                if "threshold" in kwargs:
-                    threshold = kwargs["threshold"]
-                nc_nopar.threshold = threshold
                 nc = self.NetCon(source, None, *args, **kwargs)
                 self.parallel.set_gid2node(gid, self.parallel.id())
                 self.parallel.cell(gid, nc)
