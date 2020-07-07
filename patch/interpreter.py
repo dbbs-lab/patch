@@ -147,8 +147,12 @@ class PythonHocInterpreter:
             og_target.__ref__(target)
             target.__ref__(og_target)
         nrn_target = transform(target)
-        point_process = factory(nrn_target, *args, **kwargs)
-        pp = PointProcess(self, point_process)
+        if hasattr(factory, "_patch_wrapper"):
+            # Avoid double wrapping
+            pp = factory(target, *args, **kwargs)
+        else:
+            point_process = factory(nrn_target, *args, **kwargs)
+            pp = PointProcess(self, point_process)
         target.__ref__(pp)
         pp.__ref__(target)
         return pp
@@ -252,7 +256,7 @@ class PythonHocInterpreter:
 
     def _wrap_point_processes(self):
         # Filter out all the point processes in the interpreter
-        point_processes = [k for k in dir(self.__h) if is_point_process(k)]
+        point_processes = [k for k in dir(self.__h) if self.is_point_process(k)]
         try:
             # The first time we check this, the __point_processes attribute doesn't
             # exist so we go to the except clause, this is a poor man's "hasattr".
@@ -264,8 +268,8 @@ class PythonHocInterpreter:
         for point_process in to_wrap:
             # For each point process check if a function already exists, if not, wrap the
             # HocInterpreter factory function.
-            if not hasattr(self, point_process):
-                setattr(self, point_process, self._wrap_point_process(point_process))
+            if point_process not in self.__dict__:
+                self.__dict__[point_process] = self._wrap_point_process(point_process)
         self.__point_processes = point_processes
 
     def _wrap_point_process(self, point_process):
@@ -274,7 +278,16 @@ class PythonHocInterpreter:
         def wrapper(self, target, *args, **kwargs):
             return self.PointProcess(factory, target, *args, **kwargs)
 
-        return wrapper
+        wrapper.__name__ = str(factory)[:-2]
+        wrapper._patch_wrapper = True
+        return wrapper.__get__(self)
+
+    def is_point_process(self, name):
+        try:
+            d = dir(getattr(self.__h, name))
+        except:
+            return False
+        return all(k in d for k in ["get_loc", "has_loc", "loc", "get_segment"])
 
 
 class ParallelContext(PythonHocObject):
