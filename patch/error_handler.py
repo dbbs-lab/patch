@@ -45,6 +45,9 @@ def catch_hoc_error(*args, **context):
 
 
 class ErrorHandler:
+    """
+
+    """
     def __init__(self, error, context):
         if not hasattr(self.__class__, "required"):
             raise ErrorHandlingError(
@@ -59,8 +62,7 @@ class ErrorHandler:
                         required_item, self.__class__.__name__
                     )
                 )
-        for context_item in context.items():
-            self.__dict__[context_item[0]] = context_item[1]
+        self.__dict__.update(context)
         self.catch(error, context)
 
     def catch(self, error, context):
