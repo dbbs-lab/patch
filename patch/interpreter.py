@@ -126,14 +126,12 @@ class PythonHocInterpreter:
 
           :param factory: A point process method from the HocInterpreter.
           :type factory: function
-          :param target: The Segment this point process has to be inserted into.
-          :type target: :class:`.objects.Segment`
+          :param target: The object this point process has to be inserted into.
+          :type target: :class:`.objects.PythonHocObject`
         """
+        og_target = target
         if hasattr(target, "__arc__"):
-            og_target = target
-            target = target(target.__arc__())
-            og_target.__ref__(target)
-            target.__ref__(og_target)
+            target = target(target.__arc__(), ephemeral=True)
         nrn_target = transform(target)
         point_process = factory(nrn_target, *args, **kwargs)
         pp = PointProcess(self, point_process)
