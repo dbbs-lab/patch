@@ -137,8 +137,8 @@ class PythonHocInterpreter:
         nrn_target = transform(target)
         point_process = factory(nrn_target, *args, **kwargs)
         pp = PointProcess(self, point_process)
-        target.__ref__(pp)
-        pp.__ref__(target)
+        og_target.__ref__(pp)
+        pp.__ref__(og_target)
         return pp
 
     def VecStim(self, pattern=None, *args, **kwargs):
