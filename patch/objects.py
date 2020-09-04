@@ -172,8 +172,13 @@ class Section(PythonHocObject, connectable):
             return recorder
         return self.recordings[x]
 
-    def synapse(self, factory, *args, **kwargs):
-        return self._interpreter.PointProcess(factory, self, *args, **kwargs)
+    def synapse(self, factory, store=False, *args, **kwargs):
+        synapse = self._interpreter.PointProcess(factory, self, *args, **kwargs)
+        if store:
+            if not hasattr(self, "synapses"):
+                self.synapses = []
+            self.synapses.append(synapse)
+        return synapse
 
     def iclamp(self, x=0.5, delay=0, duration=100, amplitude=0):
         clamp = self._interpreter.IClamp(x=x, sec=self)

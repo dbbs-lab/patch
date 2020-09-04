@@ -179,7 +179,19 @@ class TestSection(unittest.TestCase):
             self.assertEqual(s2, p.cas(), "Context push should put section on stack")
         self.assertEqual(s, p.cas(), "Context exit should remove section from stack")
         self.assertRaises(RuntimeError, s2.pop)
+        # Cleanup stack after test
+        s.pop()
 
+    def test_section_synapse(self):
+        s = p.Section()
+        s.synapse(p.ExpSyn)
+        self.assertEqual(1, len(s._references), "Section.synapse call should store product.")
+        self.assertEqual(1, len(s._references[0]._references), "Section.synapse call should store reciprocal reference on product.")
+        self.assertEqual(s, s._references[0]._references[0], "Section.synapse call should store reciprocal reference on product.")
+        self.assertFalse(hasattr(s, "synapses"), "Synapse should not be stored on section unless explicitly specified.")
+        syn = s.synapse(p.ExpSyn, store=True)
+        self.assertTrue(hasattr(s, "synapses"), "Synapse should have been stored on section as it was explicitly specified.")
+        self.assertIn(syn, s.synapses, "Synapse product not found in synapse collection.")
 
 class TestPointProcess(unittest.TestCase):
     def test_factory(self):
