@@ -130,6 +130,7 @@ class PythonHocInterpreter:
         ref = SectionRef(self, self.__h.SectionRef(sec=transform(sec)))
         if transform(sec) is sec:
             sec = Section(self, sec)
+        ref.__ref__(sec)
         ref.__dict__["sec"] = sec
         ref.section = sec
         return ref
