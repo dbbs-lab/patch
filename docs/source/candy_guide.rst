@@ -76,12 +76,21 @@ Sections & Segments
     s_clamp = p.IClamp()
   # `s` is automatically popped from the stack when the context is exited.
 
+* `p.SectionRef` can be called with either an arg or ``sec`` kwarg:
+
+.. code-block:: python
+
+  s = p.Section()
+  sr = p.SectionRef(sec=s)
+  sr = p.SectionRef(s)
+
 =================
 Parallel networks
 =================
 
-When you get to the level of the network it would be nice if you could describe your
-cells in a more structured way so be sure to check out Arborize for just that.
+When you get to the level of the network the work becomes alot easier if you can describe
+your cells in a more structured way, so be sure to check out `Arborize
+<https://arborize.readthedocs.io/en/latest/>`_.
 
 If you want to stay vanilla Patch still has you covered; it comes with out-of-the-box
 parallelization. Introducing the transmitter-receiver pattern:
@@ -94,8 +103,9 @@ parallelization. Introducing the transmitter-receiver pattern:
     receiver = ParallelCon(gid, obj2)
 
 Just these 2 commands will create a transmitter on node 0 that broadcasts the spikes of
-``obj1`` with the specified GID and a receiver on node 1 for ``obj2`` that listens to
-spikes with that GID.
+``obj1`` (sections, segments) with the specified GID and a receiver on node 1 for ``obj2``
+(synapses, most likely?) that listens to spikes with that GID. Know that under the hood it
+needs to be something that can be connected to a ``NetCon``.
 
 That's it. You are now spiking in parallel!
 

@@ -1,4 +1,4 @@
-import unittest, sys, os
+import unittest, sys, os, _shared
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import patch
@@ -6,7 +6,7 @@ from patch import p
 from patch.exceptions import *
 
 
-class TestInterplay(unittest.TestCase):
+class TestInterplay(_shared.NeuronTestCase):
     """
         Test whether mixing h and p together causes issues.
     """

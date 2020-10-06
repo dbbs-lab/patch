@@ -1,4 +1,4 @@
-import unittest, sys, os
+import unittest, sys, os, _shared
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import patch
@@ -10,7 +10,7 @@ from patch.exceptions import *
 @unittest.skipIf(
     p.parallel.nhost() != 1, "Single host tests should run only on 1 MPI node."
 )
-class TestSingleHostParallel(unittest.TestCase):
+class TestSingleHostParallel(_shared.NeuronTestCase):
     """
         Test parallel network approach functioning on a single MPI node.
     """
@@ -34,7 +34,7 @@ class TestSingleHostParallel(unittest.TestCase):
 @unittest.skipIf(
     p.parallel.nhost() == 1, "Cannot test parallel networks on a single MPI node."
 )
-class TestParallelNetworks(unittest.TestCase):
+class TestParallelNetworks(_shared.NeuronTestCase):
     """
         Test true functioning of parallel networks on multiple MPI nodes.
     """

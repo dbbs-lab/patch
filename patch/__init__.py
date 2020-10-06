@@ -16,7 +16,7 @@ class PythonHocModule(types.ModuleType):
     transform_record = staticmethod(transform_record)
     transform_arc = staticmethod(transform_arc)
 
-    __version__ = "2.1.1"
+    __version__ = "2.2.0"
 
     @property
     def p(self):

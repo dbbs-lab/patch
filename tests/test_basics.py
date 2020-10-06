@@ -1,11 +1,11 @@
-import unittest, sys, os
+import unittest, sys, os, _shared
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import patch.objects
 from patch import p
 
 
-class TestPatch(unittest.TestCase):
+class TestPatch(_shared.NeuronTestCase):
     """
         Check Patch basics like object wrapping and the standard interface.
     """
@@ -106,7 +106,7 @@ class TestPatch(unittest.TestCase):
         )
 
 
-class TestSection(unittest.TestCase):
+class TestSection(_shared.NeuronTestCase):
     def test_section_call(self):
         s = p.Section()
         s.nseg = 5
@@ -193,7 +193,20 @@ class TestSection(unittest.TestCase):
         self.assertTrue(hasattr(s, "synapses"), "Synapse should have been stored on section as it was explicitly specified.")
         self.assertIn(syn, s.synapses, "Synapse product not found in synapse collection.")
 
-class TestPointProcess(unittest.TestCase):
+class TestSectionRef(_shared.NeuronTestCase):
+    def test_ref(self):
+        s = p.Section()
+        s2 = p.Section()
+        s.connect(s2)
+        s2.connect(s)
+        sr = p.SectionRef(s)
+        sr2 = p.SectionRef(sec=s2)
+        self.assertIs(sr.section, s, 'SectionRef section stored incorrectly.')
+        self.assertIs(sr.sec, s, 'SectionRef section stored incorrectly.')
+        child = sr.child[0]
+        self.assertIs(patch.objects.Section, type(child), 'SectionRef.child should return Patch Section')
+
+class TestPointProcess(_shared.NeuronTestCase):
     def test_factory(self):
         s = p.Section()
         pp = p.PointProcess(p.ExpSyn, s(0.5))

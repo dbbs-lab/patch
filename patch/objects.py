@@ -217,6 +217,12 @@ class Section(PythonHocObject, connectable):
             )
 
 
+class SectionRef(PythonHocObject):
+    @property
+    def child(self):
+        return [Section(self._interpreter, s) for s in self.__neuron__().child]
+
+
 class Vector(PythonHocObject):
     def record(self, target, *args, **kwargs):
         nrn_target = transform_record(target)

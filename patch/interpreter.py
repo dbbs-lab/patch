@@ -1,4 +1,4 @@
-from .objects import PythonHocObject, NetCon, PointProcess, VecStim, Section, IClamp
+from .objects import PythonHocObject, NetCon, PointProcess, VecStim, Section, IClamp, SectionRef
 from .core import (
     transform,
     transform_netcon,
@@ -116,6 +116,25 @@ class PythonHocInterpreter:
             raise ParallelConnectError(
                 "Exactly one of the first or second arguments has to be a GID."
             )
+
+    def SectionRef(self, *args, sec=None):
+        if len(args) > 1:
+            raise TypeError(f"SectionRef takes 1 positional argument but {len(args)} given.")
+        if sec is None:
+            if args:
+                sec = args[0]
+            else:
+                sec = self.cas()
+                if not sec:
+                    raise RuntimeError("SectionRef() failed as there is no currently accessed section available. Please specify a Section.")
+        ref = SectionRef(self, self.__h.SectionRef(sec=transform(sec)))
+        if transform(sec) is sec:
+            sec = Section(self, sec)
+        ref.__ref__(sec)
+        ref.__dict__["sec"] = sec
+        ref.section = sec
+        return ref
+
 
     def ParallelContext(self):
         return self.parallel
