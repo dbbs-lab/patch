@@ -1,4 +1,4 @@
-import unittest, sys, os
+import unittest, sys, os, _shared
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import patch
@@ -9,7 +9,7 @@ from patch.error_handler import *
 from patch.error_handler import _suppress_nrn
 
 
-class TestErrorHandling(unittest.TestCase):
+class TestErrorHandling(_shared.NeuronTestCase):
     """
         Test whether the error handling system functions.
     """
