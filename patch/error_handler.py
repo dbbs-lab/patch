@@ -106,4 +106,14 @@ class CatchSectionAccess(ErrorHandler):
 
     def catch(self, error, context):
         if error.find("Section access unspecified") != -1:
-            raise HocSectionAccessError("This operation requires a Section on the stack.")
+            raise HocSectionAccessError("This operation requires a Section on the stack or perhaps a `sec` keyword argument.")
+
+
+class CatchRecord(ErrorHandler):
+    required = ["target"]
+
+    def catch(self, error, context):
+        if error.lower().find("first arg is not a point_process") != -1:
+            raise HocRecordError(f"Can't record {type(self.target)}, its record pointer is not a point process.")
+        if error.lower().find("number was provided instead of a pointer") != -1:
+            raise HocRecordError(f"Can't record {self.target}, its record pointer is a value. Make sure that you're recording `y._ref_x` rather than `y.x`.")
