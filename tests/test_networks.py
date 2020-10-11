@@ -1,4 +1,4 @@
-import unittest, sys, os
+import unittest, sys, os, _shared
 from random import random
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -8,7 +8,7 @@ from patch.objects import NetCon
 from patch.exceptions import *
 
 
-class TestNetworks(unittest.TestCase):
+class TestNetworks(_shared.NeuronTestCase):
     """
         Test network use cases such as PointProcesses, NetCon, NetStim, VecStim, ...
     """

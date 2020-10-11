@@ -1,7 +1,21 @@
 from .core import transform, transform_record, _is_sequence
+from .error_handler import catch_hoc_error, CatchRecord
+
+
+_registration_queue = []
 
 
 class PythonHocObject:
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        try:
+            from .interpreter import PythonHocInterpreter
+        except ImportError:
+            _registration_queue.append(cls)
+            return
+
+        PythonHocInterpreter.register_hoc_object(cls)
+
     def __init__(self, interpreter, ptr):
         # Initialize ourselves with a reference to our own "pointer"
         # and prepare a list for other references.
@@ -172,8 +186,13 @@ class Section(PythonHocObject, connectable):
             return recorder
         return self.recordings[x]
 
-    def synapse(self, factory, *args, **kwargs):
-        return self._interpreter.PointProcess(factory, self, *args, **kwargs)
+    def synapse(self, factory, store=False, *args, **kwargs):
+        synapse = self._interpreter.PointProcess(factory, self, *args, **kwargs)
+        if store:
+            if not hasattr(self, "synapses"):
+                self.synapses = []
+            self.synapses.append(synapse)
+        return synapse
 
     def iclamp(self, x=0.5, delay=0, duration=100, amplitude=0):
         clamp = self._interpreter.IClamp(x=x, sec=self)
@@ -212,10 +231,17 @@ class Section(PythonHocObject, connectable):
             )
 
 
+class SectionRef(PythonHocObject):
+    @property
+    def child(self):
+        return [Section(self._interpreter, s) for s in self.__neuron__().child]
+
+
 class Vector(PythonHocObject):
     def record(self, target, *args, **kwargs):
         nrn_target = transform_record(target)
-        self.__neuron__().record(nrn_target, *args, **kwargs)
+        with catch_hoc_error(CatchRecord, target=target):
+            self.__neuron__().record(nrn_target, *args, **kwargs)
         self.__ref__(target)
 
 
@@ -296,3 +322,7 @@ class PointProcess(PythonHocObject, connectable):
             stimulus = self._interpreter.VecStim(pattern=pattern)
         self._interpreter.NetCon(stimulus, self, weight=weight, delay=delay)
         return stimulus
+
+
+def _get_obj_registration_queue():
+    return _registration_queue

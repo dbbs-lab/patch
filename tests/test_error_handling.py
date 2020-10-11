@@ -1,4 +1,4 @@
-import unittest, sys, os
+import unittest, sys, os, _shared
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import patch
@@ -9,7 +9,7 @@ from patch.error_handler import *
 from patch.error_handler import _suppress_nrn
 
 
-class TestErrorHandling(unittest.TestCase):
+class TestErrorHandling(_shared.NeuronTestCase):
     """
         Test whether the error handling system functions.
     """
@@ -34,7 +34,7 @@ class TestErrorHandling(unittest.TestCase):
             test()
 
         class UndefinedRequirements(ErrorHandler):
-            def catch(self, error, context):
+            def catch(self, error, context):  # pragme: nocover
                 pass
 
         def test_undef():
@@ -52,7 +52,30 @@ class TestErrorHandling(unittest.TestCase):
         t = p.Vector()
         with self.assertRaises(HocConnectError, msg="Didn't catch NetCon error"):
             p.NetCon(s, t)
+        with self.assertRaises(HocConnectError, msg="Didn't catch NetCon error"):
+            p.NetCon(t, s)
+        with self.assertRaises(HocConnectError, msg="Didn't catch NetCon error"):
+            p.NetCon(5, 12)
 
     def test_suppress(self):
         with _suppress_nrn():
             print('ERROR! SUPPRESSION FAILED!')
+
+    def test_error_handling_error(self):
+        class BrokenHandler(ErrorHandler):
+            required = []
+
+            def catch(self, error, context):
+                raise Exception("I crashed")
+
+        with self.assertRaises(ErrorHandlingError):
+            with catch_hoc_error(BrokenHandler):
+                h.NetCon(5, 12)
+
+    def test_missing_handle(self):
+        class NoCatchHandler(ErrorHandler):
+            required = []
+
+        with self.assertRaises(ErrorHandlingError):
+            with catch_hoc_error(NoCatchHandler):
+                h.NetCon(5, 12)

@@ -1,11 +1,31 @@
-import unittest, sys, os
+import unittest, sys, os, _shared
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import patch.objects
 from patch import p
+from patch.exceptions import *
 
 
-class TestPatch(unittest.TestCase):
+class TestPatchRegistration(_shared.NeuronTestCase):
+    """
+    Check that the registration of PythonHocObjects works. (Will almost never be relevant
+    since most actual HocObjects will be covered by Patch and use the registration queue
+    rather than immediate registration; and any class names that don't correspond to an
+    actual ``h.<name>`` function don't create a wrapper)
+    """
+
+    def test_registration(self):
+        from patch import p
+
+        # Create a new PythonHocObject, no wrapper will be added as it does not exist in h
+        class NewHocObject(patch.objects.PythonHocObject):
+            pass
+
+        # Nothing to test, but the import inside ``PythonHocObject.__init_subclass__``
+        # should complete and the call to ``PythonHocInterpreter.register_hoc_object``
+        # should be covered in test coverage results.
+
+class TestPatch(_shared.NeuronTestCase):
     """
         Check Patch basics like object wrapping and the standard interface.
     """
@@ -105,8 +125,18 @@ class TestPatch(unittest.TestCase):
             "Transform arc on non-arced object should yield transform of the object",
         )
 
+    def test_record(self):
+        s = p.Section()
+        v = p.record(s)
+        self.assertEqual(patch.objects.Vector, type(v), 'p.record should return Vector')
+        sr = p.SectionRef(s)
+        with self.assertRaises(HocRecordError):
+            v = p.record(sr)
+        with self.assertRaises(HocRecordError):
+            v = p.record(4)
 
-class TestSection(unittest.TestCase):
+
+class TestSection(_shared.NeuronTestCase):
     def test_section_call(self):
         s = p.Section()
         s.nseg = 5
@@ -179,9 +209,39 @@ class TestSection(unittest.TestCase):
             self.assertEqual(s2, p.cas(), "Context push should put section on stack")
         self.assertEqual(s, p.cas(), "Context exit should remove section from stack")
         self.assertRaises(RuntimeError, s2.pop)
+        # Cleanup stack after test
+        s.pop()
 
+    def test_section_synapse(self):
+        s = p.Section()
+        s.synapse(p.ExpSyn)
+        self.assertEqual(1, len(s._references), "Section.synapse call should store product.")
+        self.assertEqual(1, len(s._references[0]._references), "Section.synapse call should store reciprocal reference on product.")
+        self.assertEqual(s, s._references[0]._references[0], "Section.synapse call should store reciprocal reference on product.")
+        self.assertFalse(hasattr(s, "synapses"), "Synapse should not be stored on section unless explicitly specified.")
+        syn = s.synapse(p.ExpSyn, store=True)
+        self.assertTrue(hasattr(s, "synapses"), "Synapse should have been stored on section as it was explicitly specified.")
+        self.assertIn(syn, s.synapses, "Synapse product not found in synapse collection.")
 
-class TestPointProcess(unittest.TestCase):
+class TestSectionRef(_shared.NeuronTestCase):
+    def test_ref(self):
+        s = p.Section()
+        s2 = p.Section()
+        s.connect(s2)
+        s2.connect(s)
+        sr = p.SectionRef(s)
+        sr2 = p.SectionRef(sec=s2)
+        self.assertIs(sr.section, s, 'SectionRef section stored incorrectly.')
+        self.assertIs(sr.sec, s, 'SectionRef section stored incorrectly.')
+        child = sr.child[0]
+        self.assertIs(patch.objects.Section, type(child), 'SectionRef.child should return Patch Section')
+
+    def test_section_access(self):
+        # Currently can't be tested because h.cas() exits rather than errors:
+        # https://github.com/neuronsimulator/nrn/issues/769
+        pass
+
+class TestPointProcess(_shared.NeuronTestCase):
     def test_factory(self):
         s = p.Section()
         pp = p.PointProcess(p.ExpSyn, s(0.5))

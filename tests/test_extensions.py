@@ -1,4 +1,4 @@
-import unittest, sys, os
+import unittest, sys, os, _shared
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import patch
@@ -6,7 +6,7 @@ from patch import p
 from patch.exceptions import *
 
 
-class TestExtensions(unittest.TestCase):
+class TestExtensions(_shared.NeuronTestCase):
     """
         Test whether the extension system functions.
     """

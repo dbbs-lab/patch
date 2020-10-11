@@ -1,10 +1,10 @@
-import unittest, sys, os
+import unittest, sys, os, _shared
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from patch import p
 
 
-class TestReferencing(unittest.TestCase):
+class TestReferencing(_shared.NeuronTestCase):
     """
         Test whether references to other objects are created and removed at the
         proper moments.
@@ -58,5 +58,12 @@ class TestReferencing(unittest.TestCase):
         self.assertEqual(
             1, len(s3.children()), "Referencing failure, child section garbage collected."
         )
+
+    def test_parallel_con_ref(self):
+        import weakref, gc
+        s = p.Section()
+        r = weakref.ref(p.ParallelCon(s, 901))
+        gc.collect()
+        self.assertIsNotNone(r(), "ParallelCon got garbage collected")
 
     # TODO: Test Synapses, point processes, NetStim & NetCon

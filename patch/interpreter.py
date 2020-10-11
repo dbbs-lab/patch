@@ -1,4 +1,4 @@
-from .objects import PythonHocObject, NetCon, PointProcess, VecStim, Section, IClamp
+from .objects import PythonHocObject, NetCon, PointProcess, VecStim, Section, IClamp, SectionRef, _get_obj_registration_queue
 from .core import (
     transform,
     transform_netcon,
@@ -8,6 +8,7 @@ from .core import (
 )
 from .exceptions import *
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
+from functools import wraps
 
 
 class PythonHocInterpreter:
@@ -15,23 +16,53 @@ class PythonHocInterpreter:
         from neuron import h
 
         self.__dict__["_PythonHocInterpreter__h"] = h
-        # Wrapping should occur around all calls to functions that share a name with
-        # child classes of the PythonHocObject like h.Section, h.NetStim, h.NetCon
-        self.__object_classes = PythonHocObject.__subclasses__().copy()
-        self.__requires_wrapping = [cls.__name__ for cls in self.__object_classes]
         self._wrap_point_processes()
         self.__loaded_extensions = []
         self.load_file("stdrun.hoc")
         self.runtime = 0
 
+    @classmethod
+    def _process_registration_queue(cls):
+        """
+        Most PythonHocObject classes (all those provided by Patch for sure) are created
+        before the PythonHocInterpreter class is available. Yet they require the class to
+        combine the original pointer from ``h.<object>`` (e.g. ``h.Section``) with a
+        function that defers to their constructor so that you can call ``p.Section()``
+        and create a PythonHocObject wrapped around the underlying ``h`` pointer.
+
+        This function is called right after the PythonHocInterpreter class is created so
+        that PythonHocObjects can place themselves in a queue and have themselves
+        registered into the class right after it's ready.
+        """
+        for hoc_object_class in _get_obj_registration_queue():
+            cls.register_hoc_object(hoc_object_class)
+
+    @classmethod
+    def register_hoc_object(interpreter_class, hoc_object_class):
+        # We shouldn't use multiple copies of h in case of monkey patches but  since we
+        # need only native functions that return a hoc object this is fine.
+        from neuron import h
+
+        if hoc_object_class.__name__ in interpreter_class.__dict__:
+            # The function call was overridden in the interpreter and should not be destroyed.
+            return
+        hoc_object_name = hoc_object_class.__name__
+        # If the original interpreter doesn't have a function with the same name we can't
+        # simplify the constructor of the PythonHocObject and shouldn't wrap it.
+        if hasattr(h, hoc_object_name):
+            # Wrap it in the interpreter with a call to the underlying `h` to obtain a pointer
+            # and use that to make our PythonHocObject
+            factory = getattr(h, hoc_object_name)
+            @wraps(hoc_object_class.__init__)
+            def wrapper(interpreter_instance, *args, **kwargs):
+                hoc_ptr = factory(*args, **kwargs)
+                return hoc_object_class(interpreter_instance, hoc_ptr)
+
+            setattr(PythonHocInterpreter, hoc_object_class.__name__, wrapper)
+
     def __getattr__(self, attr_name):
-        # Get the missing attribute from h, if it requires wrapping return a wrapped
-        # object instead.
-        attr = getattr(self.__h, attr_name)
-        if attr_name in self.__requires_wrapping:
-            return self.wrap(attr, attr_name)
-        else:
-            return attr
+        # Get the missing attribute from h
+        return getattr(self.__h, attr_name)
 
     def __setattr__(self, attr, value):
         if hasattr(self.__h, attr):
@@ -42,14 +73,6 @@ class PythonHocInterpreter:
     def nrn_load_dll(self, path):
         self.__h.nrn_load_dll(path)
         self._wrap_point_processes()
-
-    def wrap(self, factory, name):
-        def wrapper(*args, **kwargs):
-            obj = factory(*args, **kwargs)
-            cls = next((c for c in self.__object_classes if c.__name__ == name), None)
-            return cls(self, obj)
-
-        return wrapper
 
     def NetCon(self, source, target, *args, **kwargs):
         nrn_source = transform_netcon(source)
@@ -75,7 +98,11 @@ class PythonHocInterpreter:
         # Set the weight, delay and threshold independently
         for k, v in setters.items():
             if k == "weight":
-                connection.weight[0] = v
+                if hasattr(type(v), "__iter__"):  # pragma: nocover
+                    for i, w in enumerate(v):
+                        connection.weight[i] = w
+                else:
+                    connection.weight[0] = v
             else:
                 setattr(connection, k, v)
         # Have the NetCon reference source and target
@@ -88,6 +115,11 @@ class PythonHocInterpreter:
             assert_connectable(target, label="Target")
             source._connections[target] = connection
             target._connections[source] = connection
+        elif hasattr(source, "__ref__"):
+            # Since the connection isn't established, make sure that the source and NetCon
+            # reference eachother both ways
+            source.__ref__(connection)
+
         return connection
 
     def ParallelCon(self, a, b, output=True, *args, **kwargs):
@@ -97,13 +129,6 @@ class PythonHocInterpreter:
         if a_int != b_int:
             if b_int:
                 source = a
-                # Create a second NetCon, with explicit thresholds, as a workaround for an
-                # esoteric NEURON spike detection bug.
-                nc_nopar = self.NetCon(source, None)
-                threshold = -20.0
-                if "threshold" in kwargs:
-                    threshold = kwargs["threshold"]
-                nc_nopar.threshold = threshold
                 nc = self.NetCon(source, None, *args, **kwargs)
                 self.parallel.set_gid2node(gid, self.parallel.id())
                 self.parallel.cell(gid, nc)
@@ -129,6 +154,25 @@ class PythonHocInterpreter:
                 "Exactly one of the first or second arguments has to be a GID."
             )
 
+    def SectionRef(self, *args, sec=None):
+        if len(args) > 1:
+            raise TypeError(f"SectionRef takes 1 positional argument but {len(args)} given.")
+        if sec is None:
+            if args:
+                sec = args[0]
+            else:
+                sec = self.cas()
+                if not sec:
+                    raise RuntimeError("SectionRef() failed as there is no currently accessed section available. Please specify a Section.")
+        ref = SectionRef(self, self.__h.SectionRef(sec=transform(sec)))
+        if transform(sec) is sec:
+            sec = Section(self, sec)
+        ref.__ref__(sec)
+        ref.__dict__["sec"] = sec
+        ref.section = sec
+        return ref
+
+
     def ParallelContext(self):
         return self.parallel
 
@@ -138,14 +182,12 @@ class PythonHocInterpreter:
 
           :param factory: A point process method from the HocInterpreter.
           :type factory: function
-          :param target: The Segment this point process has to be inserted into.
-          :type target: :class:`.objects.Segment`
+          :param target: The object this point process has to be inserted into.
+          :type target: :class:`.objects.PythonHocObject`
         """
+        og_target = target
         if hasattr(target, "__arc__"):
-            og_target = target
-            target = target(target.__arc__())
-            og_target.__ref__(target)
-            target.__ref__(og_target)
+            target = target(target.__arc__(), ephemeral=True)
         nrn_target = transform(target)
         if hasattr(factory, "_patch_wrapper"):
             # Avoid double wrapping
@@ -153,8 +195,8 @@ class PythonHocInterpreter:
         else:
             point_process = factory(nrn_target, *args, **kwargs)
             pp = PointProcess(self, point_process)
-        target.__ref__(pp)
-        pp.__ref__(target)
+        og_target.__ref__(pp)
+        pp.__ref__(og_target)
         return pp
 
     def VecStim(self, pattern=None, *args, **kwargs):
@@ -229,7 +271,13 @@ class PythonHocInterpreter:
         self.__h.run()
 
     def cas(self):
-        return Section(self, self.__h.cas())
+        # Currently error won't be triggered as h.cas() exits on undefined section acces:
+        # https://github.com/neuronsimulator/nrn/issues/769
+        try:
+            with catch_hoc_error(CatchSectionAccess):
+                return Section(self, self.__h.cas())
+        except HocSectionAccessError: # pragma: nocover
+            return None
 
     def _init_pc(self):
         if not hasattr(self, "_PythonHocInterpreter__pc"):
@@ -254,6 +302,10 @@ class PythonHocInterpreter:
         self._init_pc()
         return self.__pc
 
+    def record(self, target):
+        v = self.Vector()
+        v.record(target)
+        return v
     def _wrap_point_processes(self):
         # Filter out all the point processes in the interpreter
         point_processes = [k for k in dir(self.__h) if self.is_point_process(k)]
@@ -351,3 +403,5 @@ class ParallelContext(PythonHocObject):
             raise BroadcastError(
                 "Root node did not transmit. Look for root node error."
             ) from None
+
+PythonHocInterpreter._process_registration_queue()

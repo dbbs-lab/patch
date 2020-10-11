@@ -16,13 +16,14 @@ class PythonHocModule(types.ModuleType):
     transform_record = staticmethod(transform_record)
     transform_arc = staticmethod(transform_arc)
 
-    __version__ = "2.1.1"
+    __version__ = "2.2.0"
 
     @property
     def p(self):
         global _p
         if _p is None:
             _p = PythonHocModule.PythonHocInterpreter()
+            PythonHocModule.PythonHocInterpreter._process_registration_queue()
         return _p
 
     def connection(self, source, target, strict=True):
