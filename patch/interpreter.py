@@ -70,7 +70,11 @@ class PythonHocInterpreter:
         # Set the weight, delay and threshold independently
         for k, v in setters.items():
             if k == "weight":
-                connection.weight[0] = v
+                if hasattr(type(v), "__iter__"):  # pragma: nocover
+                    for i, w in enumerate(v):
+                        connection.weight[i] = w
+                else:
+                    connection.weight[0] = v
             else:
                 setattr(connection, k, v)
         # Have the NetCon reference source and target
