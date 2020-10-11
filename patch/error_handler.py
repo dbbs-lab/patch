@@ -135,7 +135,9 @@ class CatchNetCon(ErrorHandler):
             )
 
 
-class CatchSectionAccess(ErrorHandler):
+# Section access errors can't be triggered without NEURON exiting:
+# https://github.com/neuronsimulator/nrn/issues/769
+class CatchSectionAccess(ErrorHandler): #  pragma: nocover
     """
     Catches errors that occur when the Section stack is empty and accessed, raises
     ``HocSectionAccessError``.
@@ -159,5 +161,6 @@ class CatchRecord(ErrorHandler):
         e = detector(error)
         if e("first arg is not a point_process") or e("interpreter stack type error"):
             raise HocRecordError(f"Can't record {self.target}, its record pointer is not a point process.")
-        if e("number was provided instead of a pointer"):
+        # Encountered this error locally, most likely on NEURON 7.7, don't cover
+        if e("number was provided instead of a pointer"): #  pragma: nocover
             raise HocRecordError(f"Can't record {self.target}, its record pointer is a value. Make sure that you're recording `y._ref_x` rather than `y.x`.")
