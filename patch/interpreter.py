@@ -235,7 +235,7 @@ class PythonHocInterpreter:
         try:
             with catch_hoc_error(CatchSectionAccess):
                 return Section(self, self.__h.cas())
-        except HocSectionAccessError:
+        except HocSectionAccessError: # pragma: nocover
             return None
 
     def _init_pc(self):
