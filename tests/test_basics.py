@@ -3,6 +3,7 @@ import unittest, sys, os, _shared
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import patch.objects
 from patch import p
+from patch.exceptions import *
 
 
 class TestPatch(_shared.NeuronTestCase):
@@ -105,6 +106,16 @@ class TestPatch(_shared.NeuronTestCase):
             "Transform arc on non-arced object should yield transform of the object",
         )
 
+    def test_record(self):
+        s = p.Section()
+        v = p.record(s)
+        self.assertEqual(patch.objects.Vector, type(v), 'p.record should return Vector')
+        sr = p.SectionRef(s)
+        with self.assertRaises(HocRecordError):
+            v = p.record(sr)
+        with self.assertRaises(HocRecordError):
+            v = p.record(4)
+
 
 class TestSection(_shared.NeuronTestCase):
     def test_section_call(self):
@@ -205,6 +216,11 @@ class TestSectionRef(_shared.NeuronTestCase):
         self.assertIs(sr.sec, s, 'SectionRef section stored incorrectly.')
         child = sr.child[0]
         self.assertIs(patch.objects.Section, type(child), 'SectionRef.child should return Patch Section')
+
+    def test_section_access(self):
+        # Currently can't be tested because h.cas() exits rather than errors:
+        # https://github.com/neuronsimulator/nrn/issues/769
+        pass
 
 class TestPointProcess(_shared.NeuronTestCase):
     def test_factory(self):

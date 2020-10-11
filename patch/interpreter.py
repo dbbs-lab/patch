@@ -230,7 +230,13 @@ class PythonHocInterpreter:
         self.__h.run()
 
     def cas(self):
-        return Section(self, self.__h.cas())
+        # Currently error won't be triggered as h.cas() exits on undefined section acces:
+        # https://github.com/neuronsimulator/nrn/issues/769
+        try:
+            with catch_hoc_error(CatchSectionAccess):
+                return Section(self, self.__h.cas())
+        except HocSectionAccessError: # pragma: nocover
+            return None
 
     def _init_pc(self):
         if not hasattr(self, "_PythonHocInterpreter__pc"):
@@ -254,6 +260,11 @@ class PythonHocInterpreter:
     def parallel(self):
         self._init_pc()
         return self.__pc
+
+    def record(self, target):
+        v = self.Vector()
+        v.record(target)
+        return v
 
 
 class ParallelContext(PythonHocObject):

@@ -46,7 +46,27 @@ def catch_hoc_error(*args, **context):
 
 class ErrorHandler:
     """
+    Base error handler class.
 
+    The class object is "callable" and takes the arguments that an error handle callable
+    should take. This means that when the class is passed in the argument list of
+    ``catch_hoc_error`` that we'll construct an object;
+
+    The constructor checks whether the context contains enough information for us to
+    handle the error and calls its ``catch`` method that you need to override. Inside of
+    the catch method you can analyze the error message and context and raise a polished
+    version of the error. All raised errors must inherit from ``patch.object.PatchError``
+    or they'll be treated as a failure of the error handler and an ``ErrorHandlingError``
+    will be raised on top of it.
+
+    To specify the required items of the context create a class attribute list
+    ``required``::
+
+      class A(ErrorHandler):
+          required = ["info_i_need_to_operate"]
+
+    Whenever the error handler class ``A`` is used, the ``catch_hoc_error`` call will
+    have the specify the keyword argument ``info_i_need_to_operate``.
     """
     def __init__(self, error, context):
         if not hasattr(self.__class__, "required"):
@@ -63,7 +83,12 @@ class ErrorHandler:
                     )
                 )
         self.__dict__.update(context)
-        self.catch(error, context)
+        try:
+            self.catch(error, context)
+        except PatchError:
+            raise
+        except Exception as e:
+            raise ErrorHandlingError(f"{self.__class__.__name__} errored out during error handling.")
 
     def catch(self, error, context):
         raise ErrorHandlingError(
@@ -71,24 +96,38 @@ class ErrorHandler:
         )
 
 
+def detector(error):
+    """
+    Pass this the error message and it returns a lambda function that you can pass a
+    string. Returns ``True`` if the string occurs in the error message, ``False``
+    otherwise.
+    """
+    return lambda trigger: error.lower().find(trigger) != -1
+
+
 class CatchNetCon(ErrorHandler):
+    """
+    Catches a variety of errors that can occur when using ``h.NetCon`` and raises
+    ``HocConnectError``.
+    """
     required = ["nrn_source", "nrn_target"]
 
     def catch(self, error, context):
-        if error.lower().find("must be a point process or nullobject") != -1:
-            if error.find("arg 1") != -1:
+        e = detector(error)
+        if e("must be a point process or nullobject"):
+            if e("arg 1"):
                 raise HocConnectError(
                     "Source is not a point process. Transformed type: '{}'".format(
                         type(self.nrn_source)
                     )
                 )
-            if error.find("arg 2") != -1:
+            if e("arg 2"):
                 raise HocConnectError(
                     "Target is not a point process. Transformed type: '{}'".format(
                         type(self.nrn_target)
                     )
                 )
-        if error.find("interpreter stack type error") != -1:
+        if e("interpreter stack type error"):
             raise HocConnectError(
                 "Incorrect types passed to NetCon. Source: {}, target: {}".format(
                     type(self.nrn_source), type(self.nrn_target)
@@ -96,9 +135,32 @@ class CatchNetCon(ErrorHandler):
             )
 
 
-class CatchSectionAccess(ErrorHandler):
+# Section access errors can't be triggered without NEURON exiting:
+# https://github.com/neuronsimulator/nrn/issues/769
+class CatchSectionAccess(ErrorHandler): #  pragma: nocover
+    """
+    Catches errors that occur when the Section stack is empty and accessed, raises
+    ``HocSectionAccessError``.
+    """
     required = []
 
     def catch(self, error, context):
-        if error.find("Section access unspecified") != -1:
-            raise HocSectionAccessError("This operation requires a Section on the stack.")
+        e = detector(error)
+        if e("Section access unspecified"):
+            raise HocSectionAccessError("This operation requires a Section on the stack or perhaps a `sec` keyword argument.")
+
+
+class CatchRecord(ErrorHandler):
+    """
+    Catches a variety of errors that occur when using ``h.Vector().record``, raises
+    ``HocRecordError``.
+    """
+    required = ["target"]
+
+    def catch(self, error, context):
+        e = detector(error)
+        if e("first arg is not a point_process") or e("interpreter stack type error"):
+            raise HocRecordError(f"Can't record {self.target}, its record pointer is not a point process.")
+        # Encountered this error locally, most likely on NEURON 7.7, don't cover
+        if e("number was provided instead of a pointer"): #  pragma: nocover
+            raise HocRecordError(f"Can't record {self.target}, its record pointer is a value. Make sure that you're recording `y._ref_x` rather than `y.x`.")

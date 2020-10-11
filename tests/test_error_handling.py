@@ -34,7 +34,7 @@ class TestErrorHandling(_shared.NeuronTestCase):
             test()
 
         class UndefinedRequirements(ErrorHandler):
-            def catch(self, error, context):
+            def catch(self, error, context):  # pragme: nocover
                 pass
 
         def test_undef():
@@ -52,7 +52,30 @@ class TestErrorHandling(_shared.NeuronTestCase):
         t = p.Vector()
         with self.assertRaises(HocConnectError, msg="Didn't catch NetCon error"):
             p.NetCon(s, t)
+        with self.assertRaises(HocConnectError, msg="Didn't catch NetCon error"):
+            p.NetCon(t, s)
+        with self.assertRaises(HocConnectError, msg="Didn't catch NetCon error"):
+            p.NetCon(5, 12)
 
     def test_suppress(self):
         with _suppress_nrn():
             print('ERROR! SUPPRESSION FAILED!')
+
+    def test_error_handling_error(self):
+        class BrokenHandler(ErrorHandler):
+            required = []
+
+            def catch(self, error, context):
+                raise Exception("I crashed")
+
+        with self.assertRaises(ErrorHandlingError):
+            with catch_hoc_error(BrokenHandler):
+                h.NetCon(5, 12)
+
+    def test_missing_handle(self):
+        class NoCatchHandler(ErrorHandler):
+            required = []
+
+        with self.assertRaises(ErrorHandlingError):
+            with catch_hoc_error(NoCatchHandler):
+                h.NetCon(5, 12)
