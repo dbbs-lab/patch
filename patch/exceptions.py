@@ -1,50 +1,16 @@
-class PatchError(Exception):
-    pass
+from errr.tree import make_tree as _make_tree, exception as _e
 
-
-class NotConnectableError(PatchError):
-    pass
-
-
-class NotConnectedError(PatchError):
-    pass
-
-
-class TransformError(PatchError):
-    pass
-
-
-class HocError(PatchError):
-    pass
-
-
-class HocConnectError(HocError):
-    pass
-
-
-class HocSectionAccessError(HocError):
-    pass
-
-
-class SimulationError(PatchError):
-    pass
-
-
-class UninitializedError(SimulationError):
-    pass
-
-
-class ErrorHandlingError(PatchError):
-    pass
-
-
-class ParallelError(PatchError):
-    pass
-
-
-class ParallelConnectError(PatchError):
-    pass
-
-
-class BroadcastError(ParallelError):
-    pass
+_make_tree(globals(), PatchError=_e(
+    NotConnectableError=_e(),
+    NotConnectedError=_e(),
+    TransformError=_e(),
+    HocError=_e(
+        HocConnectError=_e(),
+        HocRecordError=_e(),
+        HocSectionAccessError=_e()
+    ),
+    SimulationError=_e(),
+    UninitializedError=_e(),
+    ErrorHandlingError=_e(),
+    ParallelError=_e(ParallelConnectError=_e(), BroadcastError=_e(),),
+))

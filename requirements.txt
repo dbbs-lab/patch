@@ -1,2 +1,3 @@
-nrn-glia>=0.3.4
+nrn-glia>=0.3.7
 mpi4py>=3.0.3
+err>=1.0.0
