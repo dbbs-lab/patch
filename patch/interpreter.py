@@ -10,12 +10,17 @@ from .core import (
 from .exceptions import *
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
 from functools import wraps
-from neuron import h
-
+# We don't need to reraise ImportErrors, they should be clear enough by themselves. If not
+# and you're reading this: Fix the NEURON install, it's currently not importable ;)
+import neuron as _nrn
+from neuron import h as _h
+_nrnv_parts = [int(p) for p in _nrn.version.split(".")]
+if _nrnv_parts[0] < 7 or _nrnv_parts[0] == 7 and _nrnv_parts[1] < 8:
+    raise ImportError("Patch 3.0+ only supports NEURON v7.8.0 or higher.")
 
 class PythonHocInterpreter:
     __point_processes = []
-    __h = h
+    __h = _h
 
     def __init__(self):
         self.__loaded_extensions = []
