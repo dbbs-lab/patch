@@ -63,7 +63,12 @@ class ErrorHandler:
                     )
                 )
         self.__dict__.update(context)
-        self.catch(error, context)
+        try:
+            self.catch(error, context)
+        except PatchError:
+            raise
+        except Exception as e:
+            raise ErrorHandlingError(f"{self.__class__.__name__} errored out during error handling.")
 
     def catch(self, error, context):
         raise ErrorHandlingError(
