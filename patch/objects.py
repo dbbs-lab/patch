@@ -2,13 +2,19 @@ from .core import transform, transform_record, _is_sequence
 from .error_handler import catch_hoc_error, CatchRecord
 
 
+_registration_queue = []
+
+
 class PythonHocObject:
     def __init_subclass__(cls, **kwargs):
-        from .interpreter import PythonHocInterpreter
-
         super().__init_subclass__(**kwargs)
-        if cls.__name__ not in PythonHocInterpreter.__dict__:
-            register_hoc_object(PythonHocInterpreter, cls)
+        try:
+            from .interpreter import PythonHocInterpreter
+        except ImportError:
+            _registration_queue.append(cls)
+            return
+
+        PythonHocInterpreter.register_hoc_object(cls)
 
     def __init__(self, interpreter, ptr):
         # Initialize ourselves with a reference to our own "pointer"
@@ -318,18 +324,5 @@ class PointProcess(PythonHocObject, connectable):
         return stimulus
 
 
-def register_hoc_object(interpreter_class, hoc_object_class):
-    h = interpreter_class.__dict__[f"_{interpreter_class.__name__}__h"]
-    hoc_object_name = hoc_object_class.__name__
-    if hasattr(h, hoc_object_name):
-        factory = getattr(h, hoc_object_name)
-        @wraps(hoc_object_class.__init__)
-        def wrapper(interpreter_instance, *args, **kwargs):
-            hoc_ptr = factory(*args, **kwargs)
-            return cls(interpreter_instance, hoc_ptr)
-    else:
-        @wraps(hoc_object_class.__init__)
-        def wrapper(interpreter_instance, hoc_ptr, *args, **kwargs):
-            return cls(interpreter_instance, hoc_ptr)
-
-        PythonHocInterpreter.__dict__[cls.__name__] = wrapper
+def _get_obj_registration_queue():
+    return _registration_queue
