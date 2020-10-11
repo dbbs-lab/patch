@@ -1,4 +1,5 @@
 from .core import transform, transform_record, _is_sequence
+from .error_handler import catch_hoc_error, CatchRecord
 
 
 class PythonHocObject:
@@ -226,7 +227,8 @@ class SectionRef(PythonHocObject):
 class Vector(PythonHocObject):
     def record(self, target, *args, **kwargs):
         nrn_target = transform_record(target)
-        self.__neuron__().record(nrn_target, *args, **kwargs)
+        with catch_hoc_error(CatchRecord, target=target):
+            self.__neuron__().record(nrn_target, *args, **kwargs)
         self.__ref__(target)
 
 
