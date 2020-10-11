@@ -87,6 +87,11 @@ class PythonHocInterpreter:
             assert_connectable(target, label="Target")
             source._connections[target] = connection
             target._connections[source] = connection
+        elif hasattr(source, "__ref__"):
+            # Since the connection isn't established, make sure that the source and NetCon
+            # reference eachother both ways
+            source.__ref__(connection)
+
         return connection
 
     def ParallelCon(self, a, b, output=True, *args, **kwargs):

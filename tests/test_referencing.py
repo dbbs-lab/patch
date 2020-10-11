@@ -59,4 +59,11 @@ class TestReferencing(_shared.NeuronTestCase):
             1, len(s3.children()), "Referencing failure, child section garbage collected."
         )
 
+    def test_parallel_con_ref(self):
+        import weakref, gc
+        s = p.Section()
+        r = weakref.ref(p.ParallelCon(s, 901))
+        gc.collect()
+        self.assertIsNotNone(r(), "ParallelCon got garbage collected")
+
     # TODO: Test Synapses, point processes, NetStim & NetCon
