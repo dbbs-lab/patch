@@ -71,8 +71,9 @@ class PythonHocInterpreter:
             self.__dict__[attr] = value
 
     def nrn_load_dll(self, path):
-        self.__h.nrn_load_dll(path)
-        self._wrap_point_processes()
+        result = self.__h.nrn_load_dll(path)
+        self.__class__._wrap_point_processes()
+        return result
 
     def NetCon(self, source, target, *args, **kwargs):
         nrn_source = transform_netcon(source)
