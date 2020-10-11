@@ -54,3 +54,13 @@ def assert_connectable(obj, label=None):
 
 def is_section(obj):
     return transform(obj).__class__.__name__ == "Section"
+
+
+def is_point_process(name):
+    from neuron import h
+
+    try:
+        d = dir(getattr(h, name))
+    except:
+        return False
+    return all(k in d for k in ["get_loc", "has_loc", "loc", "get_segment"])
