@@ -14,6 +14,7 @@ install:
   - pip3 install -e . --no-use-pep517
   - pip3 install coverage
 script:
+  - coverage run --parallel-mode -m unittest discover -v -s ./tests/seperate
   - coverage run --parallel-mode -m unittest discover -v -s ./tests
   - mpiexec -n 4 coverage run --parallel-mode -m unittest discover -v -s ./tests
 after_success:
