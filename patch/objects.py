@@ -2,7 +2,20 @@ from .core import transform, transform_record, _is_sequence
 from .error_handler import catch_hoc_error, CatchRecord
 
 
+_registration_queue = []
+
+
 class PythonHocObject:
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        try:
+            from .interpreter import PythonHocInterpreter
+        except ImportError:
+            _registration_queue.append(cls)
+            return
+
+        PythonHocInterpreter.register_hoc_object(cls)
+
     def __init__(self, interpreter, ptr):
         # Initialize ourselves with a reference to our own "pointer"
         # and prepare a list for other references.
@@ -309,3 +322,7 @@ class PointProcess(PythonHocObject, connectable):
             stimulus = self._interpreter.VecStim(pattern=pattern)
         self._interpreter.NetCon(stimulus, self, weight=weight, delay=delay)
         return stimulus
+
+
+def _get_obj_registration_queue():
+    return _registration_queue

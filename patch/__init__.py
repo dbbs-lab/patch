@@ -23,6 +23,7 @@ class PythonHocModule(types.ModuleType):
         global _p
         if _p is None:
             _p = PythonHocModule.PythonHocInterpreter()
+            PythonHocModule.PythonHocInterpreter._process_registration_queue()
         return _p
 
     def connection(self, source, target, strict=True):

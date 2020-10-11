@@ -6,6 +6,25 @@ from patch import p
 from patch.exceptions import *
 
 
+class TestPatchRegistration(_shared.NeuronTestCase):
+    """
+    Check that the registration of PythonHocObjects works. (Will almost never be relevant
+    since most actual HocObjects will be covered by Patch and use the registration queue
+    rather than immediate registration; and any class names that don't correspond to an
+    actual ``h.<name>`` function don't create a wrapper)
+    """
+
+    def test_registration(self):
+        from patch import p
+
+        # Create a new PythonHocObject, no wrapper will be added as it does not exist in h
+        class NewHocObject(patch.objects.PythonHocObject):
+            pass
+
+        # Nothing to test, but the import inside ``PythonHocObject.__init_subclass__``
+        # should complete and the call to ``PythonHocInterpreter.register_hoc_object``
+        # should be covered in test coverage results.
+
 class TestPatch(_shared.NeuronTestCase):
     """
         Check Patch basics like object wrapping and the standard interface.
