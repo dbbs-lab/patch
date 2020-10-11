@@ -4,19 +4,20 @@ from .core import (
     transform_netcon,
     assert_connectable,
     is_section,
+    is_point_process,
     transform_arc,
 )
 from .exceptions import *
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
 from functools import wraps
+from neuron import h
 
 
 class PythonHocInterpreter:
-    def __init__(self):
-        from neuron import h
+    __point_processes = []
+    __h = h
 
-        self.__dict__["_PythonHocInterpreter__h"] = h
-        self._wrap_point_processes()
+    def __init__(self):
         self.__loaded_extensions = []
         self.load_file("stdrun.hoc")
         self.runtime = 0
@@ -39,9 +40,7 @@ class PythonHocInterpreter:
 
     @classmethod
     def register_hoc_object(interpreter_class, hoc_object_class):
-        # We shouldn't use multiple copies of h in case of monkey patches but  since we
-        # need only native functions that return a hoc object this is fine.
-        from neuron import h
+        h = interpreter_class.__h
 
         if hoc_object_class.__name__ in interpreter_class.__dict__:
             # The function call was overridden in the interpreter and should not be destroyed.
@@ -173,32 +172,8 @@ class PythonHocInterpreter:
         ref.section = sec
         return ref
 
-
     def ParallelContext(self):
         return self.parallel
-
-    def PointProcess(self, factory, target, *args, **kwargs):
-        """
-          Creates a point process from a h.MyMechanism factory.
-
-          :param factory: A point process method from the HocInterpreter.
-          :type factory: function
-          :param target: The object this point process has to be inserted into.
-          :type target: :class:`.objects.PythonHocObject`
-        """
-        og_target = target
-        if hasattr(target, "__arc__"):
-            target = target(target.__arc__(), ephemeral=True)
-        nrn_target = transform(target)
-        if hasattr(factory, "_patch_wrapper"):
-            # Avoid double wrapping
-            pp = factory(target, *args, **kwargs)
-        else:
-            point_process = factory(nrn_target, *args, **kwargs)
-            pp = PointProcess(self, point_process)
-        og_target.__ref__(pp)
-        pp.__ref__(og_target)
-        return pp
 
     def VecStim(self, pattern=None, *args, **kwargs):
         import glia as g
@@ -307,40 +282,37 @@ class PythonHocInterpreter:
         v = self.Vector()
         v.record(target)
         return v
-    def _wrap_point_processes(self):
+
+    @classmethod
+    def _wrap_point_processes(cls):
         # Filter out all the point processes in the interpreter
-        point_processes = [k for k in dir(self.__h) if self.is_point_process(k)]
-        try:
-            # The first time we check this, the __point_processes attribute doesn't
-            # exist so we go to the except clause, this is a poor man's "hasattr".
-            old_point_processes = self.__point_processes
-        except:
-            old_point_processes = []
+        point_processes = [k for k in dir(cls.__h) if is_point_process(k)]
+        old_point_processes = cls.__point_processes
         # Check if there are any new things to wrap.
-        to_wrap = list(set(point_processes) - set(old_point_processes))
-        for point_process in to_wrap:
+        for point_process in set(point_processes) - set(old_point_processes):
             # For each point process check if a function already exists, if not, wrap the
             # HocInterpreter factory function.
-            if point_process not in self.__dict__:
-                self.__dict__[point_process] = self._wrap_point_process(point_process)
-        self.__point_processes = point_processes
+            if point_process not in cls.__dict__:
+                setattr(cls, point_process, cls._wrap_point_process(point_process))
+        cls.__point_processes = point_processes
 
-    def _wrap_point_process(self, point_process):
-        factory = getattr(self.__h, point_process)
+    @classmethod
+    def _wrap_point_process(cls, point_process):
+        # Create a function that has the right `f.__code__.co_name` for error messages.
+        exec(f"""def {point_process}(self, target, *args, **kwargs):
+            h = getattr(self, '_PythonHocInterpreter__h')
+            factory = getattr(h, '{point_process}')
+            og_target = target
+            if hasattr(target, "__arc__"):
+                target = target(target.__arc__(), ephemeral=True)
+            nrn_target = transform(target)
+            nrn_ptr = factory(nrn_target, *args, **kwargs)
+            point_process = PointProcess(self, nrn_ptr)
+            og_target.__ref__(point_process)
+            point_process.__ref__(og_target)
+            return point_process""")
 
-        def wrapper(self, target, *args, **kwargs):
-            return self.PointProcess(factory, target, *args, **kwargs)
-
-        wrapper.__name__ = str(factory)[:-2]
-        wrapper._patch_wrapper = True
-        return wrapper.__get__(self)
-
-    def is_point_process(self, name):
-        try:
-            d = dir(getattr(self.__h, name))
-        except:
-            return False
-        return all(k in d for k in ["get_loc", "has_loc", "loc", "get_segment"])
+        return locals()[point_process]
 
 
 class ParallelContext(PythonHocObject):
@@ -406,3 +378,4 @@ class ParallelContext(PythonHocObject):
             ) from None
 
 PythonHocInterpreter._process_registration_queue()
+PythonHocInterpreter._wrap_point_processes()
