@@ -71,3 +71,11 @@ class TestErrorHandling(_shared.NeuronTestCase):
         with self.assertRaises(ErrorHandlingError):
             with catch_hoc_error(BrokenHandler):
                 h.NetCon(5, 12)
+
+    def test_missing_handle(self):
+        class NoCatchHandler(ErrorHandler):
+            required = []
+
+        with self.assertRaises(ErrorHandlingError):
+            with catch_hoc_error(NoCatchHandler):
+                h.NetCon(5, 12)
