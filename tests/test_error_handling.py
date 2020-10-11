@@ -34,7 +34,7 @@ class TestErrorHandling(_shared.NeuronTestCase):
             test()
 
         class UndefinedRequirements(ErrorHandler):
-            def catch(self, error, context):
+            def catch(self, error, context):  # pragme: nocover
                 pass
 
         def test_undef():
