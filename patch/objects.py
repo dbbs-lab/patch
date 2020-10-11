@@ -49,7 +49,7 @@ class PythonHocObject:
         # Relay iteration to the underlying pointer
         try:
             return iter(ptr)
-        except TypeError as _:
+        except TypeError:
             raise
 
     def __len__(self):
@@ -81,7 +81,7 @@ class PythonHocObject:
         try:
             self._references.remove(obj)
             return True
-        except ValueError as _:
+        except ValueError:
             return False
 
 
@@ -187,7 +187,7 @@ class Section(PythonHocObject, connectable):
         return self.recordings[x]
 
     def synapse(self, factory, store=False, *args, **kwargs):
-        synapse = self._interpreter.PointProcess(factory, self, *args, **kwargs)
+        synapse = factory(self, *args, **kwargs)
         if store:
             if not hasattr(self, "synapses"):
                 self.synapses = []
@@ -301,8 +301,7 @@ class Segment(PythonHocObject, connectable):
 
 class PointProcess(PythonHocObject, connectable):
     """
-        Wrapper for all point processes (membrane and synapse mechanisms). Use
-        ``PythonHocInterpreter.PointProcess`` to construct these objects.
+        Wrapper for all point processes (membrane and synapse mechanisms).
     """
 
     def __init__(self, *args, **kwargs):
