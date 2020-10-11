@@ -48,20 +48,6 @@ gotcha's and introducing sugar and quality of life improvements. For a detailed 
 of niceties that will keep you sane instead of hunting down obscure bugs, check out the
 :doc:`candy_guide`.
 
-Known unpatched holes
----------------------
-
-* When creating point processes the returned object is unwrapped.
-  This can be resolved using `Glia <https://github.com/dbbs-lab/glia>`_, or by
-  using this syntax:
-
-.. code-block:: python
-
-    # In neuron
-    process = h.MyMechanismName(my_section(0.5), *args, **kwargs)
-    # In patch
-    point_process = p.PointProcess(p.MyMechanismName, my_section(0.5), *args, **kwargs)
-
 
 Indices and tables
 ==================

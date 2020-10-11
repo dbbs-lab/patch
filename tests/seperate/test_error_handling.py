@@ -1,7 +1,8 @@
-import unittest, sys, os, _shared
+import unittest, sys, os
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-import patch
+import patch, _shared
 from patch import p
 from neuron import h
 from patch.exceptions import *

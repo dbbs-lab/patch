@@ -244,7 +244,7 @@ class TestSectionRef(_shared.NeuronTestCase):
 class TestPointProcess(_shared.NeuronTestCase):
     def test_factory(self):
         s = p.Section()
-        pp = p.PointProcess(p.ExpSyn, s(0.5))
+        pp = p.ExpSyn(s(0.5))
         self.assertEqual(
             patch.objects.PointProcess,
             type(pp),
@@ -257,7 +257,7 @@ class TestPointProcess(_shared.NeuronTestCase):
 
     def test_stimulate(self):
         s = p.Section()
-        pp = p.PointProcess(p.ExpSyn, s(0.5))
+        pp = p.ExpSyn(s(0.5))
         stim = pp.stimulate(start=0, number=1)
         stim._connections[pp].weight[0] = 0.4
         r = s.record()

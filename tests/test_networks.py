@@ -15,7 +15,7 @@ class TestNetworks(_shared.NeuronTestCase):
 
     def test_connection_helper(self):
         s = p.Section()
-        pp = p.PointProcess(p.ExpSyn, s)
+        pp = p.ExpSyn(s)
         stim = pp.stimulate()
         self.assertEqual(
             NetCon,
@@ -31,9 +31,9 @@ class TestNetworks(_shared.NeuronTestCase):
         s1 = p.Section()
         s2 = p.Section()
         s3 = p.Section()
-        se = p.PointProcess(p.ExpSyn, s1)
-        se2 = p.PointProcess(p.ExpSyn, s2)
-        se3 = p.PointProcess(p.ExpSyn, s3)
+        se = p.ExpSyn(s1)
+        se2 = p.ExpSyn(s2)
+        se3 = p.ExpSyn(s3)
         ns = se.stimulate(start=1, number=3, interval=1)
         vs = se2.stimulate(pattern=[1, 2, 3])
         vs2 = se3.stimulate(pattern=[random() * 2, random() + 2, random() * 2 + 3])
@@ -59,12 +59,12 @@ class TestNetworks(_shared.NeuronTestCase):
 
     def test_netcon_record(self):
         s1 = p.Section()
-        se = p.PointProcess(p.ExpSyn, s1)
+        se = p.ExpSyn(s1)
         ns = se.stimulate(start=1, number=3, interval=1, weight=100)
         r = s1.record()
         s2 = p.Section()
         r2 = s2.record()
-        syn = p.PointProcess(p.ExpSyn, s2)
+        syn = p.ExpSyn(s2)
         nc = s1.connect_points(syn)
         v = p.Vector()
         t = p.time

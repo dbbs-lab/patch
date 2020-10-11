@@ -88,16 +88,3 @@ method is passed instead. The connection is stored on the original object. This 
 simplify the calls to NetCon, or to add more elegant default behavior, like inserting the
 connection on a random segment of a section and being able to use just ``p.NetCon(section,
 synapse)``
-
-# Known unpatched holes
-
-* When inserting point processes the returned object is unwrapped.
-  This can be resolved using [Glia](https://github.com/dbbs-lab/glia), or by
-  using this syntax:
-
-```python
-  # In neuron
-  process = h.MyMechanismName(my_section(0.5), *args, **kwargs)
-  # In patch
-  point_process = p.PointProcess(p.MyMechanismName, my_section(0.5), *args, **kwargs)
-```

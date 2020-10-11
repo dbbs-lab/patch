@@ -7,15 +7,14 @@ jobs:
       before_install:
         - sudo apt-get update
         - sudo apt-get install -y libopenmpi-dev openmpi-bin
-        - wget https://neuron.yale.edu/ftp/neuron/versions/v7.7/nrn-7.7.x86_64-linux.deb
-        - sudo dpkg -i nrn-7.7.x86_64-linux.deb
-        - export PYTHONPATH=$PYTHONPATH:/usr/local/nrn/lib/python
 install:
   - pip3 install --upgrade pip
   - pip3 install -r requirements.txt
+  - pip3 install 'NEURON>=7.8.0,<7.8.1'
   - pip3 install -e . --no-use-pep517
   - pip3 install coverage
 script:
+  - coverage run --parallel-mode -m unittest discover -v -s ./tests/seperate
   - coverage run --parallel-mode -m unittest discover -v -s ./tests
   - mpiexec -n 4 coverage run --parallel-mode -m unittest discover -v -s ./tests
 after_success:
