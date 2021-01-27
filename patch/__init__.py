@@ -17,6 +17,7 @@ class PythonHocModule(types.ModuleType):
     transform_arc = staticmethod(transform_arc)
 
     __version__ = "3.0.0b0"
+    __path__ = __path__
 
     @property
     def p(self):
@@ -57,7 +58,7 @@ class PythonHocModule(types.ModuleType):
         return pkg_resources.resource_filename(__package__, path)
 
     # Define all for `from patch import *` statements
-    __all__ = list(set(vars().keys()) - {"__module__", "__qualname__"})
+    __all__ = list(set(vars().keys()) - {"__module__", "__qualname__", "__path__"})
 
 
 # Register a PythonHocModule instance as this module

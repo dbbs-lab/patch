@@ -1,4 +1,13 @@
-from .objects import PythonHocObject, NetCon, PointProcess, VecStim, Section, IClamp, SectionRef, _get_obj_registration_queue
+from .objects import (
+    PythonHocObject,
+    NetCon,
+    PointProcess,
+    VecStim,
+    Section,
+    IClamp,
+    SectionRef,
+    _get_obj_registration_queue,
+)
 from .core import (
     transform,
     transform_netcon,
@@ -10,13 +19,16 @@ from .core import (
 from .exceptions import *
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
 from functools import wraps
+
 # We don't need to reraise ImportErrors, they should be clear enough by themselves. If not
 # and you're reading this: Fix the NEURON install, it's currently not importable ;)
 import neuron as _nrn
 from neuron import h as _h
+
 _nrnv_parts = [int(p) if p.isnumeric() else p for p in _nrn.version.split(".")]
 if _nrnv_parts[0] < 7 or _nrnv_parts[0] == 7 and _nrnv_parts[1] < 8:
     raise ImportError("Patch 3.0+ only supports NEURON v7.8.0 or higher.")
+
 
 class PythonHocInterpreter:
     __point_processes = []
@@ -26,6 +38,7 @@ class PythonHocInterpreter:
         self.__loaded_extensions = []
         self.load_file("stdrun.hoc")
         self.runtime = 0
+        self.celsius = 32
 
     @classmethod
     def _process_registration_queue(cls):
@@ -57,6 +70,7 @@ class PythonHocInterpreter:
             # Wrap it in the interpreter with a call to the underlying `h` to obtain a pointer
             # and use that to make our PythonHocObject
             factory = getattr(h, hoc_object_name)
+
             @wraps(hoc_object_class.__init__)
             def wrapper(interpreter_instance, *args, **kwargs):
                 hoc_ptr = factory(*args, **kwargs)
@@ -161,14 +175,18 @@ class PythonHocInterpreter:
 
     def SectionRef(self, *args, sec=None):
         if len(args) > 1:
-            raise TypeError(f"SectionRef takes 1 positional argument but {len(args)} given.")
+            raise TypeError(
+                f"SectionRef takes 1 positional argument but {len(args)} given."
+            )
         if sec is None:
             if args:
                 sec = args[0]
             else:
                 sec = self.cas()
                 if not sec:
-                    raise RuntimeError("SectionRef() failed as there is no currently accessed section available. Please specify a Section.")
+                    raise RuntimeError(
+                        "SectionRef() failed as there is no currently accessed section available. Please specify a Section."
+                    )
         ref = SectionRef(self, self.__h.SectionRef(sec=transform(sec)))
         if transform(sec) is sec:
             sec = Section(self, sec)
@@ -257,7 +275,7 @@ class PythonHocInterpreter:
         try:
             with catch_hoc_error(CatchSectionAccess):
                 return Section(self, self.__h.cas())
-        except HocSectionAccessError: # pragma: nocover
+        except HocSectionAccessError:  # pragma: nocover
             return None
 
     def _init_pc(self):
@@ -304,7 +322,8 @@ class PythonHocInterpreter:
     @classmethod
     def _wrap_point_process(cls, point_process):
         # Create a function that has the right `f.__code__.co_name` for error messages.
-        exec(f"""def {point_process}(self, target, *args, **kwargs):
+        exec(
+            f"""def {point_process}(self, target, *args, **kwargs):
             h = getattr(self, '_PythonHocInterpreter__h')
             factory = getattr(h, '{point_process}')
             og_target = target
@@ -315,7 +334,8 @@ class PythonHocInterpreter:
             point_process = PointProcess(self, nrn_ptr)
             og_target.__ref__(point_process)
             point_process.__ref__(og_target)
-            return point_process""")
+            return point_process"""
+        )
 
         return locals()[point_process]
 
@@ -381,6 +401,7 @@ class ParallelContext(PythonHocObject):
             raise BroadcastError(
                 "Root node did not transmit. Look for root node error."
             ) from None
+
 
 PythonHocInterpreter._process_registration_queue()
 PythonHocInterpreter._wrap_point_processes()
