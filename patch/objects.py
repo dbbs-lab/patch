@@ -243,6 +243,7 @@ class Vector(PythonHocObject):
         with catch_hoc_error(CatchRecord, target=target):
             self.__neuron__().record(nrn_target, *args, **kwargs)
         self.__ref__(target)
+        return self
 
 
 class IClamp(PythonHocObject):
