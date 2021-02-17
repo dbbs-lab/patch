@@ -1,3 +1,10 @@
+# 3.0.0
+
+* 32° is the default temperature now.
+* Point processes are automatically wrapped.
+* Added `p.record` to create a Vector and record the argument.
+* `Vector.record` returns the vector for chaining.
+
 # 2.1.1
 
 * Re-release of 2.1.0 (sync with PyPI)

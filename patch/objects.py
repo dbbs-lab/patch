@@ -5,6 +5,13 @@ from .error_handler import catch_hoc_error, CatchRecord
 _registration_queue = []
 
 
+def _safe_call(method):
+    def caller(self, *args, **kwargs):
+        call_result = self._safe_call(method.__name__, *args, **kwargs)
+        return method(self, call_result, *args, **kwargs)
+
+    return caller
+
 class PythonHocObject:
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -83,6 +90,12 @@ class PythonHocObject:
             return True
         except ValueError:
             return False
+
+    def _safe_call(self, func_name, *args, **kwargs):
+        func = getattr(transform(self), func_name)
+        args = [transform(a) for a in args]
+        kwargs = {k: transform(v) for k, v in kwargs.items()}
+        return func(*args, **kwargs)
 
 
 class connectable:

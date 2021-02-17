@@ -7,6 +7,7 @@ from .objects import (
     IClamp,
     SectionRef,
     _get_obj_registration_queue,
+    _safe_call,
 )
 from .core import (
     transform,
@@ -109,6 +110,8 @@ class PythonHocInterpreter:
             del kwargs[key]
         if is_section(source):
             kwargs["sec"] = transform(source)
+        if "sec" in kwargs:
+            kwargs["sec"] = transform(kwargs["sec"])
         # Execute HOC NetCon and wrap result into `connection`
         with catch_hoc_error(CatchNetCon, nrn_source=nrn_source, nrn_target=nrn_target):
             connection = NetCon(
@@ -243,6 +246,11 @@ class PythonHocInterpreter:
         self.__loaded_extensions.append(extension)
 
     def finitialize(self, initial=None):
+        if self.parallel._transfer_flag:
+            import warnings
+
+            warnings.warn("Called `setup_transfer`.")
+            self.parallel.setup_transfer()
         if initial is not None:
             self.__h.finitialize(initial)
         else:
@@ -341,8 +349,27 @@ class PythonHocInterpreter:
 
 
 class ParallelContext(PythonHocObject):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._transfer_flag = False
+
     def cell(self, gid, nc):
         transform(self).cell(gid, transform(nc))
+
+    @_safe_call
+    def source_var(self, call_result, *args, **kwargs):
+        self._transfer_flag = True
+        return call_result
+
+    @_safe_call
+    def target_var(self, call_result, *args, **kwargs):
+        self._transfer_flag = True
+        return call_result
+
+    @_safe_call
+    def setup_transfer(self, call_result, *args, **kwargs):
+        self._transfer_flag = False
+        return call_result
 
     def broadcast(self, data, root=0):
         """
