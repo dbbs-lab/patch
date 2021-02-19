@@ -340,7 +340,8 @@ class PythonHocInterpreter:
             nrn_target = transform(target)
             nrn_ptr = factory(nrn_target, *args, **kwargs)
             point_process = PointProcess(self, nrn_ptr)
-            og_target.__ref__(point_process)
+            if hasattr(og_target, "__ref__"):
+                og_target.__ref__(point_process)
             point_process.__ref__(og_target)
             return point_process"""
         )
