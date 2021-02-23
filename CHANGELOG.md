@@ -4,7 +4,8 @@
 * Point processes are automatically wrapped.
 * Added `p.record` to create a Vector and record the argument.
 * `Vector.record` returns the vector for chaining.
-* Fixed https://github.com/neuronsimulator/nrn/issues/1002 with dummy transfers.
+* Fixed https://github.com/neuronsimulator/nrn/issues/1002 with collective
+  `setup_transfer` call.
 
 # 2.1.1
 

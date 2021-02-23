@@ -348,18 +348,8 @@ class PythonHocInterpreter:
         from mpi4py import MPI
 
         comm = MPI.COMM_WORLD
-        rank = comm.Get_rank()
-        transfer_nodes = comm.allgather(self.parallel._transfer_max)
-        high = max(transfer_nodes)
-        low = min(transfer_nodes)
-        if high and low == -1:
-            if not rank:
-                self.__wa_sec = self.Section()
-                self.parallel.source_var(self.__wa_sec(0.5)._ref_v, high + 1, sec=self.__wa_sec)
-            elif transfer_nodes[rank] == -1:
-                self.__wa_sec = self.Section()
-                self.parallel.target_var(self.__wa_sec(0.5)._ref_v, high + 1)
-        if self.parallel._transfer_flag:
+        should_setup = sum(comm.allgather(self.parallel._transfer_flag))
+        if should_setup:
             self.parallel.setup_transfer()
 
 
