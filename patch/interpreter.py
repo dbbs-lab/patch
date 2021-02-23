@@ -246,11 +246,7 @@ class PythonHocInterpreter:
         self.__loaded_extensions.append(extension)
 
     def finitialize(self, initial=None):
-        if self.parallel._transfer_flag:
-            import warnings
-
-            warnings.warn("Called `setup_transfer`.")
-            self.parallel.setup_transfer()
+        self._setup_transfer()
         if initial is not None:
             self.__h.finitialize(initial)
         else:
@@ -348,10 +344,29 @@ class PythonHocInterpreter:
 
         return locals()[point_process]
 
+    def _setup_transfer(self):
+        from mpi4py import MPI
+
+        comm = MPI.COMM_WORLD
+        rank = comm.Get_rank()
+        transfer_nodes = comm.allgather(self.parallel._transfer_max)
+        high = max(transfer_nodes)
+        low = min(transfer_nodes)
+        if high and low == -1:
+            if not rank:
+                self.__wa_sec = self.Section()
+                self.parallel.source_var(self.__wa_sec(0.5)._ref_v, high + 1, sec=self.__wa_sec)
+            elif transfer_nodes[rank] == -1:
+                self.__wa_sec = self.Section()
+                self.parallel.target_var(self.__wa_sec(0.5)._ref_v, high + 1)
+        if self.parallel._transfer_flag:
+            self.parallel.setup_transfer()
+
 
 class ParallelContext(PythonHocObject):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._transfer_max = -1
         self._transfer_flag = False
 
     def cell(self, gid, nc):
@@ -359,11 +374,21 @@ class ParallelContext(PythonHocObject):
 
     @_safe_call
     def source_var(self, call_result, *args, **kwargs):
+        key = args[-1]
+        if key < 0:
+            raise ValueError("Transfer variable keys must be larger than 0.")
+        # Store the highest used identifier
+        self._transfer_max = max(self._transfer_max, args[-1])
         self._transfer_flag = True
         return call_result
 
     @_safe_call
     def target_var(self, call_result, *args, **kwargs):
+        key = args[-1]
+        if key < 0:
+            raise ValueError("Transfer variable keys must be larger than 0.")
+        # Store the highest used identifier
+        self._transfer_max = max(self._transfer_max, args[-1])
         self._transfer_flag = True
         return call_result
 
