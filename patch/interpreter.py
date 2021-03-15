@@ -5,6 +5,7 @@ from .objects import (
     VecStim,
     Section,
     IClamp,
+    SEClamp,
     SectionRef,
     _get_obj_registration_queue,
     _safe_call,
@@ -216,6 +217,13 @@ class PythonHocInterpreter:
     def IClamp(self, x=0.5, sec=None):
         sec = sec if sec is not None else self.cas()
         clamp = IClamp(self, self.__h.IClamp(x, sec=transform(sec)))
+        clamp.__ref__(sec)
+        if hasattr(sec, "__ref__"):
+            sec.__ref__(clamp)
+        return clamp
+
+    def SEClamp(self, sec, x=0.5):
+        clamp = SEClamp(self, self.__h.SEClamp(transform(sec(x))))
         clamp.__ref__(sec)
         if hasattr(sec, "__ref__"):
             sec.__ref__(clamp)

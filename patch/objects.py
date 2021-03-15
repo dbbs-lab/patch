@@ -263,6 +263,10 @@ class IClamp(PythonHocObject):
     pass
 
 
+class SEClamp(PythonHocObject):
+    pass
+
+
 class NetStim(PythonHocObject, connectable):
     def __init__(self, *args, **kwargs):
         PythonHocObject.__init__(self, *args, **kwargs)
