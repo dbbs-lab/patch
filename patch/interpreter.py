@@ -20,7 +20,7 @@ from .core import (
 )
 from .exceptions import *
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
-from functools import wraps
+from functools import wraps, cached_property
 
 # We don't need to reraise ImportErrors, they should be clear enough by themselves. If not
 # and you're reading this: Fix the NEURON install, it's currently not importable ;)
@@ -229,20 +229,14 @@ class PythonHocInterpreter:
             sec.__ref__(clamp)
         return clamp
 
-    @property
+    @cached_property
     def time(self):
-        if not hasattr(self, "_time"):
-            t = self.Vector()
-            # Fix for upstream NEURON bug. See https://github.com/neuronsimulator/nrn/issues/416
-            try:
-                with catch_hoc_error(CatchSectionAccess):
-                    t.record(self._ref_t)
-            except HocSectionAccessError as e:
-                self.__dud_section = self.Section(name="this_is_here_to_record_time")
-                # Recurse to try again.
-                return self.time
-            self._time = t
-        return self._time
+        t = self.Vector()
+        # Fix for upstream NEURON bug. See https://github.com/neuronsimulator/nrn/issues/416
+        if not any(self.allsec()):
+            self.__dud_section = self.Section(name="this_is_here_to_record_time")
+        t.record(self._ref_t)
+        return t
 
     def load_extension(self, extension):  # pragma: nocover
         if extension in self.__loaded_extensions:

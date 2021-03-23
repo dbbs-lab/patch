@@ -32,6 +32,15 @@ Python interfaces should be Pythonic, this wrapper offers just that:
   - Correct garbage collection, objects connected to eachother don't
     dissapear: Objects that rely on eachother store a reference to
     eachother. As is the basis for any sane object oriented interface.
+  - Explicit exceptions: I catch silent failures and gotchas and raise
+    semantic errors with a class hierarchy instead for granular
+    exception handling.
+
+**Warning:** When running MPI simulations errors cannot be caught due to a
+[bug](https://github.com/neuronsimulator/nrn/issues/1112) in NEURON where every
+exception results in NEURON calling `MPI_Abort` and shutting down the
+simulation. If this leads to confusing failure modes please post an issue with
+your Patch code to the GitHub repo!
 
 # Basic usage
 
