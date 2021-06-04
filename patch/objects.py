@@ -184,6 +184,18 @@ class Section(PythonHocObject, connectable):
             self._interpreter.pt3dadd(*point, diameter)
         self._interpreter.pop_section()
 
+    @property
+    def points(self):
+        import numpy
+
+        return numpy.column_stack(
+            (
+                [self.x3d(n) for n in range(self.n3d())],
+                [self.y3d(n) for n in range(self.n3d())],
+                [self.z3d(n) for n in range(self.n3d())],
+            )
+        )
+
     def wholetree(self):
         return [Section(self._interpreter, s) for s in self.__neuron__().wholetree()]
 
