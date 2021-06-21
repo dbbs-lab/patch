@@ -6,6 +6,7 @@
 * `Vector.record` returns the vector for chaining.
 * Fixed https://github.com/neuronsimulator/nrn/issues/1002 with collective
   `setup_transfer` call.
+* Added `SEClamp` and `Section.vclamp`.
 
 # 2.1.1
 

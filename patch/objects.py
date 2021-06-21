@@ -235,6 +235,24 @@ class Section(PythonHocObject, connectable):
             clamp.amp = amplitude
         return clamp
 
+    def vclamp(self, x=0.5, delay=0, duration=100, after=0, voltage=-70, holding=-70):
+        clamp = self._interpreter.SEClamp(x=x, sec=self)
+        clamp.dur1 = delay
+        clamp.dur2 = duration
+        clamp.dur3 = after
+        try:
+            voltage = iter(voltage)
+        except TypeError:
+            clamp.amp1 = holding
+            clamp.amp2 = voltage
+            clamp.amp3 = holding
+        else:
+            voltage = list(voltage)
+            clamp.amp1 = voltage[0]
+            clamp.amp2 = voltage[1]
+            clamp.amp3 = voltage[2]
+        return clamp
+
     def push(self):
         transform(self).push()
 
