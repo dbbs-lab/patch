@@ -1,0 +1,43 @@
+name: Build and test Patch
+
+on: [push]
+
+jobs:
+  build:
+    name: build py${{ matrix.py }}, NEURON ${{ matrix.nrn }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        py: [3.8, 3.9]
+        nrn: [7.8.2, 8.0.0]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.py }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.py }}
+    - name: Install apt dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install openmpi-bin libopenmpi-dev
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-
+    - name: Install dependencies & self
+      run: |
+        python -m pip install --upgrade pip
+        pip install wheel
+        pip install -r requirements.txt --prefer-binary
+        pip install NEURON==${{ matrix.nrn }}
+        pip install -e .
+    - name: Run tests & coverage
+      run: |
+        coverage run --parallel-mode -m unittest discover -v -s ./tests/seperate
+        coverage run --parallel-mode -m unittest discover -v -s ./tests
+        mpiexec -n 4 coverage run --parallel-mode -m unittest discover -v -s ./tests
+        bash <(curl -s https://codecov.io/bash)

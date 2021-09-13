@@ -84,7 +84,7 @@ class PythonHocInterpreter:
                 hoc_ptr = factory(*args, **kwargs)
                 return hoc_object_class(interpreter_instance, hoc_ptr)
 
-            setattr(PythonHocInterpreter, hoc_object_class.__name__, wrapper)
+            setattr(interpreter_class, hoc_object_class.__name__, wrapper)
 
     def __getattr__(self, attr_name):
         # Get the missing attribute from h
