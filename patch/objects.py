@@ -236,6 +236,12 @@ class Section(PythonHocObject, connectable):
         return [Section(self._interpreter, s) for s in self.__neuron__().wholetree()]
 
     def record(self, x=None):
+        """
+        Record the Section at a certain point.
+
+        :param x: Arcpoint, defaults to ``__arc__`` if omitted.
+        :type x: float
+        """
         if x is None:
             x = self.__arc__()
         if not hasattr(self, "recordings"):
@@ -247,7 +253,17 @@ class Section(PythonHocObject, connectable):
             return recorder
         return self.recordings[x]
 
-    def synapse(self, factory, store=False, *args, **kwargs):
+    def synapse(self, factory, *args, store=False, **kwargs):
+        """
+        Insert a synapse into the Section.
+
+        :param factory: Callable that creates a point process, is given the
+          Section as first argument and passes on all other args.
+        :type factory: callable
+        :param store: Store the synapse on the Section in a ``synapses``
+          attribute.
+        :type store: bool
+        """
         synapse = factory(self, *args, **kwargs)
         if store:
             if not hasattr(self, "synapses"):
@@ -256,6 +272,9 @@ class Section(PythonHocObject, connectable):
         return synapse
 
     def iclamp(self, x=0.5, delay=0, duration=100, amplitude=0):
+        """
+        Create a current clamp on the section.
+        """
         clamp = self._interpreter.IClamp(x=x, sec=self)
         clamp.delay = delay
         clamp.dur = duration
@@ -272,6 +291,9 @@ class Section(PythonHocObject, connectable):
         return clamp
 
     def vclamp(self, x=0.5, delay=0, duration=100, after=0, voltage=-70, holding=-70):
+        """
+        Create a voltage clamp on the section.
+        """
         clamp = self._interpreter.SEClamp(x=x, sec=self)
         clamp.dur1 = delay
         clamp.dur2 = duration
@@ -291,14 +313,17 @@ class Section(PythonHocObject, connectable):
 
     def push(self):
         """
-        Return a context manager that pushes this Section onto the stack and
-        takes it off when the context is exited.
+        Return a context manager that pushes this Section onto the section stack
+        and takes it off when the context is exited.
         """
         transform(self).push()
 
         return _SectionStackContextManager(self)
 
     def pop(self):
+        """
+        Pop this section off the section stack.
+        """
         if self == self._interpreter.cas():
             self._interpreter.pop_section()
         else:
