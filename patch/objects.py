@@ -290,16 +290,13 @@ class Section(PythonHocObject, connectable):
         return clamp
 
     def push(self):
+        """
+        Return a context manager that pushes this Section onto the stack and
+        takes it off when the context is exited.
+        """
         transform(self).push()
 
-        class SectionStackContextManager:
-            def __enter__(this):
-                pass
-
-            def __exit__(*args):
-                self.pop()
-
-        return SectionStackContextManager()
+        return _SectionStackContextManager(self)
 
     def pop(self):
         if self == self._interpreter.cas():
@@ -308,6 +305,17 @@ class Section(PythonHocObject, connectable):
             raise RuntimeError(
                 "Cannot pop this section as it is not on top of the section stack"
             )
+
+
+class _SectionStackContextManager:
+    def __init__(self, section):
+        self._section = section
+
+    def __enter__(this):
+        pass
+
+    def __exit__(*args):
+        self.pop()
 
 
 class SectionRef(PythonHocObject):
