@@ -11,7 +11,9 @@ jobs:
         py: [3.8, 3.9]
         nrn: [7.8.2, 8.0.0]
         include:
-          - nrn: [7.8.0.127, 7.8.1.1]
+          - nrn: 7.8.0.127
+            py: 3.8
+          - nrn: 7.8.1.1
             py: 3.8
     steps:
     - uses: actions/checkout@v2
