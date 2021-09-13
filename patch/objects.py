@@ -337,11 +337,11 @@ class _SectionStackContextManager:
     def __init__(self, section):
         self._section = section
 
-    def __enter__(this):
+    def __enter__(self):
         pass
 
-    def __exit__(*args):
-        self.pop()
+    def __exit__(self, *args):
+        self._section.pop()
 
 
 class SectionRef(PythonHocObject):
