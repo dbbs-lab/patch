@@ -44,5 +44,5 @@ jobs:
       run: |
         coverage run --parallel-mode -m unittest discover -v -s ./tests/seperate
         coverage run --parallel-mode -m unittest discover -v -s ./tests
-        mpiexec -n 4 coverage run --parallel-mode -m unittest discover -v -s ./tests
+        mpiexec -n 2 coverage run --parallel-mode -m unittest discover -v -s ./tests
         bash <(curl -s https://codecov.io/bash)
