@@ -5,8 +5,8 @@ import os, sys
 
 def transform(obj):
     """
-        Transforms an object to its NEURON representation, if the __neuron__ magic
-        method is present.
+    Transforms an object to its NEURON representation, if the __neuron__ magic
+    method is present.
     """
     if hasattr(obj, "__neuron__"):
         return obj.__neuron__()
@@ -27,8 +27,8 @@ def transform_record(obj):
 
 def transform_arc(obj, *args, **kwargs):
     """
-        Get an arclength object on a NEURON object. Calls the __arc__ magic method
-        on the callable object if present, otherwise returns the transformed object.
+    Get an arclength object on a NEURON object. Calls the __arc__ magic method
+    on the callable object if present, otherwise returns the transformed object.
     """
     if hasattr(obj, "__arc__"):
         return transform(obj(obj.__arc__(*args, **kwargs)))

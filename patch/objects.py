@@ -12,6 +12,7 @@ def _safe_call(method):
 
     return caller
 
+
 class PythonHocObject:
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -418,7 +419,7 @@ class Segment(PythonHocObject, connectable):
 
 class PointProcess(PythonHocObject, connectable):
     """
-        Wrapper for all point processes (membrane and synapse mechanisms).
+    Wrapper for all point processes (membrane and synapse mechanisms).
     """
 
     def __init__(self, *args, **kwargs):

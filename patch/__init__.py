@@ -49,8 +49,8 @@ class PythonHocModule(types.ModuleType):
 
     def get_data_file(self, *dirs):  # pragma: nocover
         """
-            Retrieve a file from the data directory that is installed together with the
-            package.
+        Retrieve a file from the data directory that is installed together with the
+        package.
         """
         path = os.path.join("data", *dirs)
         if not pkg_resources.resource_exists(__package__, path):

@@ -25,6 +25,7 @@ try:
     from functools import wraps, cached_property
 except ImportError:
     import functools
+
     wraps = functools.wraps
     cached_property = lambda prop: property(functools.lru_cache()(prop))
 
@@ -122,7 +123,8 @@ class PythonHocInterpreter:
         # Execute HOC NetCon and wrap result into `connection`
         with catch_hoc_error(CatchNetCon, nrn_source=nrn_source, nrn_target=nrn_target):
             connection = NetCon(
-                self, self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs),
+                self,
+                self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs),
             )
         # Set the weight, delay and threshold independently
         for k, v in setters.items():
@@ -397,18 +399,18 @@ class ParallelContext(PythonHocObject):
 
     def broadcast(self, data, root=0):
         """
-            Broadcast either a Vector or arbitrary picklable data. If ``data`` is a
-            Vector, the Vectors are resized and filled with the data from the Vector in
-            the ``root`` node. If ``data`` is not a Vector, it is pickled, transmitted and
-            returned from this function to all nodes.
+        Broadcast either a Vector or arbitrary picklable data. If ``data`` is a
+        Vector, the Vectors are resized and filled with the data from the Vector in
+        the ``root`` node. If ``data`` is not a Vector, it is pickled, transmitted and
+        returned from this function to all nodes.
 
-            :param data: The data to broadcast to the nodes.
-            :type data: :class:`Vector <.objects.Vector>` or any picklable object.
-            :param root: The id of the node that is broadcasting the data.
-            :type root: int
-            :returns: None (Vectors filled) or the transmitted data
-            :raises: BroadcastError if ``neuron.hoc.HocObjects`` that aren't Vectors are
-              transmitted
+        :param data: The data to broadcast to the nodes.
+        :type data: :class:`Vector <.objects.Vector>` or any picklable object.
+        :param root: The id of the node that is broadcasting the data.
+        :type root: int
+        :returns: None (Vectors filled) or the transmitted data
+        :raises: BroadcastError if ``neuron.hoc.HocObjects`` that aren't Vectors are
+          transmitted
         """
         import neuron
 
