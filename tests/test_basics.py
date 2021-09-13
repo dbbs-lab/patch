@@ -25,6 +25,9 @@ class TestPatchRegistration(_shared.NeuronTestCase):
         # should complete and the call to ``PythonHocInterpreter.register_hoc_object``
         # should be covered in test coverage results.
 
+@unittest.skipIf(
+    p.parallel.nhost() != 1, "Avoid NEURON throwing MPI_ABORTs for weird tests"
+)
 class TestPatch(_shared.NeuronTestCase):
     """
         Check Patch basics like object wrapping and the standard interface.
