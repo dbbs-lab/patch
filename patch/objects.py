@@ -110,6 +110,9 @@ class Section(PythonHocObject, connectable):
         connectable.__init__(self)
 
     def connect(self, target, *args, **kwargs):
+        """
+        Connect this section to another one as child section.
+        """
         nrn_target = transform(target)
         self.__neuron__().connect(nrn_target, *args, **kwargs)
         if hasattr(target, "__ref__"):
@@ -117,12 +120,28 @@ class Section(PythonHocObject, connectable):
         self.__ref__(target)
 
     def __arc__(self):
+        """
+        Return the default arc-position (a point in the closed interval [0, 1]
+        that represents the position between start and end of the Section).
+
+        Defaults to 0.5
+        """
         return 0.5
 
     def __netcon__(self):
+        """
+        Return the default pointer to connect to a NetCon.
+
+        Defaults to ``self(0.5)._ref_v``
+        """
         return self(self.__arc__()).__netcon__()
 
     def __record__(self):
+        """
+        Return the default pointer to record.
+
+        Defaults to ``self(0.5)._ref_v``
+        """
         return self(self.__arc__()).__record__()
 
     def __call__(self, x, ephemeral=False, *args, **kwargs):
@@ -145,6 +164,9 @@ class Section(PythonHocObject, connectable):
             yield Segment(self._interpreter, v, self)
 
     def insert(self, *args, **kwargs):
+        """
+        Insert a mechanism into the Section.
+        """
         # Catch nrn.Section return value, always seems to be self.
         # So if Neuron doesn't raise an error, return self.
         # Probably for method chaining?
@@ -152,6 +174,10 @@ class Section(PythonHocObject, connectable):
         return self
 
     def connect_points(self, target, x=None, **kwargs):
+        """
+        Connect a Segment of this Section to a target. Usually used to connect
+        the membrane potential to a point process.
+        """
         if x is None:
             x = self.__arc__()
         segment = self(x)
@@ -161,20 +187,27 @@ class Section(PythonHocObject, connectable):
         return nc
 
     def set_dimensions(self, length, diameter):
+        """
+        Set the length and diameter of the piece of cable this Section will
+        represent in the simulation.
+        """
         self.L = length
         self.diam = diameter
 
     def set_segments(self, segments):
+        """
+        Set the number of discrete points where equations are solved during simulation.
+        """
         self.nseg = segments
 
     def add_3d(self, points, diameters=None):
         """
-      Add a new 3D point to this section xyz data.
+        Add a new 3D point to this section xyz data.
 
-      :param points: A 2D array of xyz points.
-      :param diameters: A scalar or array of diameters corresponding to the points. Default value is the section diameter.
-      :type diameters: float or array
-    """
+        :param points: A 2D array of xyz points.
+        :param diameters: A scalar or array of diameters corresponding to the points. Default value is the section diameter.
+        :type diameters: float or array
+        """
         if diameters is None:
             diameters = [self.diam for _ in range(len(points))]
         if not _is_sequence(diameters):
@@ -186,6 +219,9 @@ class Section(PythonHocObject, connectable):
 
     @property
     def points(self):
+        """
+        Return the 3d point information associated to this section.
+        """
         import numpy
 
         return numpy.column_stack(
