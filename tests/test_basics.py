@@ -26,6 +26,15 @@ class TestPatchRegistration(_shared.NeuronTestCase):
         # should be covered in test coverage results.
 
 
+class TestSimulationControl(_shared.NeuronTestCase):
+    def test_continuerun(self):
+        p.finitialize(-70)
+        p.continuerun(10)
+        p.continuerun(10, add=True)
+        self.assertAlmostEqual(20, p.t)
+        self.assertAlmostEqual(20, p.runtime)
+
+
 @unittest.skipIf(
     p.parallel.nhost() != 1, "Avoid NEURON throwing MPI_ABORTs for weird tests"
 )
@@ -315,6 +324,3 @@ class TestPointProcess(_shared.NeuronTestCase):
         p.finitialize(-70)
         p.continuerun(10)
         self.assertAlmostEqual(list(r)[-1], -68.0, delta=0.1)
-        p.continuerun(10, add=True)
-        self.assertEqual(20, p.t)
-        self.assertEqual(20, p.runtime)
