@@ -271,6 +271,8 @@ class TestSectionRef(_shared.NeuronTestCase):
         )
 
     def test_section_access(self):
+        from patch import transform
+
         s = p.Section()
         with s.push():
             r = p.SectionRef()
