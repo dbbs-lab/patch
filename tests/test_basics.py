@@ -25,12 +25,13 @@ class TestPatchRegistration(_shared.NeuronTestCase):
         # should complete and the call to ``PythonHocInterpreter.register_hoc_object``
         # should be covered in test coverage results.
 
+
 @unittest.skipIf(
     p.parallel.nhost() != 1, "Avoid NEURON throwing MPI_ABORTs for weird tests"
 )
 class TestPatch(_shared.NeuronTestCase):
     """
-        Check Patch basics like object wrapping and the standard interface.
+    Check Patch basics like object wrapping and the standard interface.
     """
 
     def setUp(self):
@@ -131,7 +132,7 @@ class TestPatch(_shared.NeuronTestCase):
     def test_record(self):
         s = p.Section()
         v = p.record(s)
-        self.assertEqual(patch.objects.Vector, type(v), 'p.record should return Vector')
+        self.assertEqual(patch.objects.Vector, type(v), "p.record should return Vector")
         sr = p.SectionRef(s)
         with self.assertRaises(HocRecordError):
             v = p.record(sr)
@@ -218,13 +219,30 @@ class TestSection(_shared.NeuronTestCase):
     def test_section_synapse(self):
         s = p.Section()
         s.synapse(p.ExpSyn)
-        self.assertEqual(1, len(s._references), "Section.synapse call should store product.")
-        self.assertEqual(1, len(s._references[0]._references), "Section.synapse call should store reciprocal reference on product.")
-        self.assertEqual(s, s._references[0]._references[0], "Section.synapse call should store reciprocal reference on product.")
-        self.assertFalse(hasattr(s, "synapses"), "Synapse should not be stored on section unless explicitly specified.")
+        self.assertEqual(
+            1, len(s._references), "Section.synapse call should store product."
+        )
+        self.assertEqual(
+            1,
+            len(s._references[0]._references),
+            "Section.synapse call should store reciprocal reference on product.",
+        )
+        self.assertEqual(
+            s,
+            s._references[0]._references[0],
+            "Section.synapse call should store reciprocal reference on product.",
+        )
+        self.assertFalse(
+            hasattr(s, "synapses"),
+            "Synapse should not be stored on section unless explicitly specified.",
+        )
         syn = s.synapse(p.ExpSyn, store=True)
-        self.assertTrue(hasattr(s, "synapses"), "Synapse should have been stored on section as it was explicitly specified.")
+        self.assertTrue(
+            hasattr(s, "synapses"),
+            "Synapse should have been stored on section as it was explicitly specified.",
+        )
         self.assertIn(syn, s.synapses, "Synapse product not found in synapse collection.")
+
 
 class TestSectionRef(_shared.NeuronTestCase):
     def test_ref(self):
@@ -234,10 +252,14 @@ class TestSectionRef(_shared.NeuronTestCase):
         s2.connect(s)
         sr = p.SectionRef(s)
         sr2 = p.SectionRef(sec=s2)
-        self.assertIs(sr.section, s, 'SectionRef section stored incorrectly.')
-        self.assertIs(sr.sec, s, 'SectionRef section stored incorrectly.')
+        self.assertIs(sr.section, s, "SectionRef section stored incorrectly.")
+        self.assertIs(sr.sec, s, "SectionRef section stored incorrectly.")
         child = sr.child[0]
-        self.assertIs(patch.objects.Section, type(child), 'SectionRef.child should return Patch Section')
+        self.assertIs(
+            patch.objects.Section,
+            type(child),
+            "SectionRef.child should return Patch Section",
+        )
 
     def test_section_access(self):
         s = p.Section()
@@ -254,10 +276,21 @@ class TestSectionRef(_shared.NeuronTestCase):
         s2.connect(s)
         sr = p.SectionRef(transform(s))
         sr2 = p.SectionRef(sec=s2)
-        self.assertIs(transform(sr.section), transform(s), 'SectionRef section stored incorrectly.')
-        self.assertIs(patch.objects.Section, type(sr), 'SectionRef with NRN sec didn\'t return wrapped sec.')
+        self.assertIs(
+            transform(sr.section), transform(s), "SectionRef section stored incorrectly."
+        )
+        self.assertIs(
+            patch.objects.Section,
+            type(sr.section),
+            "SectionRef with NRN sec didn't return wrapped sec.",
+        )
         child = sr.child[0]
-        self.assertIs(patch.objects.Section, type(child), 'SectionRef.child should return Patch Section')
+        self.assertIs(
+            patch.objects.Section,
+            type(child),
+            "SectionRef.child should return Patch Section",
+        )
+
 
 class TestPointProcess(_shared.NeuronTestCase):
     def test_factory(self):
