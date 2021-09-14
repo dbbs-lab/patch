@@ -240,9 +240,24 @@ class TestSectionRef(_shared.NeuronTestCase):
         self.assertIs(patch.objects.Section, type(child), 'SectionRef.child should return Patch Section')
 
     def test_section_access(self):
-        # Currently can't be tested because h.cas() exits rather than errors:
-        # https://github.com/neuronsimulator/nrn/issues/769
-        pass
+        s = p.Section()
+        with s.push():
+            r = p.SectionRef()
+        self.assertEqual(s, r, "Argless SectionRef should return cas.")
+
+    def test_bare_sec(self):
+        from patch import transform
+
+        s = p.Section()
+        s2 = p.Section()
+        s.connect(s2)
+        s2.connect(s)
+        sr = p.SectionRef(transform(s))
+        sr2 = p.SectionRef(sec=s2)
+        self.assertIs(transform(sr.section), transform(s), 'SectionRef section stored incorrectly.')
+        self.assertIs(patch.objects.Section, type(sr), 'SectionRef with NRN sec didn\'t return wrapped sec.')
+        child = sr.child[0]
+        self.assertIs(patch.objects.Section, type(child), 'SectionRef.child should return Patch Section')
 
 class TestPointProcess(_shared.NeuronTestCase):
     def test_factory(self):
@@ -267,3 +282,6 @@ class TestPointProcess(_shared.NeuronTestCase):
         p.finitialize(-70)
         p.continuerun(10)
         self.assertAlmostEqual(list(r)[-1], -68.0, delta=0.1)
+        p.continuerun(10, add=True)
+        self.assertEqual(20, p.t)
+        self.assertEqual(20, p.runtime)

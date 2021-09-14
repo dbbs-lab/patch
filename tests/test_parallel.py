@@ -28,7 +28,9 @@ class TestSingleHostParallel(_shared.NeuronTestCase):
         p.ParallelCon(s, 1)
         p.pop_section()
         syn = p.Section().synapse(p.ExpSyn)
-        p.ParallelCon(1, syn)
+        p.ParallelCon(1, syn, 5, 1)
+        with self.assertRaises(ParallelConnectError):
+            p.ParallelCon(None, None)
 
 
 @unittest.skipIf(
@@ -65,3 +67,5 @@ class TestParallelNetworks(_shared.NeuronTestCase):
             x = 12
         y = p.parallel.broadcast(x, root=1)
         self.assertEqual(y, 12, msg="Node specification ignored in broadcast.")
+        self.assertRaises(BroadcastError, p.parallel.broadcast, p.NetStim())
+        self.assertRaises(BroadcastError, p.parallel.broadcast, p.Section())

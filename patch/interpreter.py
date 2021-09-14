@@ -28,7 +28,7 @@ import neuron as _nrn
 from neuron import h as _h
 
 _nrnver = _nrn.version
-try:
+try:  # pragma: nocover
     _nrnv_parts = [int(p) if p.isnumeric() else p for p in _nrnver.split(".")]
     if _nrnv_parts[0] < 7 or _nrnv_parts[0] == 7 and _nrnv_parts[1] < 8:
         raise ImportError("Patch 3.0+ only supports NEURON v7.8.0 or higher.")
@@ -240,7 +240,7 @@ class PythonHocInterpreter:
     def time(self):
         t = self.Vector()
         # Fix for upstream NEURON bug. See https://github.com/neuronsimulator/nrn/issues/416
-        if not any(self.allsec()):
+        if not any(self.allsec()):  # pragma: nocover
             self.__dud_section = self.Section(name="this_is_here_to_record_time")
         t.record(self._ref_t)
         return t
@@ -300,7 +300,7 @@ class PythonHocInterpreter:
 
             # Check whether MPI and NEURON agree on the ParallelContext.
             # If not, make sure to help the user rectify this problem.
-            if MPI.COMM_WORLD.size != self.__h.ParallelContext().nhost():
+            if MPI.COMM_WORLD.size != self.__h.ParallelContext().nhost():  # pragma: nocover
                 raise RuntimeError(
                     "MPI could not be initialized. You're using NEURON {},"
                     + " please upgrade to NEURON 7.7+"

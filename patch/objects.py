@@ -6,6 +6,10 @@ _registration_queue = []
 
 
 def _safe_call(method):
+    """
+    Internal decorator to defer a method to the underlying NEURON object,
+    unpacking all args and returning the result to the decorated method.
+    """
     def caller(self, *args, **kwargs):
         call_result = self._safe_call(method.__name__, *args, **kwargs)
         return method(self, call_result, *args, **kwargs)
@@ -93,6 +97,10 @@ class PythonHocObject:
             return False
 
     def _safe_call(self, func_name, *args, **kwargs):
+        """
+        Unpacks all arguments to their NEURON variant and retrieves the naked
+        function from the HocObject then calls it.
+        """
         func = getattr(transform(self), func_name)
         args = [transform(a) for a in args]
         kwargs = {k: transform(v) for k, v in kwargs.items()}
