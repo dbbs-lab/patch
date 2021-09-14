@@ -16,7 +16,7 @@ class PythonHocModule(types.ModuleType):
     transform_record = staticmethod(transform_record)
     transform_arc = staticmethod(transform_arc)
 
-    __version__ = "3.0.0b7"
+    __version__ = "3.0.0"
     __path__ = __path__
 
     @property
@@ -49,8 +49,8 @@ class PythonHocModule(types.ModuleType):
 
     def get_data_file(self, *dirs):  # pragma: nocover
         """
-            Retrieve a file from the data directory that is installed together with the
-            package.
+        Retrieve a file from the data directory that is installed together with the
+        package.
         """
         path = os.path.join("data", *dirs)
         if not pkg_resources.resource_exists(__package__, path):

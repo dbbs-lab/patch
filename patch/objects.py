@@ -6,11 +6,17 @@ _registration_queue = []
 
 
 def _safe_call(method):
+    """
+    Internal decorator to defer a method to the underlying NEURON object,
+    unpacking all args and returning the result to the decorated method.
+    """
+
     def caller(self, *args, **kwargs):
         call_result = self._safe_call(method.__name__, *args, **kwargs)
         return method(self, call_result, *args, **kwargs)
 
     return caller
+
 
 class PythonHocObject:
     def __init_subclass__(cls, **kwargs):
@@ -59,6 +65,9 @@ class PythonHocObject:
         except TypeError:
             raise
 
+    def __bool__(self):
+        return True
+
     def __len__(self):
         # Relay length to pointer
         return len(self.__neuron__())
@@ -92,6 +101,10 @@ class PythonHocObject:
             return False
 
     def _safe_call(self, func_name, *args, **kwargs):
+        """
+        Unpacks all arguments to their NEURON variant and retrieves the naked
+        function from the HocObject then calls it.
+        """
         func = getattr(transform(self), func_name)
         args = [transform(a) for a in args]
         kwargs = {k: transform(v) for k, v in kwargs.items()}
@@ -110,6 +123,9 @@ class Section(PythonHocObject, connectable):
         connectable.__init__(self)
 
     def connect(self, target, *args, **kwargs):
+        """
+        Connect this section to another one as child section.
+        """
         nrn_target = transform(target)
         self.__neuron__().connect(nrn_target, *args, **kwargs)
         if hasattr(target, "__ref__"):
@@ -117,12 +133,28 @@ class Section(PythonHocObject, connectable):
         self.__ref__(target)
 
     def __arc__(self):
+        """
+        Return the default arc-position (a point in the closed interval [0, 1]
+        that represents the position between start and end of the Section).
+
+        Defaults to 0.5
+        """
         return 0.5
 
     def __netcon__(self):
+        """
+        Return the default pointer to connect to a NetCon.
+
+        Defaults to ``self(0.5)._ref_v``
+        """
         return self(self.__arc__()).__netcon__()
 
     def __record__(self):
+        """
+        Return the default pointer to record.
+
+        Defaults to ``self(0.5)._ref_v``
+        """
         return self(self.__arc__()).__record__()
 
     def __call__(self, x, ephemeral=False, *args, **kwargs):
@@ -145,6 +177,9 @@ class Section(PythonHocObject, connectable):
             yield Segment(self._interpreter, v, self)
 
     def insert(self, *args, **kwargs):
+        """
+        Insert a mechanism into the Section.
+        """
         # Catch nrn.Section return value, always seems to be self.
         # So if Neuron doesn't raise an error, return self.
         # Probably for method chaining?
@@ -152,6 +187,10 @@ class Section(PythonHocObject, connectable):
         return self
 
     def connect_points(self, target, x=None, **kwargs):
+        """
+        Connect a Segment of this Section to a target. Usually used to connect
+        the membrane potential to a point process.
+        """
         if x is None:
             x = self.__arc__()
         segment = self(x)
@@ -161,20 +200,27 @@ class Section(PythonHocObject, connectable):
         return nc
 
     def set_dimensions(self, length, diameter):
+        """
+        Set the length and diameter of the piece of cable this Section will
+        represent in the simulation.
+        """
         self.L = length
         self.diam = diameter
 
     def set_segments(self, segments):
+        """
+        Set the number of discrete points where equations are solved during simulation.
+        """
         self.nseg = segments
 
     def add_3d(self, points, diameters=None):
         """
-      Add a new 3D point to this section xyz data.
+        Add a new 3D point to this section xyz data.
 
-      :param points: A 2D array of xyz points.
-      :param diameters: A scalar or array of diameters corresponding to the points. Default value is the section diameter.
-      :type diameters: float or array
-    """
+        :param points: A 2D array of xyz points.
+        :param diameters: A scalar or array of diameters corresponding to the points. Default value is the section diameter.
+        :type diameters: float or array
+        """
         if diameters is None:
             diameters = [self.diam for _ in range(len(points))]
         if not _is_sequence(diameters):
@@ -186,6 +232,9 @@ class Section(PythonHocObject, connectable):
 
     @property
     def points(self):
+        """
+        Return the 3d point information associated to this section.
+        """
         import numpy
 
         return numpy.column_stack(
@@ -200,6 +249,12 @@ class Section(PythonHocObject, connectable):
         return [Section(self._interpreter, s) for s in self.__neuron__().wholetree()]
 
     def record(self, x=None):
+        """
+        Record the Section at a certain point.
+
+        :param x: Arcpoint, defaults to ``__arc__`` if omitted.
+        :type x: float
+        """
         if x is None:
             x = self.__arc__()
         if not hasattr(self, "recordings"):
@@ -211,7 +266,17 @@ class Section(PythonHocObject, connectable):
             return recorder
         return self.recordings[x]
 
-    def synapse(self, factory, store=False, *args, **kwargs):
+    def synapse(self, factory, *args, store=False, **kwargs):
+        """
+        Insert a synapse into the Section.
+
+        :param factory: Callable that creates a point process, is given the
+          Section as first argument and passes on all other args.
+        :type factory: callable
+        :param store: Store the synapse on the Section in a ``synapses``
+          attribute.
+        :type store: bool
+        """
         synapse = factory(self, *args, **kwargs)
         if store:
             if not hasattr(self, "synapses"):
@@ -220,6 +285,9 @@ class Section(PythonHocObject, connectable):
         return synapse
 
     def iclamp(self, x=0.5, delay=0, duration=100, amplitude=0):
+        """
+        Create a current clamp on the section.
+        """
         clamp = self._interpreter.IClamp(x=x, sec=self)
         clamp.delay = delay
         clamp.dur = duration
@@ -236,6 +304,9 @@ class Section(PythonHocObject, connectable):
         return clamp
 
     def vclamp(self, x=0.5, delay=0, duration=100, after=0, voltage=-70, holding=-70):
+        """
+        Create a voltage clamp on the section.
+        """
         clamp = self._interpreter.SEClamp(x=x, sec=self)
         clamp.dur1 = delay
         clamp.dur2 = duration
@@ -254,24 +325,35 @@ class Section(PythonHocObject, connectable):
         return clamp
 
     def push(self):
+        """
+        Return a context manager that pushes this Section onto the section stack
+        and takes it off when the context is exited.
+        """
         transform(self).push()
 
-        class SectionStackContextManager:
-            def __enter__(this):
-                pass
-
-            def __exit__(*args):
-                self.pop()
-
-        return SectionStackContextManager()
+        return _SectionStackContextManager(self)
 
     def pop(self):
+        """
+        Pop this section off the section stack.
+        """
         if self == self._interpreter.cas():
             self._interpreter.pop_section()
         else:
             raise RuntimeError(
                 "Cannot pop this section as it is not on top of the section stack"
             )
+
+
+class _SectionStackContextManager:
+    def __init__(self, section):
+        self._section = section
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, *args):
+        self._section.pop()
 
 
 class SectionRef(PythonHocObject):
@@ -349,7 +431,7 @@ class Segment(PythonHocObject, connectable):
 
 class PointProcess(PythonHocObject, connectable):
     """
-        Wrapper for all point processes (membrane and synapse mechanisms).
+    Wrapper for all point processes (membrane and synapse mechanisms).
     """
 
     def __init__(self, *args, **kwargs):

@@ -1,3 +1,4 @@
-nrn-glia>=0.3.7
-mpi4py>=3.0.3
-err>=1.0.0
+nrn-glia>=0.3.9
+mpi4py>=3.0.0
+errr==1.0.0
+coverage==5.5

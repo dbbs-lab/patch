@@ -20,22 +20,26 @@ from .core import (
 )
 from .exceptions import *
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
-
-try:
-    from functools import wraps, cached_property
-except ImportError:
-    import functools
-    wraps = functools.wraps
-    cached_property = lambda prop: property(functools.lru_cache()(prop))
+from functools import wraps, cached_property
 
 # We don't need to reraise ImportErrors, they should be clear enough by themselves. If not
 # and you're reading this: Fix the NEURON install, it's currently not importable ;)
 import neuron as _nrn
 from neuron import h as _h
 
-_nrnv_parts = [int(p) if p.isnumeric() else p for p in _nrn.version.split(".")]
-if _nrnv_parts[0] < 7 or _nrnv_parts[0] == 7 and _nrnv_parts[1] < 8:
-    raise ImportError("Patch 3.0+ only supports NEURON v7.8.0 or higher.")
+_nrnver = _nrn.version
+try:
+    _nrnv_parts = [int(p) if p.isnumeric() else p for p in _nrnver.split(".")]
+    if (
+        _nrnv_parts[0] < 7 or _nrnv_parts[0] == 7 and _nrnv_parts[1] < 8
+    ):  # pragma: nocover
+        raise ImportError("Patch 3.0+ only supports NEURON v7.8.0 or higher.")
+except:  # pragma: nocover
+    import warnings
+
+    warnings.warn(
+        f"Could not establish whether Patch supports installed NEURON version `{_nrnver}`"
+    )
 
 
 class PythonHocInterpreter:
@@ -84,7 +88,7 @@ class PythonHocInterpreter:
                 hoc_ptr = factory(*args, **kwargs)
                 return hoc_object_class(interpreter_instance, hoc_ptr)
 
-            setattr(PythonHocInterpreter, hoc_object_class.__name__, wrapper)
+            setattr(interpreter_class, hoc_object_class.__name__, wrapper)
 
     def __getattr__(self, attr_name):
         # Get the missing attribute from h
@@ -122,7 +126,8 @@ class PythonHocInterpreter:
         # Execute HOC NetCon and wrap result into `connection`
         with catch_hoc_error(CatchNetCon, nrn_source=nrn_source, nrn_target=nrn_target):
             connection = NetCon(
-                self, self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs),
+                self,
+                self.__h.NetCon(nrn_source, nrn_target, *args, **kwargs),
             )
         # Set the weight, delay and threshold independently
         for k, v in setters.items():
@@ -193,7 +198,7 @@ class PythonHocInterpreter:
                 sec = args[0]
             else:
                 sec = self.cas()
-                if not sec:
+                if not sec:  # pragma: nocover
                     raise RuntimeError(
                         "SectionRef() failed as there is no currently accessed section available. Please specify a Section."
                     )
@@ -239,7 +244,7 @@ class PythonHocInterpreter:
     def time(self):
         t = self.Vector()
         # Fix for upstream NEURON bug. See https://github.com/neuronsimulator/nrn/issues/416
-        if not any(self.allsec()):
+        if not any(self.allsec()):  # pragma: nocover
             self.__dud_section = self.Section(name="this_is_here_to_record_time")
         t.record(self._ref_t)
         return t
@@ -299,7 +304,9 @@ class PythonHocInterpreter:
 
             # Check whether MPI and NEURON agree on the ParallelContext.
             # If not, make sure to help the user rectify this problem.
-            if MPI.COMM_WORLD.size != self.__h.ParallelContext().nhost():
+            if (
+                MPI.COMM_WORLD.size != self.__h.ParallelContext().nhost()
+            ):  # pragma: nocover
                 raise RuntimeError(
                     "MPI could not be initialized. You're using NEURON {},"
                     + " please upgrade to NEURON 7.7+"
@@ -352,7 +359,7 @@ class PythonHocInterpreter:
 
         return locals()[point_process]
 
-    def _setup_transfer(self):
+    def _setup_transfer(self):  # pragma: nocover
         from mpi4py import MPI
 
         comm = MPI.COMM_WORLD
@@ -371,7 +378,7 @@ class ParallelContext(PythonHocObject):
         transform(self).cell(gid, transform(nc))
 
     @_safe_call
-    def source_var(self, call_result, *args, **kwargs):
+    def source_var(self, call_result, *args, **kwargs):  # pragma: nocover
         key = args[-1]
         if key < 0:
             raise ValueError("Transfer variable keys must be larger than 0.")
@@ -381,7 +388,7 @@ class ParallelContext(PythonHocObject):
         return call_result
 
     @_safe_call
-    def target_var(self, call_result, *args, **kwargs):
+    def target_var(self, call_result, *args, **kwargs):  # pragma: nocover
         key = args[-1]
         if key < 0:
             raise ValueError("Transfer variable keys must be larger than 0.")
@@ -391,24 +398,24 @@ class ParallelContext(PythonHocObject):
         return call_result
 
     @_safe_call
-    def setup_transfer(self, call_result, *args, **kwargs):
+    def setup_transfer(self, call_result, *args, **kwargs):  # pragma: nocover
         self._transfer_flag = False
         return call_result
 
     def broadcast(self, data, root=0):
         """
-            Broadcast either a Vector or arbitrary picklable data. If ``data`` is a
-            Vector, the Vectors are resized and filled with the data from the Vector in
-            the ``root`` node. If ``data`` is not a Vector, it is pickled, transmitted and
-            returned from this function to all nodes.
+        Broadcast either a Vector or arbitrary picklable data. If ``data`` is a
+        Vector, the Vectors are resized and filled with the data from the Vector in
+        the ``root`` node. If ``data`` is not a Vector, it is pickled, transmitted and
+        returned from this function to all nodes.
 
-            :param data: The data to broadcast to the nodes.
-            :type data: :class:`Vector <.objects.Vector>` or any picklable object.
-            :param root: The id of the node that is broadcasting the data.
-            :type root: int
-            :returns: None (Vectors filled) or the transmitted data
-            :raises: BroadcastError if ``neuron.hoc.HocObjects`` that aren't Vectors are
-              transmitted
+        :param data: The data to broadcast to the nodes.
+        :type data: :class:`Vector <.objects.Vector>` or any picklable object.
+        :param root: The id of the node that is broadcasting the data.
+        :type root: int
+        :returns: None (Vectors filled) or the transmitted data
+        :raises: BroadcastError if ``neuron.hoc.HocObjects`` that aren't Vectors are
+          transmitted
         """
         import neuron
 

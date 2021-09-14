@@ -6,7 +6,7 @@ import io, sys, os
 @contextmanager
 def _suppress_nrn(stream=None, close=False):
     """
-        Makes NEURON shut the fuck up.
+    Makes NEURON (mostly) shut the fuck up.
     """
     if stream is None:
         stream = open(os.devnull, "w")
@@ -68,6 +68,7 @@ class ErrorHandler:
     Whenever the error handler class ``A`` is used, the ``catch_hoc_error`` call will
     have the specify the keyword argument ``info_i_need_to_operate``.
     """
+
     def __init__(self, error, context):
         if not hasattr(self.__class__, "required"):
             raise ErrorHandlingError(
@@ -88,7 +89,9 @@ class ErrorHandler:
         except PatchError:
             raise
         except Exception as e:
-            raise ErrorHandlingError(f"{self.__class__.__name__} errored out during error handling.")
+            raise ErrorHandlingError(
+                f"{self.__class__.__name__} errored out during error handling."
+            )
 
     def catch(self, error, context):
         raise ErrorHandlingError(
@@ -110,6 +113,7 @@ class CatchNetCon(ErrorHandler):
     Catches a variety of errors that can occur when using ``h.NetCon`` and raises
     ``HocConnectError``.
     """
+
     required = ["nrn_source", "nrn_target"]
 
     def catch(self, error, context):
@@ -137,17 +141,20 @@ class CatchNetCon(ErrorHandler):
 
 # Section access errors can't be triggered without NEURON exiting:
 # https://github.com/neuronsimulator/nrn/issues/769
-class CatchSectionAccess(ErrorHandler): #  pragma: nocover
+class CatchSectionAccess(ErrorHandler):  #  pragma: nocover
     """
     Catches errors that occur when the Section stack is empty and accessed, raises
     ``HocSectionAccessError``.
     """
+
     required = []
 
     def catch(self, error, context):
         e = detector(error)
         if e("Section access unspecified"):
-            raise HocSectionAccessError("This operation requires a Section on the stack or perhaps a `sec` keyword argument.")
+            raise HocSectionAccessError(
+                "This operation requires a Section on the stack or perhaps a `sec` keyword argument."
+            )
 
 
 class CatchRecord(ErrorHandler):
@@ -155,12 +162,17 @@ class CatchRecord(ErrorHandler):
     Catches a variety of errors that occur when using ``h.Vector().record``, raises
     ``HocRecordError``.
     """
+
     required = ["target"]
 
     def catch(self, error, context):
         e = detector(error)
         if e("first arg is not a point_process") or e("interpreter stack type error"):
-            raise HocRecordError(f"Can't record {self.target}, its record pointer is not a point process.")
+            raise HocRecordError(
+                f"Can't record {self.target}, its record pointer is not a point process."
+            )
         # Encountered this error locally, most likely on NEURON 7.7, don't cover
-        if e("number was provided instead of a pointer"): #  pragma: nocover
-            raise HocRecordError(f"Can't record {self.target}, its record pointer is a value. Make sure that you're recording `y._ref_x` rather than `y.x`.")
+        if e("number was provided instead of a pointer"):  #  pragma: nocover
+            raise HocRecordError(
+                f"Can't record {self.target}, its record pointer is a value. Make sure that you're recording `y._ref_x` rather than `y.x`."
+            )

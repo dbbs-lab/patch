@@ -141,3 +141,11 @@ Position in space
             for point, diameter in zip(points, diameters):
                 h.pt3dadd(*point, diameter)
             h.pop_section()
+
+Full reference
+--------------
+
+Here is a full list of methods that Patch patched or added to the interface of
+``nrn.Section``:
+
+.. autoclass:: patch.objects.Section
