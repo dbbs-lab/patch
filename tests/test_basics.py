@@ -304,6 +304,9 @@ class TestSectionRef(_shared.NeuronTestCase):
             "SectionRef.child should return Patch Section",
         )
 
+    def test_wrong_args(self):
+        self.assertRaises(TypeError, p.SectionRef, 2, 2)
+
 
 class TestPointProcess(_shared.NeuronTestCase):
     def test_factory(self):

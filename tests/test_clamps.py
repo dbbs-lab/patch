@@ -8,7 +8,7 @@ from patch.exceptions import *
 
 class TestClamps(_shared.NeuronTestCase):
     """
-        Test the current and voltage clamp mechanisms
+    Test the current and voltage clamp mechanisms
     """
 
     def setUp(self):
@@ -62,3 +62,7 @@ class TestClamps(_shared.NeuronTestCase):
             min(s4.recordings[0.5]),
             "No negative injected current detected",
         )
+
+    def test_seclamp(self):
+        # Lazy coverage test :)
+        clamp = p.SEClamp(p.Section())

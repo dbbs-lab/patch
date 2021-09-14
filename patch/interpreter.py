@@ -28,11 +28,13 @@ import neuron as _nrn
 from neuron import h as _h
 
 _nrnver = _nrn.version
-try:  # pragma: nocover
+try:
     _nrnv_parts = [int(p) if p.isnumeric() else p for p in _nrnver.split(".")]
-    if _nrnv_parts[0] < 7 or _nrnv_parts[0] == 7 and _nrnv_parts[1] < 8:
+    if (
+        _nrnv_parts[0] < 7 or _nrnv_parts[0] == 7 and _nrnv_parts[1] < 8
+    ):  # pragma: nocover
         raise ImportError("Patch 3.0+ only supports NEURON v7.8.0 or higher.")
-except:
+except:  # pragma: nocover
     import warnings
 
     warnings.warn(
@@ -196,7 +198,7 @@ class PythonHocInterpreter:
                 sec = args[0]
             else:
                 sec = self.cas()
-                if not sec:
+                if not sec:  # pragma: nocover
                     raise RuntimeError(
                         "SectionRef() failed as there is no currently accessed section available. Please specify a Section."
                     )
@@ -357,7 +359,7 @@ class PythonHocInterpreter:
 
         return locals()[point_process]
 
-    def _setup_transfer(self):
+    def _setup_transfer(self):  # pragma: nocover
         from mpi4py import MPI
 
         comm = MPI.COMM_WORLD
@@ -376,7 +378,7 @@ class ParallelContext(PythonHocObject):
         transform(self).cell(gid, transform(nc))
 
     @_safe_call
-    def source_var(self, call_result, *args, **kwargs):
+    def source_var(self, call_result, *args, **kwargs):  # pragma: nocover
         key = args[-1]
         if key < 0:
             raise ValueError("Transfer variable keys must be larger than 0.")
@@ -386,7 +388,7 @@ class ParallelContext(PythonHocObject):
         return call_result
 
     @_safe_call
-    def target_var(self, call_result, *args, **kwargs):
+    def target_var(self, call_result, *args, **kwargs):  # pragma: nocover
         key = args[-1]
         if key < 0:
             raise ValueError("Transfer variable keys must be larger than 0.")
@@ -396,7 +398,7 @@ class ParallelContext(PythonHocObject):
         return call_result
 
     @_safe_call
-    def setup_transfer(self, call_result, *args, **kwargs):
+    def setup_transfer(self, call_result, *args, **kwargs):  # pragma: nocover
         self._transfer_flag = False
         return call_result
 
