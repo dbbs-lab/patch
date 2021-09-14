@@ -35,7 +35,9 @@ try:  # pragma: nocover
 except:
     import warnings
 
-    warnings.warn(f"Could not establish whether Patch supports installed NEURON version `{_nrnver}`")
+    warnings.warn(
+        f"Could not establish whether Patch supports installed NEURON version `{_nrnver}`"
+    )
 
 
 class PythonHocInterpreter:
@@ -300,7 +302,9 @@ class PythonHocInterpreter:
 
             # Check whether MPI and NEURON agree on the ParallelContext.
             # If not, make sure to help the user rectify this problem.
-            if MPI.COMM_WORLD.size != self.__h.ParallelContext().nhost():  # pragma: nocover
+            if (
+                MPI.COMM_WORLD.size != self.__h.ParallelContext().nhost()
+            ):  # pragma: nocover
                 raise RuntimeError(
                     "MPI could not be initialized. You're using NEURON {},"
                     + " please upgrade to NEURON 7.7+"

@@ -10,6 +10,7 @@ def _safe_call(method):
     Internal decorator to defer a method to the underlying NEURON object,
     unpacking all args and returning the result to the decorated method.
     """
+
     def caller(self, *args, **kwargs):
         call_result = self._safe_call(method.__name__, *args, **kwargs)
         return method(self, call_result, *args, **kwargs)
