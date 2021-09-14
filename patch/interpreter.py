@@ -20,23 +20,22 @@ from .core import (
 )
 from .exceptions import *
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
-
-try:
-    from functools import wraps, cached_property
-except ImportError:
-    import functools
-
-    wraps = functools.wraps
-    cached_property = lambda prop: property(functools.lru_cache()(prop))
+from functools import wraps, cached_property
 
 # We don't need to reraise ImportErrors, they should be clear enough by themselves. If not
 # and you're reading this: Fix the NEURON install, it's currently not importable ;)
 import neuron as _nrn
 from neuron import h as _h
 
-_nrnv_parts = [int(p) if p.isnumeric() else p for p in _nrn.version.split(".")]
-if _nrnv_parts[0] < 7 or _nrnv_parts[0] == 7 and _nrnv_parts[1] < 8:
-    raise ImportError("Patch 3.0+ only supports NEURON v7.8.0 or higher.")
+_nrnver = _nrn.version
+try:
+    _nrnv_parts = [int(p) if p.isnumeric() else p for p in _nrnver.split(".")]
+    if _nrnv_parts[0] < 7 or _nrnv_parts[0] == 7 and _nrnv_parts[1] < 8:
+        raise ImportError("Patch 3.0+ only supports NEURON v7.8.0 or higher.")
+except:
+    import warnings
+
+    warnings.warn(f"Could not establish whether Patch supports installed NEURON version `{_nrnver}`")
 
 
 class PythonHocInterpreter:

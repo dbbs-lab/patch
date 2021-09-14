@@ -36,9 +36,12 @@ setuptools.setup(
     },
     classifiers=[
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Operating System :: OS Independent",
     ],
     entry_points={"glia.package": ["patch_extensions = patch_extensions"]},
+    python_requires=">=3.8",
     install_requires=["setuptools", "nrn-glia>=0.3.9", "mpi4py>=3.0.0", "errr>=1.0.0", "numpy>=1.21.0"],
     extras_require={"dev": ["sphinx", "pre-commit", "black>=20.8b1", "sphinxcontrib-contentui"]},
 )
