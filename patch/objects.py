@@ -65,6 +65,9 @@ class PythonHocObject:
         except TypeError:
             raise
 
+    def __bool__(self):
+        return True
+
     def __len__(self):
         # Relay length to pointer
         return len(self.__neuron__())
