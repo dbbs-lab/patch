@@ -11,8 +11,10 @@ _*No ducks were punched during the construction of this monkey patch._
 pip install nrn-patch
 ```
 
-![Inline replacement of NEURON by
-Patch](https://s5.gifyu.com/images/ezgif.com-video-to-gif-13b2788fb8bc11ca7.gif)
+## Minimal requirements
+
+* Python 3.8+
+* NEURON 8.0+
 
 Be aware that the interface is currently incomplete, this means that most parts are still
 "just" NEURON. I've only patched holes I frequently encounter myself when using the
