@@ -274,7 +274,9 @@ class TestSectionRef(_shared.NeuronTestCase):
         s = p.Section()
         with s.push():
             r = p.SectionRef()
-        self.assertEqual(s, r, "Argless SectionRef should return cas.")
+        self.assertEqual(
+            transform(s), transform(r.section), "Argless SectionRef should return cas."
+        )
 
     def test_bare_sec(self):
         from patch import transform
