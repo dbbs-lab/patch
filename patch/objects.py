@@ -306,6 +306,25 @@ class Section(PythonHocObject, connectable):
     def vclamp(self, x=0.5, delay=0, duration=100, after=0, voltage=-70, holding=-70):
         """
         Create a voltage clamp on the section.
+
+        :param x: Location along the segment from 0 to 1.
+        :type x: float
+        :param delay: Duration of the pre-step holding interval, from `0` to `delay` ms.
+        :type delay: float
+        :param duration: Duration of the step interval, from `delay` to `delay + duration` ms.
+        :type duration: float
+        :param after: Duration of the post-step holding interval, from `delay + duration`
+          to `delay + duration + after` ms.
+        :type after: float
+        :param voltage: Can be a single value to define the voltage during the step
+          (`delay` to `delay + duration` ms), or 3 values to define the pre-step, step and
+          post-step voltages altogether.
+        :type voltage: Union[float, List[float]]
+        :param holding: If `voltage` is a single value, `holding` is used for the pre-step
+          and post-step voltages.
+        :type holding: float
+        :returns: A single electrode voltage clamp placed in the section.
+        :rtype: :class:`.objects.SEClamp`
         """
         clamp = self._interpreter.SEClamp(x=x, sec=self)
         clamp.dur1 = delay
