@@ -132,6 +132,14 @@ class Section(PythonHocObject, connectable):
             target.__ref__(self)
         self.__ref__(target)
 
+    @property
+    def parent(self):
+        """
+        Returns the parent of the Section, or ``None``
+        """
+        ref = self._interpreter.SectionRef(sec=self)
+        return Section(self._interpreter, ref.parent) if ref.has_parent() else None
+
     def __arc__(self):
         """
         Return the default arc-position (a point in the closed interval [0, 1]
