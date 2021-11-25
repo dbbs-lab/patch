@@ -63,6 +63,4 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = []
 
 # Mocks
-autodoc_mock_imports = [
-    "mpi4py",
-]
+autodoc_mock_imports = ["mpi4py", "neuron"]
