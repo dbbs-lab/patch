@@ -12,7 +12,7 @@ from patch.error_handler import _suppress_nrn
 
 class TestErrorHandling(_shared.NeuronTestCase):
     """
-        Test whether the error handling system functions.
+    Test whether the error handling system functions.
     """
 
     def test_hoc_handler(self):
@@ -60,7 +60,7 @@ class TestErrorHandling(_shared.NeuronTestCase):
 
     def test_suppress(self):
         with _suppress_nrn():
-            print('ERROR! SUPPRESSION FAILED!')
+            print("ERROR! SUPPRESSION FAILED!")
 
     def test_error_handling_error(self):
         class BrokenHandler(ErrorHandler):

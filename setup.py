@@ -42,6 +42,20 @@ setuptools.setup(
     ],
     entry_points={"glia.package": ["patch_extensions = patch_extensions"]},
     python_requires=">=3.8",
-    install_requires=["setuptools", "nrn-glia>=0.3.9", "mpi4py>=3.0.0", "errr>=1.0.0", "numpy>=1.21.0"],
-    extras_require={"dev": ["sphinx", "pre-commit", "black>=20.8b1", "sphinx-code-tabs @ git+https://github.com/Helveg/sphinx-code-tabs.git", "sphinx_rtd_theme"]},
+    install_requires=[
+        "setuptools",
+        "nrn-glia>=0.3.9",
+        "mpi4py>=3.0.0",
+        "errr>=1.0.0",
+        "numpy>=1.21.0",
+    ],
+    extras_require={
+        "dev": [
+            "sphinx",
+            "pre-commit",
+            "black>=20.8b1",
+            "sphinx-code-tabs @ git+https://github.com/Helveg/sphinx-code-tabs.git",
+            "sphinx_rtd_theme",
+        ]
+    },
 )
