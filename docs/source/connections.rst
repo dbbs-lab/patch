@@ -9,32 +9,26 @@ Connecting sections
 To other sections
 =================
 
-.. container:: left-col
+Connecting sections together is the basic way of constructing cells in NEURON. You can
+do so using the ``Section.connect`` method.
 
-    Connecting sections together is the basic way of constructing cells in NEURON. You can
-    do so using the ``Section.connect`` method.
+.. code-tabs::
 
-.. container:: content-tabs right-col
+  .. code-tab:: python
+    :title: Patch
 
-    .. tab-container:: tab1
-        :title: Patch
+    from patch import p
+    s = p.Section()
+    s2 = p.Section()
+    s.connect(s2)
 
-        .. code-block:: python
+  .. code-tab:: python
+    :title: NEURON
 
-            from patch import p
-            s = p.Section()
-            s2 = p.Section()
-            s.connect(s2)
-
-    .. tab-container:: tab2
-        :title: NEURON
-
-        .. code-block:: python
-
-            from neuron import h
-            s = h.Section()
-            s2 = h.Section()
-            s.connect(s2)
+    from neuron import h
+    s = h.Section()
+    s2 = h.Section()
+    s.connect(s2)
 
 
 ===================
@@ -49,61 +43,56 @@ In parallel simulations
 =======================
 
 
-.. container:: left-col
+In Patch most of the parallel context is managed for you, and you can use the
+:func:`~.interpreter.PythonHocInterpreter.ParallelCon` method to either connect
+an output (cell soma, axons, ...) to a GID or a GID to an input (synapse on
+postsynaptic cell, ...).
 
-    In Patch most of the parallel context is managed for you, and you can use the
-    :func:`.interpreter.PythonHocInterpreter.ParallelCon` method to either connect an
-    output (cell soma, axons, ...) to a GID or a GID to an input (synapse on postsynaptic
-    cell, ...)
+The following code transmits the spikes of a Section on GID 1:
 
-.. container:: content-tabs right-col
+.. code-tabs::
 
-    .. tab-container:: tab1
-        :title: Patch
+  .. code-tab:: python
+    :title: Patch
 
-        Detecting the spikes of a Section and connecting them to GID 1:
+    from patch import p
+    gid = 1
+    s = p.Section()
+    nc = p.ParallelCon(s, gid)
 
-        .. code-block:: python
+  .. code-tab:: python
+    :title: NEURON
 
-            from patch import p
-            gid = 1
-            s = p.Section()
-            nc = p.ParallelCon(s, gid)
+    from neuron import h
+    gid = 1
+    h.nrnmpi_init()
+    pc = h.ParallelContext()
+    s = h.Section()
+    nc = h.NetCon(s(0.5)._ref_v, None)
+    pc.set_gid2node(gid, pc.id())
+    pc.cell(gid, nc)
+    pc.outputcell(gid)
 
-        Connecting the spikes of GID 1 to a synapse:
 
-        .. code-block:: python
+You can then receive the spikes of GID 1 on a synapse:
 
-            from patch import p
-            gid = 1
-            syn = p.Section().synapse(p.SynExp)
-            nc = p.ParallelCon(gid, syn)
+.. code-tabs::
 
-    .. tab-container:: tab2
-        :title: NEURON
+  .. code-tab:: python
+    :title: Patch
 
-        Detecting the spikes of a Section and connecting them to GID 1:
+    from patch import p
+    gid = 1
+    syn = p.Section().synapse(p.SynExp)
+    nc = p.ParallelCon(gid, syn)
 
-        .. code-block:: python
+  .. code-tab:: python
+    :title: NEURON
 
-            from neuron import h
-            gid = 1
-            h.nrnmpi_init()
-            pc = h.ParallelContext()
-            s = h.Section()
-            nc = h.NetCon(s(0.5)._ref_v, None)
-            pc.set_gid2node(gid, pc.id())
-            pc.cell(gid, nc)
-            pc.outputcell(gid)
-
-        Connecting the spikes of GID 1 to a synapse:
-
-        .. code-block:: python
-
-            from neuron import h
-            gid = 1
-            h.nrnmpi_init()
-            pc = h.ParallelContext()
-            s = h.Section()
-            syn = h.SynExp(s)
-            pc.gid_connect(gid, syn)
+    from neuron import h
+    gid = 1
+    h.nrnmpi_init()
+    pc = h.ParallelContext()
+    s = h.Section()
+    syn = h.SynExp(s)
+    pc.gid_connect(gid, syn)

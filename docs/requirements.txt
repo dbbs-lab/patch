@@ -1,2 +1,3 @@
 sphinx>=2.3.0
-sphinxcontrib-contentui
+sphinx_rtd_theme
+git+https://github.com/Helveg/sphinx-code-tabs.git
