@@ -8,7 +8,7 @@ from patch.exceptions import *
 
 class TestExtensions(_shared.NeuronTestCase):
     """
-        Test whether the extension system functions.
+    Test whether the extension system functions.
     """
 
     def test_vecstim(self):

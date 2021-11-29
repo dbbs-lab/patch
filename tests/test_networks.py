@@ -10,7 +10,7 @@ from patch.exceptions import *
 
 class TestNetworks(_shared.NeuronTestCase):
     """
-        Test network use cases such as PointProcesses, NetCon, NetStim, VecStim, ...
+    Test network use cases such as PointProcesses, NetCon, NetStim, VecStim, ...
     """
 
     def test_connection_helper(self):

@@ -2,15 +2,15 @@ Usage
 =====
 
 
-.. image:: https://s5.gifyu.com/images/ezgif.com-video-to-gif-13b2788fb8bc11ca7.gif
+.. image:: https://dbbs-static.s3.eu-south-1.amazonaws.com/misc/how-to-patch.gif
    :alt: Inline replacement of NEURON by Patch
 
 
-Be aware that the interface is currently incomplete, this means that most parts
-are still "just" NEURON. I've only patched holes I frequently encounter myself
-when using the ``h.Section``, ``h.NetStim`` and ``h.NetCon`` functions. Feel free to
-open an issue or fork this project and open a pull request for missing or broken
-parts of the interface.
+Be aware that the interface is currently incomplete, this means that most parts are still
+"just" NEURON. I've only patched holes I frequently encounter myself when using NEURON's
+:class:`~neuron.h.Section`, :class:`~neuron.NetStim` and :class:`~neuron.NetCon`
+functions. Feel free to open an issue or fork this project and open a pull request for
+missing or broken parts of the interface.
 
 Philosophy
 ----------
@@ -28,18 +28,19 @@ Python interfaces should be Pythonic, this wrapper offers just that:
 Basic usage
 -----------
 
-Use it like you would use NEURON. The wrapper doesn't make any changes to the
+Use it like you would use NEURON. The wrapper doesn't make many changes to the
 interface, it just patches up some of the more frequent and ridiculous gotchas.
 
-Patch supplies a new HOC interpreter ``p``, the ``PythonHocInterpreter`` which wraps
-the standard HOC interpreter ``h`` provided by NEURON. Any objects returned will
-either be ``PythonHocObject``'s wrapping their corresponding NEURON object, or
+Patch supplies a new HOC interpreter ``p``, the
+:class:`~.interpreter.PythonHocInterpreter` which wraps the standard HOC interpreter
+:class:`neuron.h` provided by NEURON. Any objects returned will either be
+:class:`~.objects.PythonHocObject`'s wrapping their corresponding NEURON object, or
 whatever NEURON returns.
 
 When using just Patch the difference between NEURON and Patch objects is handled
 transparently, but if you wish to mix interpreters you can transform all Patch objects
-back to NEURON objects with ``obj.__neuron__()`` or the helper function
-``patch.transform``.
+back to NEURON objects with :meth:`~.objects.PythonHocObject.__neuron__` or the helper
+function :func:`.transform`.
 
 .. code-block:: python
 

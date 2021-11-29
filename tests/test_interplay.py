@@ -8,7 +8,7 @@ from patch.exceptions import *
 
 class TestInterplay(_shared.NeuronTestCase):
     """
-        Test whether mixing h and p together causes issues.
+    Test whether mixing h and p together causes issues.
     """
 
     def setUp(self):

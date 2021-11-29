@@ -2,6 +2,8 @@
 Candy Guide
 ###########
 
+Read through this guide to get an idea of the sugar you're getting.
+
 ===========
 Referencing
 ===========

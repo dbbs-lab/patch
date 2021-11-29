@@ -12,7 +12,7 @@ from patch.exceptions import *
 )
 class TestSingleHostParallel(_shared.NeuronTestCase):
     """
-        Test parallel network approach functioning on a single MPI node.
+    Test parallel network approach functioning on a single MPI node.
     """
 
     def test_pc_singleton(self):
@@ -38,7 +38,7 @@ class TestSingleHostParallel(_shared.NeuronTestCase):
 )
 class TestParallelNetworks(_shared.NeuronTestCase):
     """
-        Test true functioning of parallel networks on multiple MPI nodes.
+    Test true functioning of parallel networks on multiple MPI nodes.
     """
 
     def test_parallel_prop(self):
