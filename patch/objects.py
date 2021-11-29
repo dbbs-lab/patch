@@ -324,16 +324,7 @@ class Section(PythonHocObject, connectable):
         clamp = self._interpreter.IClamp(x=x, sec=self)
         clamp.delay = delay
         clamp.dur = duration
-        if _is_sequence(amplitude):
-            # If its a sequence play it as a vector into the clamp
-            dt = self._interpreter.dt
-            t = self._interpreter.Vector([delay + dt * i for i in range(len(amplitude))])
-            v = self._interpreter.Vector(amplitude, t)
-            v.play(clamp._ref_amp, t.__neuron__())
-            clamp.__ref__(v)
-            clamp.__ref__(t)
-        else:
-            clamp.amp = amplitude
+        clamp.amp = amplitude
         return clamp
 
     def vclamp(self, x=0.5, delay=0, duration=100, after=0, voltage=-70, holding=-70):
@@ -360,20 +351,11 @@ class Section(PythonHocObject, connectable):
         :rtype: :class:`.objects.SEClamp`
         """
         clamp = self._interpreter.SEClamp(x=x, sec=self)
-        clamp.dur1 = delay
-        clamp.dur2 = duration
-        clamp.dur3 = after
-        try:
-            voltage = iter(voltage)
-        except TypeError:
-            clamp.amp1 = holding
-            clamp.amp2 = voltage
-            clamp.amp3 = holding
-        else:
-            voltage = list(voltage)
-            clamp.amp1 = voltage[0]
-            clamp.amp2 = voltage[1]
-            clamp.amp3 = voltage[2]
+        clamp._holding = holding
+        clamp.delay = delay
+        clamp.duration = duration
+        clamp.after = after
+        clamp.voltage = voltage
         return clamp
 
     def push(self):
@@ -424,11 +406,153 @@ class Vector(PythonHocObject):
 
 
 class IClamp(PythonHocObject):
-    pass
+    @property
+    def duration(self):
+        """
+        Get the duration of the current injection.
+        """
+        return self.dur
+
+    @duration.setter
+    def duration(self, duration):
+        """
+        Set the duration of the current injection.
+
+        :param duration: Duration in milliseconds.
+        :type duration: float
+        """
+        self.dur = duration
+
+    @property
+    def amplitude(self):
+        """
+        Get the amplitude during current injection.
+        """
+        return self.amp
+
+    @amplitude.setter
+    def amplitude(self, amplitude):
+        """
+        Set the amplitude during current injection.
+
+        :param amplitude: Can be a single value to define the current during the step
+          (`delay` to `delay + duration` ms), or a sequence to play after `delay` ms. This
+          will play 1 value of the sequence into the clamp per timestep.
+        :type amplitude: Union[float, List[float]]
+        """
+        if _is_sequence(amplitude):
+            # If its a sequence play it as a vector into the clamp
+            dt = self._interpreter.dt
+            t = self._interpreter.Vector([delay + dt * i for i in range(len(amplitude))])
+            v = self._interpreter.Vector(amplitude, t)
+            v.play(self._ref_amp, t.__neuron__())
+            clamp.__ref__(v)
+            clamp.__ref__(t)
+        else:
+            self.amp = duration
 
 
 class SEClamp(PythonHocObject):
-    pass
+    @property
+    def delay(self):
+        """
+        Get the delay period from 0ms to `delay` ms during which the holding potential is
+        clamped.
+        """
+        return self.dur1
+
+    @delay.setter
+    def delay(self, delay):
+        """
+        Set the delay period from 0ms to `delay` ms during which the holding potential is
+        clamped.
+
+        :param delay: Duration of the pre-step holding interval, from `0` to `delay` ms.
+        :type delay: float
+        """
+        self.dur1 = delay
+
+    @property
+    def duration(self):
+        """
+        Get the duration of the command potential clamping period.
+        """
+        return self.dur2
+
+    @duration.setter
+    def duration(self, duration):
+        """
+        Set the duration of the command potential clamping period.
+
+        :param duration: Duration of the step interval, from `delay` to `delay + duration` ms.
+        :type duration: float
+        """
+        self.dur2 = duration
+
+    @property
+    def after(self):
+        """
+        Get the duration of the period after clamping during which the holding potential
+        is clamped.
+        """
+        return self.dur3
+
+    @after.setter
+    def after(self, after):
+        """
+        Set the duration of the period after clamping during which the holding potential
+        is clamped.
+
+        :param after: Duration of the post-step holding interval, from `delay + duration`
+          to `delay + duration + after` ms.
+        :type after: float
+        """
+        self.dur3 = after
+
+    @property
+    def voltage(self):
+        return [self.amp1, self.amp2, self.amp3]
+
+    @voltage.setter
+    def voltage(self, voltage):
+        """
+        Set the control potentials
+
+        :param voltage: Can be a single value to define the voltage during the step
+          (`delay` to `delay + duration` ms), or 3 values to define the pre-step, step and
+          post-step voltages altogether.
+        :type voltage: Union[float, List[float]]
+        """
+        try:
+            voltage = iter(voltage)
+        except TypeError:
+            self.amp1 = self.holding
+            self.amp2 = voltage
+            self.amp3 = self.holding
+        else:
+            voltage = list(voltage)
+            self.amp1 = voltage[0]
+            self.amp2 = voltage[1]
+            self.amp3 = voltage[2]
+
+    @property
+    def holding(self):
+        """
+        Get the holding potential that is active before and after the step period.
+        """
+        return getattr(self, "_holding", -70)
+
+    @holding.setter
+    def holding(self, holding):
+        """
+        Set the holding potential which is active before and after the step period.
+
+        :param holding: Holding potential
+        :type holding: float
+        """
+        self._holding = holding
+        self.amp1 = holding
+        self.amp3 = holding
 
 
 class NetStim(PythonHocObject, connectable):
