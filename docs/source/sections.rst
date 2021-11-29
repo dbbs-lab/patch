@@ -4,8 +4,8 @@ Sections
 Sections are cilindrical representations of pieces of a cell. They have a length and a
 diameter. Sections are the main building block of a simulation in NEURON.
 
-You can use the ``.connect`` method to connect :class:`Sections <.objects.Section>`
-together.
+You can use the :meth:`~.objects.Section.connect` method to connect :class:`Sections
+<.objects.Section>` together.
 
 Sections can be subdivided into :class:`Segments <.objects.Segment>` by specifying
 ``nseg``, the simulator calculates the voltage for each segment, thereby affecting the
@@ -46,8 +46,8 @@ Retrieving segments
 -------------------
 
 
-Sections can be called with an x to retrieve the segment at that x. The segments of a
-Section can also be iterated over.
+:class:`Sections <.objects.Section>` can be called with an x to retrieve the segment at
+that x. The segments of a :class:`~.objects.Section` can also be iterated over.
 
 .. code-tabs::
 
@@ -72,13 +72,13 @@ Section can also be iterated over.
 Recording
 ---------
 
-You can tell Patch to record the membrane potential of your Section at one or
-multiple locations by calling the ``.record`` function and giving it an ``x``. If
+You can tell Patch to record the membrane potential of your :class:`~.objects.Section` at
+one or multiple locations by calling the ``.record`` function and giving it an ``x``. If
 ``x`` is omitted ``0.5`` is used.
 
-In NEURON you'd have to create a :class:`Vector <.objects.Vector>` and keep track of
-it somewhere and find a way to link it back to the Section it recorded, in Patch a
-section automatically stores its recording vectors in ``section.recordings``.
+In NEURON you'd have to create a :class:`Vector <.objects.Vector>` and keep track of it
+somewhere and find a way to link it back to the :class:`~.objects.Section` it recorded, in
+Patch a section automatically stores its recording vectors in ``section.recordings``.
 
 .. code-tabs::
 
@@ -122,7 +122,7 @@ Full reference
 --------------
 
 Here is a full list of methods that Patch patched or added to the interface of
-``nrn.Section``:
+:class:`NEURON Sections <neuron.h.Section>`:
 
 .. autoclass:: patch.objects.Section
   :members:

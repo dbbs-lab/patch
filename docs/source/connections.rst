@@ -10,7 +10,7 @@ To other sections
 =================
 
 Connecting sections together is the basic way of constructing cells in NEURON. You can
-do so using the ``Section.connect`` method.
+do so using the :meth:`.Section.connect` method.
 
 .. code-tabs::
 

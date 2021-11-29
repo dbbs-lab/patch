@@ -22,6 +22,7 @@ patch.objects module
 
 .. automodule:: patch.objects
    :members:
+   :special-members: __neuron__, __ref__, __deref__
    :undoc-members:
    :show-inheritance:
 

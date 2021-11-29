@@ -83,17 +83,24 @@ class PythonHocObject:
         return object.__hash__(self)
 
     def __neuron__(self):
-        # Magic method that allows duck typing of this object as something that
-        # needs to be represented differently when passed to NEURON.
+        """
+        Magic method that is called when this object is passed to NEURON.
+        """
         return self._neuron_ptr
 
     def __ref__(self, obj):
-        # Magic method that will store a strong reference to another object.
+        """
+        Magic method that is called when a strong reference needs to be stored on the
+        object.
+        """
         if obj not in self._references:
             self._references.append(obj)
 
     def __deref__(self, obj):
-        # Magic method that will remove a strong reference to another object.
+        """
+        Magic method that is called when a strong reference needs to be removed from the
+        object.
+        """
         try:
             self._references.remove(obj)
             return True
@@ -223,7 +230,7 @@ class Section(PythonHocObject, connectable):
 
     def add_3d(self, points, diameters=None):
         """
-        Add a new 3D point to this section xyz data.
+        Add new 3D points to this section xyz data.
 
         :param points: A 2D array of xyz points.
         :param diameters: A scalar or array of diameters corresponding to the points. Default value is the section diameter.
@@ -254,6 +261,11 @@ class Section(PythonHocObject, connectable):
         )
 
     def wholetree(self):
+        """
+        Return the whole tree of child Sections
+
+        :rtype: List[patch.Section]
+        """
         return [Section(self._interpreter, s) for s in self.__neuron__().wholetree()]
 
     def record(self, x=None):
@@ -295,6 +307,19 @@ class Section(PythonHocObject, connectable):
     def iclamp(self, x=0.5, delay=0, duration=100, amplitude=0):
         """
         Create a current clamp on the section.
+
+        :param x: Location along the segment from 0 to 1.
+        :type x: float
+        :param delay: Duration of the pre-step holding interval, from `0` to `delay` ms.
+        :type delay: float
+        :param duration: Duration of the step interval, from `delay` to `delay + duration` ms.
+        :type duration: float
+        :param amplitude: Can be a single value to define the current during the step
+          (`delay` to `delay + duration` ms), or a sequence to play after `delay` ms. This
+          will play 1 value of the sequence into the clamp per timestep.
+        :type amplitude: Union[float, List[float]]
+        :returns: The current clamp placed in the section.
+        :rtype: :class:`.objects.SEClamp`
         """
         clamp = self._interpreter.IClamp(x=x, sec=self)
         clamp.delay = delay
@@ -331,7 +356,7 @@ class Section(PythonHocObject, connectable):
         :param holding: If `voltage` is a single value, `holding` is used for the pre-step
           and post-step voltages.
         :type holding: float
-        :returns: A single electrode voltage clamp placed in the section.
+        :returns: The single electrode voltage clamp placed in the section.
         :rtype: :class:`.objects.SEClamp`
         """
         clamp = self._interpreter.SEClamp(x=x, sec=self)
@@ -466,6 +491,14 @@ class PointProcess(PythonHocObject, connectable):
         connectable.__init__(self)
 
     def stimulate(self, pattern=None, weight=0.04, delay=0.0, **kwargs):
+        """
+        Stimulate a point process.
+
+        :param pattern: Specific stimulus event times to play into the point process.
+        :type pattern: list[float]
+        :param kwargs: All keyword arguments will be passed set on the
+          :class:`NetStim <neuron:NetStim>`
+        """
         from . import connection
 
         if pattern is None:
