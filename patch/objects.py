@@ -323,8 +323,8 @@ class Section(PythonHocObject, connectable):
         """
         clamp = self._interpreter.IClamp(x=x, sec=self)
         clamp.delay = delay
-        clamp.dur = duration
-        clamp.amp = amplitude
+        clamp.duration = duration
+        clamp.amplitude = amplitude
         return clamp
 
     def vclamp(self, x=0.5, delay=0, duration=100, after=0, voltage=-70, holding=-70):
