@@ -6,10 +6,10 @@ from .core import transform, transform_arc, transform_netcon, transform_record
 try:
     from functools import cached_property
 except ImportError:  # pragma: nocover
-    from functools import lru_cache
+    import functools
 
     def cached_property(f):
-        return property(lru_cache()(f))
+        return property(functools.lru_cache()(f))
 
     functools.cached_property = cached_property
 
