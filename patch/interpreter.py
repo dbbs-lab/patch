@@ -21,14 +21,6 @@ from .core import (
 from .exceptions import *
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
 
-try:
-    from functools import wraps, cached_property
-except ImportError:
-    from functools import wraps, lru_cache
-
-    def cached_property(f):
-        return property(lru_cache()(f))
-
 
 # We don't need to reraise ImportErrors, they should be clear enough by themselves. If not
 # and you're reading this: Fix the NEURON install, it's currently not importable ;)
