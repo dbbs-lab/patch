@@ -443,13 +443,15 @@ class IClamp(PythonHocObject):
         if _is_sequence(amplitude):
             # If its a sequence play it as a vector into the clamp
             dt = self._interpreter.dt
-            t = self._interpreter.Vector([delay + dt * i for i in range(len(amplitude))])
+            t = self._interpreter.Vector(
+                [self.delay + dt * i for i in range(len(amplitude))]
+            )
             v = self._interpreter.Vector(amplitude, t)
             v.play(self._ref_amp, t.__neuron__())
             clamp.__ref__(v)
             clamp.__ref__(t)
         else:
-            self.amp = duration
+            self.amp = amplitude
 
 
 class SEClamp(PythonHocObject):
