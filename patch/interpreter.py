@@ -20,6 +20,7 @@ from .core import (
 )
 from .exceptions import *
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
+from functools import wraps, cached_property
 
 
 # We don't need to reraise ImportErrors, they should be clear enough by themselves. If not

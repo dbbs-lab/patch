@@ -4,9 +4,9 @@ import os, sys, pkg_resources, types
 from .core import transform, transform_arc, transform_netcon, transform_record
 
 try:
-    from functools import wraps, cached_property
+    from functools import cached_property
 except ImportError:  # pragma: nocover
-    from functools import wraps, lru_cache
+    from functools import lru_cache
 
     def cached_property(f):
         return property(lru_cache()(f))
