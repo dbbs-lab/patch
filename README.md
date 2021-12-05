@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Helveg/patch.svg?branch=master)](https://travis-ci.org/Helveg/patch)
+![build](https://github.com/Helveg/patch/actions/workflows/main.yml/badge.svg)
 [![codecov](https://codecov.io/gh/Helveg/patch/branch/master/graph/badge.svg)](https://codecov.io/gh/Helveg/patch)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Documentation Status](https://readthedocs.org/projects/patch/badge/?version=latest)](https://patch.readthedocs.io/en/latest/?badge=latest)

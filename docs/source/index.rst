@@ -9,8 +9,7 @@ Welcome to Patch's documentation!
 .. image:: https://badge.fury.io/gh/Helveg%2Fpatch.svg
     :target: https://badge.fury.io/gh/Helveg%2Fpatch
 
-.. image:: https://travis-ci.com/Helveg/patch.svg?branch=master
-    :target: https://travis-ci.com/Helveg/patch
+.. image:: https://github.com/Helveg/patch/actions/workflows/main.yml/badge.svg
 
 .. image:: https://codecov.io/gh/Helveg/patch/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/Helveg/patch
