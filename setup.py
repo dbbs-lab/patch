@@ -53,7 +53,7 @@ setuptools.setup(
         "dev": [
             "sphinx",
             "pre-commit",
-            "black>=20.8b1",
+            "black>=22.1.0",
             "sphinx-code-tabs @ git+https://github.com/Helveg/sphinx-code-tabs.git",
             "sphinx_rtd_theme",
         ]

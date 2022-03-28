@@ -51,7 +51,7 @@ def _is_sequence(obj):
 
 def assert_connectable(obj, label=None):
     """
-    Assert whether an object could be used as a :class:`~.objects.connectable`.
+    Assert whether an object could be used as a :class:`~.objects.Connectable`.
 
     :param label: Optional label to display to describe the object if the assertion fails.
     :type label: str

@@ -3,6 +3,7 @@ from .error_handler import catch_hoc_error, CatchRecord
 
 
 _registration_queue = []
+_had_pointers_wrapped = set()
 
 
 def _safe_call(method):
@@ -35,6 +36,7 @@ class PythonHocObject:
         self._neuron_ptr = transform(ptr)
         self._references = []
         self._interpreter = interpreter
+        super().__init__()
 
     def __getattr__(self, attr):
         # Return underlying attributes that aren't explicitly set on the wrapper
@@ -118,16 +120,62 @@ class PythonHocObject:
         return func(*args, **kwargs)
 
 
-class connectable:
+class Connectable:
     def __init__(self):
         # Prepare a dictionary that lists which other NEURON parts this is connected to
         self._connections = {}
 
 
-class Section(PythonHocObject, connectable):
+class PointerWrapper:
+    def __init__(self, attr):
+        self._attr = attr
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return owner
+
+        value = getattr(instance.__neuron__(), self._attr)
+        t = instance._interpreter.t
+
+        class SimulationValue(type(value)):
+            def __record__(v):
+                return getattr(instance.__neuron__(), f"_ref_{self._attr}")
+
+            def __str__(v):
+                return str(type(value)(v))
+
+            def __repr__(v):
+                return f"<{self._attr}={value} at t={t} of {instance}>"
+
+        return SimulationValue(value)
+
+
+class WrapsPointers:
+    def __init__(self):
+        self._init_pointers_wrappers()
+
+    def _init_pointers_wrappers(self):
+        cls = type(self)
+        target = self.__neuron__()
+        hoctype = str(target).split("[")[0].split("_0x")[0]
+        if hoctype not in _had_pointers_wrapped:
+            for k in dir(target):
+                if not k.startswith("_"):
+                    try:
+                        is_ptr = str(getattr(target, f"_ref_{k}", None)).startswith(
+                            "<pointer"
+                        )
+                    except:
+                        is_ptr = False
+                    if is_ptr:
+                        setattr(cls, k, PointerWrapper(k))
+            _had_pointers_wrapped.add(hoctype)
+
+
+class Section(PythonHocObject, Connectable, WrapsPointers):
     def __init__(self, *args, **kwargs):
         PythonHocObject.__init__(self, *args, **kwargs)
-        connectable.__init__(self)
+        Connectable.__init__(self)
 
     def connect(self, target, *args, **kwargs):
         """
@@ -423,24 +471,24 @@ class Vector(PythonHocObject):
         return self
 
 
-class IClamp(PythonHocObject):
+class IClamp(PythonHocObject, WrapsPointers):
     pass
 
 
-class SEClamp(PythonHocObject):
+class SEClamp(PythonHocObject, WrapsPointers):
     pass
 
 
-class NetStim(PythonHocObject, connectable):
+class NetStim(PythonHocObject, Connectable):
     def __init__(self, *args, **kwargs):
         PythonHocObject.__init__(self, *args, **kwargs)
-        connectable.__init__(self)
+        Connectable.__init__(self)
 
 
-class VecStim(PythonHocObject, connectable):
+class VecStim(PythonHocObject, Connectable):
     def __init__(self, *args, **kwargs):
         PythonHocObject.__init__(self, *args, **kwargs)
-        connectable.__init__(self)
+        Connectable.__init__(self)
 
     @property
     def vector(self):
@@ -468,10 +516,11 @@ class NetCon(PythonHocObject):
             return self.recorder
 
 
-class Segment(PythonHocObject, connectable):
+class Segment(PythonHocObject, Connectable, WrapsPointers):
     def __init__(self, interpreter, ptr, section, **kwargs):
         PythonHocObject.__init__(self, interpreter, ptr, **kwargs)
-        connectable.__init__(self)
+        Connectable.__init__(self)
+        WrapsPointers.__init__(self)
         self.section = section
 
     def __netcon__(self):
@@ -481,14 +530,15 @@ class Segment(PythonHocObject, connectable):
         return self.__neuron__()._ref_v
 
 
-class PointProcess(PythonHocObject, connectable):
+class PointProcess(PythonHocObject, Connectable, WrapsPointers):
     """
     Wrapper for all point processes (membrane and synapse mechanisms).
     """
 
     def __init__(self, *args, **kwargs):
         PythonHocObject.__init__(self, *args, **kwargs)
-        connectable.__init__(self)
+        Connectable.__init__(self)
+        WrapsPointers.__init__(self)
 
     def stimulate(self, pattern=None, weight=0.04, delay=0.0, **kwargs):
         """
