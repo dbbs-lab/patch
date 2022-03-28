@@ -118,16 +118,16 @@ class PythonHocObject:
         return func(*args, **kwargs)
 
 
-class connectable:
+class Connectable:
     def __init__(self):
         # Prepare a dictionary that lists which other NEURON parts this is connected to
         self._connections = {}
 
 
-class Section(PythonHocObject, connectable):
+class Section(PythonHocObject, Connectable):
     def __init__(self, *args, **kwargs):
         PythonHocObject.__init__(self, *args, **kwargs)
-        connectable.__init__(self)
+        Connectable.__init__(self)
 
     def connect(self, target, *args, **kwargs):
         """
@@ -431,16 +431,16 @@ class SEClamp(PythonHocObject):
     pass
 
 
-class NetStim(PythonHocObject, connectable):
+class NetStim(PythonHocObject, Connectable):
     def __init__(self, *args, **kwargs):
         PythonHocObject.__init__(self, *args, **kwargs)
-        connectable.__init__(self)
+        Connectable.__init__(self)
 
 
-class VecStim(PythonHocObject, connectable):
+class VecStim(PythonHocObject, Connectable):
     def __init__(self, *args, **kwargs):
         PythonHocObject.__init__(self, *args, **kwargs)
-        connectable.__init__(self)
+        Connectable.__init__(self)
 
     @property
     def vector(self):
@@ -468,10 +468,10 @@ class NetCon(PythonHocObject):
             return self.recorder
 
 
-class Segment(PythonHocObject, connectable):
+class Segment(PythonHocObject, Connectable):
     def __init__(self, interpreter, ptr, section, **kwargs):
         PythonHocObject.__init__(self, interpreter, ptr, **kwargs)
-        connectable.__init__(self)
+        Connectable.__init__(self)
         self.section = section
 
     def __netcon__(self):
@@ -481,14 +481,14 @@ class Segment(PythonHocObject, connectable):
         return self.__neuron__()._ref_v
 
 
-class PointProcess(PythonHocObject, connectable):
+class PointProcess(PythonHocObject, Connectable):
     """
     Wrapper for all point processes (membrane and synapse mechanisms).
     """
 
     def __init__(self, *args, **kwargs):
         PythonHocObject.__init__(self, *args, **kwargs)
-        connectable.__init__(self)
+        Connectable.__init__(self)
 
     def stimulate(self, pattern=None, weight=0.04, delay=0.0, **kwargs):
         """
