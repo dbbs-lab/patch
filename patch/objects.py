@@ -168,7 +168,6 @@ class WrapsPointers:
                     except:
                         is_ptr = False
                     if is_ptr:
-                        print(cls, "wrapping", k)
                         setattr(cls, k, PointerWrapper(k))
             _had_pointers_wrapped.add(hoctype)
 
