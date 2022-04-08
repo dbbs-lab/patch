@@ -45,7 +45,6 @@ setuptools.setup(
     install_requires=[
         "setuptools",
         "nrn-glia>=0.3.9",
-        "mpi4py>=3.0.0",
         "errr>=1.0.0",
         "numpy>=1.21.0",
     ],
