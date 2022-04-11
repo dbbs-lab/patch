@@ -298,6 +298,8 @@ class PythonHocInterpreter:
 
     def _init_pc(self):
         if not hasattr(self, "_PythonHocInterpreter__pc"):
+            pc = ParallelContext(self, self.__h.ParallelContext())
+            self.__h.nrnmpi_init()
             try:
                 from mpi4py import MPI
             except:
@@ -305,7 +307,7 @@ class PythonHocInterpreter:
             else:
                 msize = MPI.COMM_WORLD.size
 
-            hosts = self.__h.ParallelContext().nhost()
+            hosts = pc.nhost()
             if msize != hosts:  # pragma: nocover
                 raise RuntimeError(
                     f"MPI initialization error. `mpi4py` has a universe of size {msize},"
@@ -313,7 +315,7 @@ class PythonHocInterpreter:
                     + " `mpi4py` before importing either NEURON or Patch. If you did so,"
                     + " your tools must not agree on which MPI implementation to use."
                 )
-            self.__pc = ParallelContext(self, self.__h.ParallelContext())
+            self.__pc = pc
 
     @property
     def parallel(self):

@@ -1,8 +1,3 @@
-try:
-    from mpi4py import MPI
-except:
-    pass
-
 from .exceptions import *
 import os, sys, pkg_resources, types
 from .core import transform, transform_arc, transform_netcon, transform_record
