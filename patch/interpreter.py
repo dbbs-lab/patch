@@ -299,11 +299,11 @@ class PythonHocInterpreter:
     def _init_pc(self):
         if not hasattr(self, "_PythonHocInterpreter__pc"):
             pc = ParallelContext(self, self.__h.ParallelContext())
-            self.__h.nrnmpi_init()
             try:
                 from mpi4py import MPI
             except:
-                msize = None
+                self.__h.nrnmpi_init()
+                msize = pc.nhost()
             else:
                 msize = MPI.COMM_WORLD.size
 
