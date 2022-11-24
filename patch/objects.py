@@ -43,6 +43,9 @@ class PythonHocObject:
         return getattr(self.__dict__["_neuron_ptr"], attr)
 
     def __setattr__(self, attr, value):
+        # Check if we're shadowing a class attribute (like properties).
+        if getattr(type(self), attr, None) is not None:
+            return super().__setattr__(attr, value)
         # Set attributes on the underlying pointer, and set on self if they don't
         # exist on the underlying pointer. This allows you to set arbitrary values
         # on the NEURON objects as you would be able to with a real Pythonic object.
