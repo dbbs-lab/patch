@@ -1,3 +1,5 @@
+from typing import Sequence, Union
+
 from .core import transform, transform_record, _is_sequence
 from .error_handler import catch_hoc_error, CatchRecord
 
@@ -355,7 +357,14 @@ class Section(PythonHocObject, Connectable, WrapsPointers):
             self.synapses.append(synapse)
         return synapse
 
-    def iclamp(self, x=0.5, delay=0, duration=100, amplitude=0):
+    def iclamp(
+        self,
+        amplitude: float = 1,
+        *,
+        x: float = 0.5,
+        delay: float = 0,
+        duration: float = 100,
+    ) -> "IClamp":
         """
         Create a current clamp on the section.
 
@@ -378,15 +387,25 @@ class Section(PythonHocObject, Connectable, WrapsPointers):
         clamp.amplitude = amplitude
         return clamp
 
-    def vclamp(self, x=0.5, delay=0, duration=100, after=0, voltage=-70, holding=-70):
+    def vclamp(
+        self,
+        voltage: float = -70,
+        *,
+        x: float = 0.5,
+        before: float = 0,
+        duration: float = 100,
+        after: float = 0,
+        holding=-70,
+    ) -> "SEClamp":
         """
         Create a voltage clamp on the section.
 
         :param x: Location along the segment from 0 to 1.
         :type x: float
-        :param delay: Duration of the pre-step holding interval, from `0` to `delay` ms.
-        :type delay: float
-        :param duration: Duration of the step interval, from `delay` to `delay + duration` ms.
+        :param before: Duration of the pre-step holding interval, from `0` to `delay` ms.
+        :type before: float
+        :param duration: Duration of the step interval, from `delay` to `delay +
+        duration` ms.
         :type duration: float
         :param after: Duration of the post-step holding interval, from `delay + duration`
           to `delay + duration + after` ms.
@@ -403,7 +422,7 @@ class Section(PythonHocObject, Connectable, WrapsPointers):
         """
         clamp = self._interpreter.SEClamp(x=x, sec=self)
         clamp._holding = holding
-        clamp.delay = delay
+        clamp.delay = before
         clamp.duration = duration
         clamp.after = after
         clamp.voltage = voltage
@@ -457,15 +476,18 @@ class Vector(PythonHocObject):
 
 
 class IClamp(PythonHocObject):
+    dur: float
+    amp: float
+
     @property
-    def duration(self):
+    def duration(self) -> float:
         """
         Get the duration of the current injection.
         """
         return self.dur
 
     @duration.setter
-    def duration(self, duration):
+    def duration(self, duration: float):
         """
         Set the duration of the current injection.
 
@@ -475,14 +497,15 @@ class IClamp(PythonHocObject):
         self.dur = duration
 
     @property
-    def amplitude(self):
+    def amplitude(self) -> float:
         """
         Get the amplitude during current injection.
         """
+        print("getter called")
         return self.amp
 
     @amplitude.setter
-    def amplitude(self, amplitude):
+    def amplitude(self, amplitude: Union[float, Sequence[float]]):
         """
         Set the amplitude during current injection.
 
@@ -499,8 +522,8 @@ class IClamp(PythonHocObject):
             )
             v = self._interpreter.Vector(amplitude, t)
             v.play(self._ref_amp, t.__neuron__())
-            clamp.__ref__(v)
-            clamp.__ref__(t)
+            self.__ref__(v)
+            self.__ref__(t)
         else:
             self.amp = amplitude
 
@@ -608,7 +631,7 @@ class SEClamp(PythonHocObject):
         self.amp3 = holding
 
 
-class NetStim(PythonHocObject, connectable):
+class NetStim(PythonHocObject, Connectable):
     def __init__(self, *args, **kwargs):
         PythonHocObject.__init__(self, *args, **kwargs)
         Connectable.__init__(self)
