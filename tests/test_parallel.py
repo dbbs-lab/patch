@@ -29,6 +29,26 @@ class TestSingleHostParallel(_shared.NeuronTestCase):
         with self.assertRaises(ParallelConnectError):
             p.ParallelCon(None, None)
 
+    def test_parallel_con_props(self):
+        s = p.Section()
+        gid = 1
+        pc = p.ParallelCon(s, 1, delay=5, weight=3)
+        self.assertEqual(5, pc.delay, "Delay not set")
+        self.assertEqual(3, pc.weight[0], "Weight not set")
+
+    def test_parallel_context(self):
+        pc1 = p.ParallelContext()
+        pc2 = p.parallel
+        self.assertEqual(pc1.nhost(), pc2.nhost(), "nhost mismatch")
+
+    def test_single_bcast(self):
+        arr = p.parallel.broadcast([1, 2, 3])
+        self.assertEqual([1, 2, 3], arr, "single node broadcast failed")
+        v = p.parallel.broadcast(p.Vector([1, 2, 3]))
+        self.assertEqual([1, 2, 3], list(v), "single node vector broadcast failed")
+        with self.assertRaises(BroadcastError):
+            p.parallel.broadcast(p.NetStim())
+
 
 @unittest.skipIf(
     p.parallel.nhost() == 1, "Cannot test parallel networks on a single MPI node."
@@ -42,7 +62,12 @@ class TestParallelNetworks(_shared.NeuronTestCase):
         self.assertEqual(p.parallel, p.ParallelContext(), "PC should be a singleton")
 
     def test_parallel_con(self):
-        pass
+        pc = p.parallel
+        if pc.id():
+            section = p.Section()
+            section.synapse(
+                p.ExpSyn,
+            )
 
     def test_broadcasting(self):
         # Try sending a string
