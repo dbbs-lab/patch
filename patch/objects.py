@@ -343,7 +343,7 @@ class Section(PythonHocObject, Connectable, WrapsPointers):
             return recorder
         return self.recordings[x]
 
-    def synapse(self, factory, *args, store=False, **kwargs):
+    def synapse(self, factory, *args, store=False, attributes=None, **kwargs):
         """
         Insert a synapse into the Section.
 
@@ -355,6 +355,11 @@ class Section(PythonHocObject, Connectable, WrapsPointers):
         :type store: bool
         """
         synapse = factory(self, *args, **kwargs)
+        if attributes:
+            _syn = transform(synapse)
+            for k, v in attributes.items():
+                setattr(_syn, k, v)
+
         if store:
             if not hasattr(self, "synapses"):
                 self.synapses = []
@@ -480,8 +485,11 @@ class Vector(PythonHocObject):
 
 
 class IClamp(PythonHocObject):
-    dur: float
-    amp: float
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.delay: float = 0
+        self.dur: float = 1e200
+        self.amp: float = 1
 
     @property
     def duration(self) -> float:
@@ -505,7 +513,6 @@ class IClamp(PythonHocObject):
         """
         Get the amplitude during current injection.
         """
-        print("getter called")
         return self.amp
 
     @amplitude.setter
@@ -533,6 +540,15 @@ class IClamp(PythonHocObject):
 
 
 class SEClamp(PythonHocObject):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.dur1 = 100
+        self.dur2 = 100
+        self.dur3 = 100
+        self.amp1 = -70
+        self.amp2 = -50
+        self.amp3 = -70
+
     @property
     def delay(self):
         """
