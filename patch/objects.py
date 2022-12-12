@@ -1,3 +1,4 @@
+import typing
 from typing import Sequence, Union
 
 from .core import transform, transform_record, _is_sequence
@@ -85,6 +86,9 @@ class PythonHocObject:
     def __repr__(self):
         ostr = object.__repr__(self)
         return ostr[: ostr.rindex("at")] + "pointing to '" + str(self.__neuron__()) + "'>"
+
+    def __dir__(self) -> typing.Iterable[str]:
+        return sorted(set(dir(transform(self))) | set(super().__dir__()))
 
     def __hash__(self):
         return object.__hash__(self)
