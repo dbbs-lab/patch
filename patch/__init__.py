@@ -3,13 +3,14 @@ import os, sys, pkg_resources, types
 from .core import transform, transform_arc, transform_netcon, transform_record
 
 try:
-    from functools import cached_property
+    from functools import cached_property, cache
 except ImportError:  # pragma: nocover
     import functools
 
     def cached_property(f):
         return property(functools.lru_cache()(f))
 
+    functools.cache = functools.lru_cache()
     functools.cached_property = cached_property
 
 _p = None

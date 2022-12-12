@@ -1,11 +1,9 @@
-import sys
-
-import numpy as np
-
-import _shared
 from patch import p
+import unittest
+import _shared
 
 
+@unittest.skipIf(p.parallel.nhost() != 1, "Single-node simulation test.")
 class TestPointProcess(_shared.NeuronTestCase):
     def _setup_synapse_patch(self):
         section = p.Section()
@@ -37,6 +35,8 @@ class TestPointProcess(_shared.NeuronTestCase):
         tp, vp = self._setup_synapse_patch()
         tn, vn = self._setup_synapse_neuron()
 
+        p.tstop = 30
+        p.finitialize()
         p.run(30)
         self.assertEqual([*tp], [*tn], "Time vector differences in synaptic comparison")
         self.assertEqual([*vp], [*vn], "Outcome differences in synaptic comparison")

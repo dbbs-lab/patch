@@ -22,7 +22,7 @@ class TestSingleHostParallel(_shared.NeuronTestCase):
         s = p.Section()
         gid = 1
         s.push()
-        p.ParallelCon(s, 1)
+        p.ParallelCon(s, 202020)
         p.pop_section()
         syn = p.Section().synapse(p.ExpSyn)
         p.ParallelCon(1, syn, 5, 1)
@@ -32,7 +32,7 @@ class TestSingleHostParallel(_shared.NeuronTestCase):
     def test_parallel_con_props(self):
         s = p.Section()
         gid = 1
-        pc = p.ParallelCon(s, 1, delay=5, weight=3)
+        pc = p.ParallelCon(s, 202021, delay=5, weight=3)
         self.assertEqual(5, pc.delay, "Delay not set")
         self.assertEqual(3, pc.weight[0], "Weight not set")
 

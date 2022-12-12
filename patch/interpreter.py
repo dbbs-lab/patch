@@ -2,6 +2,7 @@ import typing
 
 from .objects import (
     PythonHocObject,
+    Vector,
     NetCon,
     PointProcess,
     VecStim,
@@ -26,7 +27,7 @@ from .exceptions import (
     ParallelConnectError,
 )
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess
-from functools import wraps, cached_property
+from functools import wraps, cache
 
 
 # We don't need to reraise ImportErrors, they should be clear enough by themselves. If not
@@ -47,6 +48,12 @@ except Exception:  # pragma: nocover
     warnings.warn(
         f"Could not establish whether Patch supports installed NEURON version `{_nrnver}`"
     )
+
+
+class TimeSingleton(Vector):
+    @cache
+    def __new__(cls, *args, **kwargs):
+        return super().__new__(cls)
 
 
 class PythonHocInterpreter:
@@ -249,14 +256,16 @@ class PythonHocInterpreter:
             sec.__ref__(clamp)
         return clamp
 
-    @cached_property
+    @property
     def time(self):
-        t = self.Vector()
         # Fix for upstream NEURON bug. See https://github.com/neuronsimulator/nrn/issues/416
         if not any(self.allsec()):  # pragma: nocover
             self.__dud_section = self.Section(name="this_is_here_to_record_time")
-        t.record(self._ref_t)
-        return t
+        # Time vectors need to be shared, because it can only be recorded into 1
+        # target, but should also update every time they are accessed, to resize them
+        # between simulation sessions
+        time_singleton = TimeSingleton(self, self.__h.Vector().record(self._ref_t))
+        return time_singleton
 
     def load_extension(self, extension):  # pragma: nocover
         if extension in self.__loaded_extensions:
