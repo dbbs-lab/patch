@@ -1,10 +1,7 @@
-import unittest, sys, os, _shared
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-import patch
+import mpi4py.MPI
+import unittest, _shared
 from patch import p, connection
-from patch.objects import NetCon
-from patch.exceptions import *
+from patch.exceptions import BroadcastError, ParallelConnectError
 
 
 @unittest.skipIf(

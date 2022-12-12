@@ -1,13 +1,8 @@
-import unittest, sys, os
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-import patch, _shared
+import _shared
 from patch import p
 from neuron import h
 from patch.exceptions import *
-from patch.error_handler import *
-from patch.error_handler import _suppress_nrn
+from patch.error_handler import CatchNetCon, ErrorHandler, _suppress_nrn, catch_hoc_error
 
 
 class TestErrorHandling(_shared.NeuronTestCase):

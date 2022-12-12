@@ -1,6 +1,5 @@
-import unittest, sys, os, _shared
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+import unittest
+import _shared
 import patch.objects
 from patch import p
 from patch.exceptions import *
@@ -33,6 +32,10 @@ class TestSimulationControl(_shared.NeuronTestCase):
         p.continuerun(10, add=True)
         self.assertAlmostEqual(20, p.t)
         self.assertAlmostEqual(20, p.runtime)
+
+    def test_run(self):
+        p.tstop = 1000
+        p.run()
 
 
 @unittest.skipIf(
@@ -225,7 +228,7 @@ class TestSection(_shared.NeuronTestCase):
         # Cleanup stack after test
         s.pop()
 
-    def test_section_synapse(self):
+    def test_section_synapse_insertion(self):
         s = p.Section()
         s.synapse(p.ExpSyn)
         self.assertEqual(

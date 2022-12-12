@@ -86,6 +86,6 @@ def is_point_process(name):
 
     try:
         d = dir(getattr(h, name))
-    except:
+    except Exception:
         return False
     return all(k in d for k in ["get_loc", "has_loc", "loc", "get_segment"])

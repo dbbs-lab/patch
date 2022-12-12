@@ -1,7 +1,4 @@
-import unittest, sys, os, _shared
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-import patch
+import _shared
 from patch import p
 from patch.exceptions import *
 
@@ -27,12 +24,16 @@ class TestClamps(_shared.NeuronTestCase):
         s4.record()
         p.time
 
-        s1.iclamp(amplitude=10, delay=5)
+        cs = s1.iclamp(amplitude=10, delay=5)
         c = p.IClamp(sec=s2)
         c.amp = 10
         c.dur = 10
         c2 = s3.iclamp(amplitude=10)
         s4.iclamp(amplitude=[-10 for _ in range(int(10 / p.dt))])
+
+        self.assertEqual(10, cs.amplitude, "fcall setter mismatch")
+        self.assertEqual(10, c.amplitude, "direct neuron setter mismatch")
+        self.assertEqual(10, cs.__neuron__().amp, "clamp amp setting failed")
 
         p.finitialize()
         p.continuerun(10)
@@ -64,5 +65,14 @@ class TestClamps(_shared.NeuronTestCase):
         )
 
     def test_seclamp(self):
-        # Lazy coverage test :)
         clamp = p.SEClamp(p.Section())
+        self.assertEqual(100, clamp.delay, "default delay should be 100")
+        clamp.delay = 102
+        self.assertEqual(102, clamp.__neuron__().dur1, "delay setting failed")
+        self.assertEqual(102, clamp.delay, "delay get failed")
+        clamp.duration = 102
+        self.assertEqual(102, clamp.__neuron__().dur2, "duration setting failed")
+        self.assertEqual(102, clamp.duration, "duration get failed")
+        clamp.after = 102
+        self.assertEqual(102, clamp.__neuron__().dur3, "after setting failed")
+        self.assertEqual(102, clamp.after, "duration get failed")

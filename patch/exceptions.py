@@ -1,4 +1,5 @@
 from errr.tree import make_tree as _make_tree, exception as _e
+from typing import Type
 
 _make_tree(
     globals(),
@@ -18,3 +19,17 @@ _make_tree(
         ),
     ),
 )
+
+PatchError: Type[Exception]
+NotConnectableError: Type[PatchError]
+TransformError: Type[PatchError]
+HocError: Type[PatchError]
+HocConnectError: Type[HocError]
+HocRecordError: Type[HocError]
+HocSectionAccessError: Type[HocError]
+SimulationError: Type[PatchError]
+UninitializedError: Type[PatchError]
+ErrorHandlingError: Type[PatchError]
+ParallelError: Type[PatchError]
+ParallelConnectError: Type[ParallelError]
+BroadcastError: Type[ParallelError]

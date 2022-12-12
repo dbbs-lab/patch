@@ -1,8 +1,4 @@
-import unittest, sys, os, _shared
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-import patch
-from patch import p
+import _shared
 from patch.exceptions import *
 
 

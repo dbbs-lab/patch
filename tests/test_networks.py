@@ -1,8 +1,5 @@
-import unittest, sys, os, _shared
+import _shared
 from random import random
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-import patch
 from patch import p, connection
 from patch.objects import NetCon
 from patch.exceptions import *
