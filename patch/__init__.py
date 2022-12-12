@@ -13,6 +13,7 @@ except ImportError:  # pragma: nocover
     functools.cached_property = cached_property
 
 _p = None
+p: "PythonHocInterpreter"
 
 
 class PythonHocModule(types.ModuleType):
