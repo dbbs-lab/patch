@@ -1,3 +1,5 @@
+import typing
+
 from .objects import (
     PythonHocObject,
     NetCon,
@@ -16,10 +18,14 @@ from .core import (
     assert_connectable,
     is_section,
     is_point_process,
-    transform_arc,
 )
-from .exceptions import *
-from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess, _suppress_nrn
+from .exceptions import (
+    BroadcastError,
+    HocSectionAccessError,
+    UninitializedError,
+    ParallelConnectError,
+)
+from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess
 from functools import wraps, cached_property
 
 
@@ -35,7 +41,7 @@ try:
         _nrnv_parts[0] < 7 or _nrnv_parts[0] == 7 and _nrnv_parts[1] < 8
     ):  # pragma: nocover
         raise ImportError("Patch 3.0+ only supports NEURON v7.8.0 or higher.")
-except:  # pragma: nocover
+except Exception:  # pragma: nocover
     import warnings
 
     warnings.warn(
@@ -46,6 +52,7 @@ except:  # pragma: nocover
 class PythonHocInterpreter:
     __point_processes = []
     __h = _h
+    _finitialized: bool
 
     def __init__(self):
         self.__loaded_extensions = []
@@ -74,14 +81,15 @@ class PythonHocInterpreter:
         h = interpreter_class.__h
 
         if hoc_object_class.__name__ in interpreter_class.__dict__:
-            # The function call was overridden in the interpreter and should not be destroyed.
+            # The function call was overridden in the interpreter and should not be
+            # destroyed.
             return
         hoc_object_name = hoc_object_class.__name__
         # If the original interpreter doesn't have a function with the same name we can't
         # simplify the constructor of the PythonHocObject and shouldn't wrap it.
         if hasattr(h, hoc_object_name):
-            # Wrap it in the interpreter with a call to the underlying `h` to obtain a pointer
-            # and use that to make our PythonHocObject
+            # Wrap it in the interpreter with a call to the underlying `h` to obtain a
+            # pointer and use that to make our PythonHocObject
             factory = getattr(h, hoc_object_name)
 
             @wraps(hoc_object_class.__init__)
@@ -169,7 +177,6 @@ class PythonHocInterpreter:
                 self.parallel.cell(gid, nc)
                 if output:
                     self.parallel.outputcell(gid)
-                return nc
             else:
                 target = b
                 nrn_target = transform_netcon(target)
@@ -178,12 +185,12 @@ class PythonHocInterpreter:
                 nc = NetCon(self, nrn_nc)
                 nc.__ref__(b)
                 b.__ref__(nc)
-                if "delay" in kwargs:
-                    nc.delay = kwargs["delay"]
-                if "weight" in kwargs:
-                    nc.weight[0] = kwargs["weight"]
-                nc.threshold = kwargs["threshold"] if "threshold" in kwargs else -20.0
-                return nc
+            if "delay" in kwargs:
+                nc.delay = kwargs["delay"]
+            if "weight" in kwargs:
+                nc.weight[0] = kwargs["weight"]
+            nc.threshold = kwargs["threshold"] if "threshold" in kwargs else -20.0
+            return nc
         else:
             raise ParallelConnectError(
                 "Exactly one of the first or second arguments has to be a GID."
@@ -201,7 +208,8 @@ class PythonHocInterpreter:
                 sec = self.cas()
                 if not sec:  # pragma: nocover
                     raise RuntimeError(
-                        "SectionRef() failed as there is no currently accessed section available. Please specify a Section."
+                        "SectionRef() failed as there is no currently accessed section "
+                        "available. Please specify a Section."
                     )
         ref = SectionRef(self, self.__h.SectionRef(sec=transform(sec)))
         if transform(sec) is sec:
@@ -280,12 +288,13 @@ class PythonHocInterpreter:
             self.__h.continuerun(time_stop)
             self.runtime = time_stop
 
-    def run(self):
-        if not hasattr(self, "_finitialized"):  # pragma: nocover
-            raise UninitializedError(
-                "Cannot start NEURON simulation without first using `p.finitialize`."
-            )
-        self.__h.run()
+    def run(self, duration, v_init=None):
+        if not hasattr(self, "_finitialized"):
+            if v_init is not None:
+                self.__h.finitialize(v_init)
+            else:
+                self.__h.finitialize()
+        self.__h.continuerun(duration)
 
     def cas(self):
         # Currently error won't be triggered as h.cas() exits on undefined section acces:
@@ -318,7 +327,7 @@ class PythonHocInterpreter:
             self.__pc = pc
 
     @property
-    def parallel(self):
+    def parallel(self) -> ParallelContext:
         self._init_pc()
         return self.__pc
 
@@ -430,7 +439,9 @@ class ParallelContext(PythonHocObject):
                 # If this node is broadcasting a Vector, then proceed to traditional
                 # broadcasting. If all nodes are broadcasting a Vector traditional
                 # broadcasting will occur, otherwise a BroadcastError is thrown.
-                transform(self).broadcast(data_ptr, root=root)
+                transform(self).broadcast(data_ptr, root)
+                # After succesful broadcasts, the Vector is updated, return it.
+                return data
             else:
                 # Send an empty vector so the other nodes don't hang.
                 transform(self).broadcast(transform(self._interpreter.Vector()), root)
