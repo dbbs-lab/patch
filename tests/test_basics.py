@@ -1,3 +1,6 @@
+# Import mpi4py first, so that we avoid MPI initialization errors during testing.
+import mpi4py.MPI
+
 import unittest
 import _shared
 import patch.objects
@@ -34,8 +37,9 @@ class TestSimulationControl(_shared.NeuronTestCase):
         self.assertAlmostEqual(20, p.runtime)
 
     def test_run(self):
-        p.tstop = 1000
-        p.run()
+        p.finitialize(-70)
+        p.run(10)
+        self.assertAlmostEqual(10, p.t)
 
 
 @unittest.skipIf(
