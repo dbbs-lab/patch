@@ -50,6 +50,9 @@ except Exception:  # pragma: nocover
     )
 
 
+ParallelContextType: "ParallelContext"
+
+
 class TimeSingleton(Vector):
     @cache
     def __new__(cls, *args, **kwargs):
@@ -57,15 +60,15 @@ class TimeSingleton(Vector):
 
 
 class PythonHocInterpreter:
+    __pc: "ParallelContextType"
     __point_processes = []
     __h = _h
-    _finitialized: bool
 
     def __init__(self):
         self.__loaded_extensions = []
         self.load_file("stdrun.hoc")
-        self.runtime = 0
         self.celsius = 32
+        self._finitialized: bool = False
 
     @classmethod
     def _process_registration_queue(cls):
@@ -200,7 +203,7 @@ class PythonHocInterpreter:
             return nc
         else:
             raise ParallelConnectError(
-                "Exactly one of the first or second arguments has to be a GID."
+                "Either the first or second argument has to be a GID."
             )
 
     def SectionRef(self, *args, sec=None):
@@ -277,33 +280,28 @@ class PythonHocInterpreter:
         self.__loaded_extensions.append(extension)
 
     def finitialize(self, initial=None):
+        self.parallel.set_maxstep(10)
         self._setup_transfer()
         if initial is not None:
             self.__h.finitialize(initial)
         else:
             self.__h.finitialize()
-        self.runtime = 0
         self._finitialized = True
 
-    def continuerun(self, time_stop, add=False):
-        if not hasattr(self, "_finitialized"):  # pragma: nocover
-            raise UninitializedError(
-                "Cannot start NEURON simulation without first using `p.finitialize`."
-            )
-        if add:
-            self.__h.continuerun(self.runtime + time_stop)
-            self.runtime += time_stop
-        else:
-            self.__h.continuerun(time_stop)
-            self.runtime = time_stop
+    def continuerun(self, duration, v_init=None):
+        self._do_init(v_init)
+        self.__h.continuerun(self.__h.t + duration)
 
     def run(self, duration, v_init=None):
-        if not hasattr(self, "_finitialized"):
+        self._do_init(v_init)
+        self.__h.continuerun(duration)
+
+    def _do_init(self, v_init=None):
+        if not self._finitialized:
             if v_init is not None:
                 self.__h.finitialize(v_init)
             else:
                 self.__h.finitialize()
-        self.__h.continuerun(duration)
 
     def cas(self):
         # Currently error won't be triggered as h.cas() exits on undefined section acces:
@@ -336,7 +334,7 @@ class PythonHocInterpreter:
             self.__pc = pc
 
     @property
-    def parallel(self) -> ParallelContext:
+    def parallel(self) -> "ParallelContextType":
         self._init_pc()
         return self.__pc
 
@@ -481,6 +479,12 @@ class ParallelContext(PythonHocObject):
             raise BroadcastError(
                 "Root node did not transmit. Look for root node error."
             ) from None
+
+    def psolve(self, tstop, v_init=None):
+        self._interpreter._do_init(v_init)
+        self_ = transform(self)
+        # self_.set_maxstep(10)
+        self_.psolve(tstop)
 
 
 PythonHocInterpreter._process_registration_queue()
