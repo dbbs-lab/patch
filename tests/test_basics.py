@@ -1,6 +1,3 @@
-# Import mpi4py first, so that we avoid MPI initialization errors during testing.
-import mpi4py.MPI
-
 import unittest
 import _shared
 import patch.objects
@@ -32,9 +29,8 @@ class TestSimulationControl(_shared.NeuronTestCase):
     def test_continuerun(self):
         p.finitialize(-70)
         p.continuerun(10)
-        p.continuerun(10, add=True)
+        p.continuerun(10)
         self.assertAlmostEqual(20, p.t)
-        self.assertAlmostEqual(20, p.runtime)
 
     def test_run(self):
         p.finitialize(-70)
@@ -86,7 +82,9 @@ class TestPatch(_shared.NeuronTestCase):
         net_stim = type(p.NetStim())
         section = type(p.Section())
         self.assertEqual(
-            section, patch.objects.Section, "Incorrect Section wrapping: " + str(section)
+            section,
+            patch.objects.Section,
+            "Incorrect Section wrapping: " + str(section),
         )
         self.assertEqual(
             net_stim,
@@ -297,7 +295,9 @@ class TestSectionRef(_shared.NeuronTestCase):
         sr = p.SectionRef(transform(s))
         sr2 = p.SectionRef(sec=s2)
         self.assertIs(
-            transform(sr.section), transform(s), "SectionRef section stored incorrectly."
+            transform(sr.section),
+            transform(s),
+            "SectionRef section stored incorrectly.",
         )
         self.assertIs(
             patch.objects.Section,

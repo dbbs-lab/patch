@@ -10,14 +10,6 @@ with open(os.path.join(os.path.dirname(__file__), "patch", "__init__.py"), "r") 
             exec(line.strip())
             break
 
-# Collect all files recursively from the data folder
-data_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), "patch", "data"))
-data_files = []
-for (dirpath, dirnames, filenames) in os.walk(data_folder):
-    rel_folder = os.path.relpath(dirpath, "patch")
-    if len(filenames) > 0:
-        data_files.append(os.path.join(rel_folder, "*"))
-
 setuptools.setup(
     name="nrn-patch",
     version=__version__,
@@ -28,10 +20,9 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/helveg/patch",
     license="MIT",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=["tests"]),
     include_package_data=True,
     package_data={
-        "patch": data_files,
         "patch_extensions": [os.path.join("mod", "*.mod")],
     },
     classifiers=[

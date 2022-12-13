@@ -54,7 +54,9 @@ class TestReferencing(_shared.NeuronTestCase):
 
         patched_closure()
         self.assertEqual(
-            1, len(s3.children()), "Referencing failure, child section garbage collected."
+            1,
+            len(s3.children()),
+            "Referencing failure, child section garbage collected.",
         )
 
     def test_parallel_con_ref(self):

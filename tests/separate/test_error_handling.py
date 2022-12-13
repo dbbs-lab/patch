@@ -2,7 +2,12 @@ import _shared
 from patch import p
 from neuron import h
 from patch.exceptions import *
-from patch.error_handler import CatchNetCon, ErrorHandler, _suppress_nrn, catch_hoc_error
+from patch.error_handler import (
+    CatchNetCon,
+    ErrorHandler,
+    _suppress_nrn,
+    catch_hoc_error,
+)
 
 
 class TestErrorHandling(_shared.NeuronTestCase):
@@ -25,7 +30,8 @@ class TestErrorHandling(_shared.NeuronTestCase):
                 h.NetCon(5, 12)
 
         with self.assertRaises(
-            ErrorHandlingError, msg="Did not complain about missing handler requirements"
+            ErrorHandlingError,
+            msg="Did not complain about missing handler requirements",
         ):
             test()
 

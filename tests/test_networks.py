@@ -62,7 +62,7 @@ class TestNetworks(_shared.NeuronTestCase):
         s2 = p.Section()
         r2 = s2.record()
         syn = p.ExpSyn(s2)
-        nc = s1.connect_points(syn)
+        nc = s1.connect_synapse(syn)
         v = p.Vector()
         t = p.time
         nc.record(v)
