@@ -4,6 +4,9 @@ from typing import Sequence, Union
 from .core import transform, transform_record, _is_sequence
 from .error_handler import catch_hoc_error, CatchRecord
 
+if typing.TYPE_CHECKING:
+    from .interpreter import PythonHocInterpreter
+
 
 _registration_queue = []
 _had_pointers_wrapped = set()
@@ -33,7 +36,7 @@ class PythonHocObject:
 
         PythonHocInterpreter.register_hoc_object(cls)
 
-    def __init__(self, interpreter, ptr):
+    def __init__(self, interpreter: "PythonHocInterpreter", ptr):
         # Initialize ourselves with a reference to our own "pointer"
         # and prepare a list for other references.
         self._neuron_ptr = transform(ptr)
@@ -258,18 +261,12 @@ class Section(PythonHocObject, Connectable, WrapsPointers):
         self.__neuron__().insert(*args, **kwargs)
         return self
 
-    def connect_points(self, target, x=None, **kwargs):
+    def connect_synapse(self, target, **kwargs):
         """
         Connect a Segment of this Section to a target. Usually used to connect
         the membrane potential to a point process.
         """
-        if x is None:
-            x = self.__arc__()
-        segment = self(x)
-        self.push()
-        nc = self._interpreter.NetCon(segment, target, **kwargs)
-        self._interpreter.pop_section()
-        return nc
+        return self._interpreter.NetCon(self, target, **kwargs)
 
     def set_dimensions(self, length, diameter):
         """

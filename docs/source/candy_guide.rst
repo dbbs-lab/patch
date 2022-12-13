@@ -57,7 +57,7 @@ Sections & Segments
 
   s = p.Section()
   target_syn = p.Section().synapse(p.ExpSyn) # Creates an ExpSyn synapse
-  s.connect_points(target_syn) # Creates a NetCon between s(0.5)._ref_v and target_syn
+  s.connect_synapse(target_syn) # Creates a NetCon between s(0.5)._ref_v and target_syn
 
 * Create a current clamp in a Section and configure it with keyword arguments:
 
