@@ -128,7 +128,7 @@ class PythonHocInterpreter:
         # independent optional keyword arguments.
         setters = {}
         # Set sensible defaults: NetCons appear not to work sometimes if they're not set.
-        defaults = {"weight": 0.1, "delay": 0, "threshold": -20}
+        defaults = {"weight": 0.1, "delay": 1, "threshold": -20}
         setter_keys = ["weight", "delay", "threshold"]
         for key in setter_keys:
             if key not in kwargs:
