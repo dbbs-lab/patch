@@ -22,6 +22,7 @@ _make_tree(
 
 PatchError: Type[Exception]
 NotConnectableError: Type[PatchError]
+NotConnectedError: Type[PatchError]
 TransformError: Type[PatchError]
 HocError: Type[PatchError]
 HocConnectError: Type[HocError]
