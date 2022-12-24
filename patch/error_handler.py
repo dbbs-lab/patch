@@ -1,6 +1,16 @@
+import io
+import os
+import sys
 from contextlib import contextmanager
-from .exceptions import *
-import io, sys, os
+
+from patch.exceptions import (
+    ErrorHandlingError,
+    HocConnectError,
+    HocError,
+    HocRecordError,
+    HocSectionAccessError,
+    PatchError,
+)
 
 
 @contextmanager

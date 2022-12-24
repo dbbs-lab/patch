@@ -35,9 +35,10 @@ setuptools.setup(
     python_requires=">=3.8",
     install_requires=[
         "setuptools",
-        "nrn-glia>=0.3.9",
+        "nrn-glia>=4.0.0a0",
         "errr>=1.0.0",
         "numpy>=1.21.0",
+        "NEURON>=8.0",
     ],
     extras_require={
         "dev": [

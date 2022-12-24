@@ -1,8 +1,8 @@
 import unittest
 import _shared
 import patch.objects
-from patch import p
-from patch.exceptions import *
+from patch import is_density_mechanism, p, is_point_process
+from patch.exceptions import HocRecordError
 
 
 class TestPatchRegistration(_shared.NeuronTestCase):
@@ -142,6 +142,56 @@ class TestPatch(_shared.NeuronTestCase):
             transform_arc(1),
             "Transform arc on non-arced object should yield transform of the object",
         )
+
+    def test_is_point_process(self):
+        from neuron import h
+
+        pps = [s for s in dir(h) if is_point_process(s)]
+        pp_attrs = []
+        for s in dir(h):
+            try:
+                attr = getattr(h, s)
+            except Exception:
+                pass
+            else:
+                if is_point_process(attr):
+                    pp_attrs.append(s)
+        self.assertEqual(
+            [
+                "APCount",
+                "AlphaSynapse",
+                "Exp2Syn",
+                "ExpSyn",
+                "IClamp",
+                "OClamp",
+                "PointProcessMark",
+                "SEClamp",
+                "VClamp",
+            ],
+            pps,
+            "Diff point processes",
+        )
+        self.assertEqual(pps, pp_attrs, "Diff when using `is_point_process` with attrs")
+
+    def test_is_density_mechanism(self):
+        from neuron import h
+
+        dms = [s for s in dir(h) if is_density_mechanism(s)]
+        self.assertEqual(
+            [
+                "extracellular",
+                "fastpas",
+                "hh",
+                "k_ion",
+                "na_ion",
+                "pas",
+            ],
+            dms,
+            "Diff density mechanisms",
+        )
+        s = h.Section()
+        s.insert("pas")
+        self.assertTrue(is_density_mechanism(s(0.5).pas), "Density mech not detected")
 
     def test_record(self):
         s = p.Section()

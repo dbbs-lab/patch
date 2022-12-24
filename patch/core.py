@@ -1,6 +1,10 @@
-from contextlib import contextmanager
-from .exceptions import *
-import os, sys
+import typing
+from typing import Union
+
+from patch import NotConnectableError
+
+if typing.TYPE_CHECKING:
+    from neuron.hoc import HocObject
 
 
 def transform(obj):
@@ -71,21 +75,45 @@ def is_section(obj):
     return type(transform(obj)).__name__ == "Section"
 
 
-def is_point_process(name):
+def is_point_process(obj: Union[str, "HocObject"]):
     """
-    Check if a PointProcess with ``name`` exists on the ``HocInterpreter``.
+    Check if obj is a (name of a) PointProcess on the ``HocInterpreter``.
 
-    :param name: Name of the PointProcess to look for. Needs to be a known attribute of
-      ``neuron.h``.
-    :type name: str
-    :returns: Whether an attribute with ``name`` exists on ``neuron.h`` and has functions
-      matching those expected to be present on a ``PointProcess``.
+    :param obj: HocObject or name of the PointProcess to look for. Needs to be a known
+      attribute of ``neuron.h``.
     :rtype: bool
     """
     from neuron import h
+    from neuron import hoc
 
     try:
-        d = dir(getattr(h, name))
+        if not isinstance(obj, hoc.HocObject):
+            obj = getattr(h, obj)
     except Exception:
         return False
-    return all(k in d for k in ["get_loc", "has_loc", "loc", "get_segment"])
+    return all(k in dir(obj) for k in ["get_loc", "has_loc", "loc", "get_segment"])
+
+
+def is_density_mechanism(obj: Union[str, "HocObject"]):
+    """
+    Check if obj is a (name of a) DensityMechanism on the ``HocInterpreter``.
+
+    :param obj: HocObject or name of the DensityMechanism to look for. Needs to be a known
+      attribute of ``neuron.h``.
+    :rtype: bool
+    """
+    from neuron import h
+    from neuron import hoc
+    import nrn
+
+    if isinstance(obj, nrn.Mechanism):
+        return True
+    try:
+        if not isinstance(obj, hoc.HocObject):
+            obj = getattr(h, obj)
+        hname = str(obj)
+        return "neuron.DensityMechanism" in hname
+    except TypeError as e:
+        return "mechanism" in str(e)
+    except Exception as e:
+        return False

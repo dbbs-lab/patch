@@ -1,6 +1,14 @@
 from .exceptions import NotConnectableError, NotConnectedError
-from .core import transform, transform_arc, transform_netcon, transform_record
 from .interpreter import PythonHocInterpreter
+from .core import (
+    transform,
+    transform_arc,
+    transform_netcon,
+    transform_record,
+    is_point_process,
+    is_density_mechanism,
+    is_section,
+)
 
 try:
     from functools import cached_property, cache

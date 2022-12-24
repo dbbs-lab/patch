@@ -270,15 +270,6 @@ class PythonHocInterpreter:
         time_singleton = TimeSingleton(self, self.__h.Vector().record(self._ref_t))
         return time_singleton
 
-    def load_extension(self, extension):  # pragma: nocover
-        if extension in self.__loaded_extensions:
-            return
-        from . import get_data_file
-
-        hoc_file = get_data_file("extensions", extension + ".hoc").replace("\\", "/")
-        self.__h.load_file(hoc_file)
-        self.__loaded_extensions.append(extension)
-
     def finitialize(self, initial=None):
         self.parallel.set_maxstep(10)
         self._setup_transfer()
