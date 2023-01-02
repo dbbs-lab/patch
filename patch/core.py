@@ -70,9 +70,28 @@ def assert_connectable(obj, label=None):
 
 def is_section(obj):
     """
-    Check if the class name of an object is ``Section``.
+    Check if an object is a section.
     """
-    return type(transform(obj)).__name__ == "Section"
+    cls = type(transform(obj))
+    return cls.__module__ == "nrn" and cls.__name__ == "Section"
+
+
+def is_segment(obj):
+    """
+    Check if an object is a segment.
+    """
+    cls = type(transform(obj))
+    return cls.__module__ == "nrn" and cls.__name__ == "Segment"
+
+
+def is_nrn_scalar(obj):
+    cls = type(transform(obj))
+    if cls.__module__ != "hoc" or cls.__name__ != "HocObject":
+        return False
+    try:
+        return "pointer to hoc scalar" in str(obj)
+    except Exception:
+        return False
 
 
 def is_point_process(obj: Union[str, "HocObject"]):
