@@ -435,6 +435,16 @@ class ParallelContext(PythonHocObject):
         self._transfer_flag = False
         return call_result
 
+    def spike_record(self, gids=-1, time_vector=None, gid_vector=None, /):
+        if time_vector is None:
+            time_vector = self._interpreter.Vector()
+        if gid_vector is None:
+            gid_vector = self._interpreter.Vector()
+        transform(self).spike_record(gids, transform(time_vector), transform(gid_vector))
+        if gids == -1:
+            self._warn_new_gids = True
+        return time_vector, gid_vector
+
     def broadcast(self, data, root=0):
         """
         Broadcast either a Vector or arbitrary picklable data. If ``data`` is a
