@@ -669,6 +669,10 @@ class VecStim(PythonHocObject, Connectable):
 
 
 class NetCon(PythonHocObject):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._nothreshold = False
+
     def record(self, vector=None):
         if vector is not None:
             self._neuron_ptr.record(transform(vector))
@@ -683,6 +687,20 @@ class NetCon(PythonHocObject):
                 if hasattr(vector, "__ref__"):
                     vector.__ref__(self)
             return self.recorder
+
+    @property
+    def threshold(self):
+        return transform(self).threshold
+
+    @threshold.setter
+    def threshold(self, value):
+        if self._nothreshold:
+            raise RuntimeError(
+                "Do not set threshold on `gid_connect`ed NetCon's. See "
+                "https://github.com/neuronsimulator/nrn/issues/2135 for more information."
+            )
+        else:
+            transform(self).threshold = value
 
 
 class Segment(PythonHocObject, Connectable, WrapsPointers):
