@@ -8,6 +8,8 @@ from .core import (
     is_point_process,
     is_density_mechanism,
     is_section,
+    is_segment,
+    is_nrn_scalar,
 )
 
 try:
@@ -21,6 +23,7 @@ except ImportError:  # pragma: nocover
     functools.cache = functools.lru_cache()
     functools.cached_property = cached_property
 
+__version__ = "4.0.0a2"
 p: "PythonHocInterpreter"
 
 

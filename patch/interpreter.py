@@ -14,11 +14,13 @@ from .objects import (
     _safe_call,
 )
 from .core import (
+    is_segment,
     transform,
     transform_netcon,
     assert_connectable,
     is_section,
     is_point_process,
+    is_nrn_scalar,
 )
 from .exceptions import (
     BroadcastError,
@@ -28,6 +30,7 @@ from .exceptions import (
 )
 from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess
 from functools import wraps, cache
+import warnings
 
 
 # We don't need to reraise ImportErrors, they should be clear enough by themselves. If not
@@ -43,8 +46,6 @@ try:
     ):  # pragma: nocover
         raise ImportError("Patch 3.0+ only supports NEURON v7.8.0 or higher.")
 except Exception:  # pragma: nocover
-    import warnings
-
     warnings.warn(
         f"Could not establish whether Patch supports installed NEURON version `{_nrnver}`"
     )
@@ -285,18 +286,15 @@ class PythonHocInterpreter:
 
     def continuerun(self, duration, v_init=None):
         self._do_init(v_init)
-        self.__h.continuerun(self.__h.t + duration)
+        self.parallel.psolve(self.__h.t + duration, v_init)
 
-    def run(self, duration, v_init=None):
-        self._do_init(v_init)
+    def run(self, duration, v_init=None, reset=True):
+        self._do_init(v_init, reset=reset)
         self.__h.continuerun(duration)
 
-    def _do_init(self, v_init=None):
-        if not self._finitialized:
-            if v_init is not None:
-                self.__h.finitialize(v_init)
-            else:
-                self.__h.finitialize()
+    def _do_init(self, v_init=None, reset=False):
+        if reset or not self._finitialized:
+            self.finitialize(v_init)
 
     def cas(self):
         # Currently error won't be triggered as h.cas() exits on undefined section acces:
@@ -312,7 +310,7 @@ class PythonHocInterpreter:
             pc = ParallelContext(self, self.__h.ParallelContext())
             try:
                 from mpi4py import MPI
-            except:
+            except Exception:
                 self.__h.nrnmpi_init()
                 msize = pc.nhost()
             else:
@@ -384,6 +382,7 @@ class PythonHocInterpreter:
 class ParallelContext(PythonHocObject):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._warn_new_gids = False
         self._transfer_max = -1
         self._transfer_flag = False
 
@@ -506,9 +505,9 @@ class ParallelContext(PythonHocObject):
             ) from None
 
     def psolve(self, tstop, v_init=None):
-        self._interpreter._do_init(v_init)
         self_ = transform(self)
-        # self_.set_maxstep(10)
+        self_.set_maxstep(10)
+        self._interpreter._do_init(v_init)
         self_.psolve(tstop)
 
 
