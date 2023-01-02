@@ -194,23 +194,20 @@ class PythonHocInterpreter:
                 self.parallel.cell(gid, nc)
                 if output:
                     self.parallel.outputcell(gid)
+                # We only set threshold for sending NetCon's, as setting it on receiving
+                # NetCons may break transmission:
+                # https://github.com/neuronsimulator/nrn/issues/2135
+                nc.threshold = kwargs["threshold"] if "threshold" in kwargs else -20.0
             else:
                 target = b
-                nrn_target = transform_netcon(target)
-                nrn_nc = self.parallel.gid_connect(gid, nrn_target)
-                # Wrap the gid_connect NetCon
-                nc = NetCon(self, nrn_nc)
-                nc.__ref__(b)
-                b.__ref__(nc)
-            if "delay" in kwargs:
-                nc.delay = kwargs["delay"]
-            if "weight" in kwargs:
-                nc.weight[0] = kwargs["weight"]
-            nc.threshold = kwargs["threshold"] if "threshold" in kwargs else -20.0
+                nc = self.parallel.gid_connect(gid, target)
+                nc.delay = kwargs.get("delay", nc.delay)
+                nc.weight[0] = kwargs.get("weight", nc.weight[0])
+            nc.gid = gid
             return nc
         else:
             raise ParallelConnectError(
-                "Either the first or second argument has to be a GID."
+                "Either the first or second argument has to be an integer GID."
             )
 
     def SectionRef(self, *args, sec=None):
@@ -392,6 +389,16 @@ class ParallelContext(PythonHocObject):
 
     def cell(self, gid, nc):
         transform(self).cell(gid, transform(nc))
+
+    def gid_connect(self, gid, target):
+        nrn_nc = transform(self).gid_connect(gid, transform_netcon(target))
+        nc = NetCon(self, nrn_nc)
+        # Forbid set threshold. See https://github.com/neuronsimulator/nrn/issues/2135
+        nc._nothreshold = True
+        nc.__ref__(target)
+        if hasattr(target, "__ref__"):
+            target.__ref__(nc)
+        return nc
 
     @_safe_call
     def source_var(self, call_result, *args, **kwargs):  # pragma: nocover
