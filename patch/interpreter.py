@@ -139,7 +139,14 @@ class PythonHocInterpreter:
             setters[key] = kwargs[key]
             del kwargs[key]
         if is_section(source):
-            kwargs["sec"] = transform(source)
+            kwargs["sec"] = source
+        elif is_segment(source):
+            kwargs["sec"] = source.sec
+        elif is_nrn_scalar(source) and "sec" not in kwargs:
+            raise ConnectionError(
+                "Using NetCon with a scalar such as s(0.5)._ref_v is discouraged. "
+                "Use s(0.5) instead."
+            )
         if "sec" in kwargs:
             kwargs["sec"] = transform(kwargs["sec"])
         # Execute HOC NetCon and wrap result into `connection`
