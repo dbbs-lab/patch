@@ -390,6 +390,16 @@ class ParallelContext(PythonHocObject):
     def cell(self, gid, nc):
         transform(self).cell(gid, transform(nc))
 
+    def set_gid2node(self, gid, id=None):
+        if self._warn_new_gids:
+            warnings.warn(
+                f"New GID ({gid}) registered after `spike_record` was called."
+                " This GID will not be recorded."
+            )
+        if id is None:
+            id = self.id()
+        return transform(self).set_gid2node(gid, id)
+
     def gid_connect(self, gid, target):
         nrn_nc = transform(self).gid_connect(gid, transform_netcon(target))
         nc = NetCon(self, nrn_nc)
