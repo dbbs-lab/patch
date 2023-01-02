@@ -48,7 +48,7 @@ def catch_hoc_error(*args, **context):
             except Exception as e:
                 raise e from None
             # Uncaught HocError
-            if str(e).find("hoc error") != -1:
+            if "hoc error" in str(e) or "hocobj_call error" in str(e):
                 raise HocError(error) from None
             # Actual RuntimeError
             raise e from None  # pragma: nocover
