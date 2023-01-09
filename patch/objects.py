@@ -546,6 +546,9 @@ class SEClamp(PythonHocObject):
         self.amp2 = -50
         self.amp3 = -70
 
+    def __record__(self):
+        return self._ref_i
+
     @property
     def delay(self):
         """
