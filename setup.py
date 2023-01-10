@@ -35,7 +35,7 @@ setuptools.setup(
     python_requires=">=3.8",
     install_requires=[
         "setuptools",
-        "nrn-glia>=4.0.0a0",
+        "nrn-glia[neuron]==4.0.0a4",
         "errr>=1.2.0",
         "numpy>=1.21.0",
         "NEURON>=8.0",
