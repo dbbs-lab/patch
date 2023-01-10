@@ -25,10 +25,11 @@ except ImportError:  # pragma: nocover
 
 __version__ = "4.0.0a2"
 p: "PythonHocInterpreter"
+h: "PythonHocInterpreter"
 
 
 def __getattr__(attr):
-    if attr == "p":
+    if attr == "p" or attr == "h":
         return _get_interpreter()
     else:
         raise AttributeError(f"module {__name__} has no attribute {attr}.")
