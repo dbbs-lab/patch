@@ -752,6 +752,9 @@ class PointProcess(PythonHocObject, Connectable, WrapsPointers):
         self._interpreter.NetCon(stimulus, self, weight=weight, delay=delay)
         return stimulus
 
+    def __record__(self):
+        return self.__neuron__()._ref_i
+
 
 def _get_obj_registration_queue():
     return _registration_queue
