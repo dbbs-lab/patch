@@ -1,3 +1,4 @@
+import patch.objects
 from patch import p
 import unittest
 import _shared
@@ -38,3 +39,16 @@ class TestPointProcess(_shared.NeuronTestCase):
 
         self.assertEqual([*tp], [*tn], "Time vector differences in synaptic comparison")
         self.assertEqual([*vp], [*vn], "Outcome differences in synaptic comparison")
+
+    def test_wrapper(self):
+        section = p.Section()
+        syn = section.synapse(p.ExpSyn)
+        self.assertIs(
+            patch.objects.PointerWrapper, type(type(syn).e), "ExpSyn pointer not wrapped"
+        )
+        self.assertEqual(0, syn.e, "Wrapper get incorrect")
+        syn.e = 4
+        self.assertEqual(4, syn.__neuron__().e, "Wrapper set failed")
+        self.assertIs(
+            patch.objects.PointerWrapper, type(type(syn).e), "Wrapper set broke wrapper"
+        )

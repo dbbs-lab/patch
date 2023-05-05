@@ -23,7 +23,7 @@ except ImportError:  # pragma: nocover
     functools.cache = functools.lru_cache()
     functools.cached_property = cached_property
 
-__version__ = "4.0.0a4"
+__version__ = "4.0.0a5"
 p: "PythonHocInterpreter"
 h: "PythonHocInterpreter"
 

@@ -145,7 +145,7 @@ class PointerWrapper:
 
     def __get__(self, instance, owner):
         if instance is None:
-            return owner
+            return self
 
         value = getattr(instance.__neuron__(), self._attr)
         t = instance._interpreter.t
@@ -161,6 +161,9 @@ class PointerWrapper:
                 return f"<{self._attr}={value} at t={t} of {instance}>"
 
         return SimulationValue(value)
+
+    def __set__(self, instance, value):
+        setattr(instance.__neuron__(), self._attr, value)
 
 
 class WrapsPointers:
