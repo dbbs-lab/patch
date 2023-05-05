@@ -133,9 +133,10 @@ class PythonHocObject:
 
 
 class Connectable:
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         # Prepare a dictionary that lists which other NEURON parts this is connected to
         self._connections = {}
+        super().__init__(*args, **kwargs)
 
 
 class PointerWrapper:
@@ -163,7 +164,8 @@ class PointerWrapper:
 
 
 class WrapsPointers:
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._init_pointers_wrappers()
 
     def _init_pointers_wrappers(self):
@@ -185,10 +187,6 @@ class WrapsPointers:
 
 
 class Section(PythonHocObject, Connectable, WrapsPointers):
-    def __init__(self, *args, **kwargs):
-        PythonHocObject.__init__(self, *args, **kwargs)
-        Connectable.__init__(self)
-
     def connect(self, target, *args, **kwargs):
         """
         Connect this section to another one as child section.
@@ -652,16 +650,10 @@ class SEClamp(PythonHocObject):
 
 
 class NetStim(PythonHocObject, Connectable):
-    def __init__(self, *args, **kwargs):
-        PythonHocObject.__init__(self, *args, **kwargs)
-        Connectable.__init__(self)
+    pass
 
 
 class VecStim(PythonHocObject, Connectable):
-    def __init__(self, *args, **kwargs):
-        PythonHocObject.__init__(self, *args, **kwargs)
-        Connectable.__init__(self)
-
     @property
     def vector(self):
         return self._vector
@@ -708,9 +700,7 @@ class NetCon(PythonHocObject):
 
 class Segment(PythonHocObject, Connectable, WrapsPointers):
     def __init__(self, interpreter, ptr, section, **kwargs):
-        PythonHocObject.__init__(self, interpreter, ptr, **kwargs)
-        Connectable.__init__(self)
-        WrapsPointers.__init__(self)
+        super().__init__(interpreter, ptr, **kwargs)
         self.section = section
 
     def __netcon__(self):
@@ -724,11 +714,6 @@ class PointProcess(PythonHocObject, Connectable, WrapsPointers):
     """
     Wrapper for all point processes (membrane and synapse mechanisms).
     """
-
-    def __init__(self, *args, **kwargs):
-        PythonHocObject.__init__(self, *args, **kwargs)
-        Connectable.__init__(self)
-        WrapsPointers.__init__(self)
 
     def stimulate(self, pattern=None, weight=0.04, delay=0.0, **kwargs):
         """
