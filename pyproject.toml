@@ -17,7 +17,7 @@ classifiers = [
 dynamic = ["version", "description"]
 python_requires = ">=3.8"
 dependencies = [
-    "nrn-glia[neuron]>=4.0.0b0",
+    "nrn-glia[neuron]>=4.0.0b1",
     "errr>=1.2.0",
     "numpy>=1.21.0",
     "NEURON>=8.0",

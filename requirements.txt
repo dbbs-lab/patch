@@ -1,4 +1,4 @@
-nrn-glia[neuron]==4.0.0b0
+nrn-glia[neuron]==4.0.0b1
 errr==1.2.0
 mpi4py==3.1.5
 coverage==5.5
