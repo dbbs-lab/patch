@@ -2,7 +2,7 @@ import unittest
 
 import _shared
 
-from patch import connection, p
+from patch import p
 from patch.exceptions import BroadcastError, ParallelConnectError
 
 

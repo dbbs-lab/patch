@@ -1,5 +1,3 @@
-import unittest
-
 import _shared
 
 import patch.objects

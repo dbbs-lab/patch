@@ -1,7 +1,5 @@
 import _shared
 
-from patch.exceptions import *
-
 
 class TestExtensions(_shared.NeuronTestCase):
     """

@@ -1,7 +1,6 @@
 import _shared
 
 from patch import p
-from patch.exceptions import *
 
 
 class TestClamps(_shared.NeuronTestCase):

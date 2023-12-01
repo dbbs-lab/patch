@@ -1,8 +1,7 @@
 import _shared
 
 import patch
-from patch import p
-from patch.exceptions import *
+from patch import NotConnectableError, p
 
 
 class TestInterplay(_shared.NeuronTestCase):

@@ -2,8 +2,7 @@ from random import random
 
 import _shared
 
-from patch import connection, p
-from patch.exceptions import *
+from patch import NotConnectableError, NotConnectedError, connection, p
 from patch.objects import NetCon
 
 
@@ -26,7 +25,6 @@ class TestNetworks(_shared.NeuronTestCase):
         self.assertRaises(NotConnectableError, connection, s, p.Vector())
 
     def test_stimulate(self):
-
         s1 = p.Section()
         s2 = p.Section()
         s3 = p.Section()
