@@ -1,42 +1,41 @@
 import typing
-
-from .objects import (
-    PythonHocObject,
-    Vector,
-    NetCon,
-    PointProcess,
-    VecStim,
-    Section,
-    IClamp,
-    SEClamp,
-    SectionRef,
-    _get_obj_registration_queue,
-    _safe_call,
-)
-from .core import (
-    is_segment,
-    transform,
-    transform_netcon,
-    assert_connectable,
-    is_section,
-    is_point_process,
-    is_nrn_scalar,
-)
-from .exceptions import (
-    BroadcastError,
-    HocSectionAccessError,
-    UninitializedError,
-    ParallelConnectError,
-)
-from .error_handler import catch_hoc_error, CatchNetCon, CatchSectionAccess
-from functools import wraps, cache
 import warnings
-
+from functools import cache, wraps
 
 # We don't need to reraise ImportErrors, they should be clear enough by themselves. If not
 # and you're reading this: Fix the NEURON install, it's currently not importable ;)
 import neuron as _nrn
 from neuron import h as _h
+
+from .core import (
+    assert_connectable,
+    is_nrn_scalar,
+    is_point_process,
+    is_section,
+    is_segment,
+    transform,
+    transform_netcon,
+)
+from .error_handler import CatchNetCon, CatchSectionAccess, catch_hoc_error
+from .exceptions import (
+    BroadcastError,
+    HocSectionAccessError,
+    ParallelConnectError,
+    UninitializedError,
+)
+from .objects import (
+    IClamp,
+    NetCon,
+    PointProcess,
+    PythonHocObject,
+    SEClamp,
+    Section,
+    SectionRef,
+    VecStim,
+    Vector,
+    _get_obj_registration_queue,
+    _safe_call,
+)
 
 _nrnver = _nrn.version
 try:

@@ -1,8 +1,9 @@
 # noinspection PyUnresolvedReferences, PyPackageRequirements
 # Import mpi4py before importing patch during the tests.
-import mpi4py.MPI
 import gc
 import unittest
+
+import mpi4py.MPI
 
 
 class NeuronTestCase(unittest.TestCase):

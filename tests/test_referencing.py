@@ -1,4 +1,5 @@
 import _shared
+
 from patch import p
 
 
@@ -60,7 +61,8 @@ class TestReferencing(_shared.NeuronTestCase):
         )
 
     def test_parallel_con_ref(self):
-        import weakref, gc
+        import gc
+        import weakref
 
         s = p.Section()
         r = weakref.ref(p.ParallelCon(s, 901))

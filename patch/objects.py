@@ -1,8 +1,8 @@
 import typing
 from typing import Sequence, Union
 
-from .core import transform, transform_record, _is_sequence
-from .error_handler import catch_hoc_error, CatchRecord
+from .core import _is_sequence, transform, transform_record
+from .error_handler import CatchRecord, catch_hoc_error
 
 if typing.TYPE_CHECKING:
     from .interpreter import PythonHocInterpreter

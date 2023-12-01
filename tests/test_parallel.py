@@ -1,6 +1,8 @@
 import unittest
+
 import _shared
-from patch import p, connection
+
+from patch import connection, p
 from patch.exceptions import BroadcastError, ParallelConnectError
 
 
@@ -222,6 +224,7 @@ class TestParallelPointProcess(_shared.NeuronTestCase):
         tps, vps = self._setup_patch_across_nodes()
         tpn, vpn = self._setup_neuron_across_nodes()
         import numpy as np
+
         from patch import p
 
         spt, spid = p.parallel.spike_record()

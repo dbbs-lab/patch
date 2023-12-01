@@ -1,4 +1,5 @@
 import _shared
+
 import patch
 from patch import p
 from patch.exceptions import *

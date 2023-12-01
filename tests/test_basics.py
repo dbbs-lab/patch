@@ -1,7 +1,9 @@
 import unittest
+
 import _shared
+
 import patch.objects
-from patch import is_density_mechanism, p, is_point_process
+from patch import is_density_mechanism, is_point_process, p
 from patch.exceptions import HocRecordError
 
 
@@ -96,8 +98,9 @@ class TestPatch(_shared.NeuronTestCase):
         )
 
     def test_transform(self):
-        from patch import transform, transform_record, transform_netcon, transform_arc
         from neuron import h
+
+        from patch import transform, transform_arc, transform_netcon, transform_record
 
         nrn_section1 = transform(p.Section())
         self.assertEqual(

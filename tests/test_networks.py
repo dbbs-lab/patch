@@ -1,8 +1,10 @@
-import _shared
 from random import random
-from patch import p, connection
-from patch.objects import NetCon
+
+import _shared
+
+from patch import connection, p
 from patch.exceptions import *
+from patch.objects import NetCon
 
 
 class TestNetworks(_shared.NeuronTestCase):

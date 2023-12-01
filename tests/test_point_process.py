@@ -1,7 +1,9 @@
+import unittest
+
+import _shared
+
 import patch.objects
 from patch import p
-import unittest
-import _shared
 
 
 class TestPointProcess(_shared.NeuronTestCase):

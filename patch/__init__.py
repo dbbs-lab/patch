@@ -2,22 +2,22 @@
 Quality of life patch for the NEURON simulator.
 """
 
-from .exceptions import NotConnectableError, NotConnectedError
-from .interpreter import PythonHocInterpreter
 from .core import (
+    is_density_mechanism,
+    is_nrn_scalar,
+    is_point_process,
+    is_section,
+    is_segment,
     transform,
     transform_arc,
     transform_netcon,
     transform_record,
-    is_point_process,
-    is_density_mechanism,
-    is_section,
-    is_segment,
-    is_nrn_scalar,
 )
+from .exceptions import NotConnectableError, NotConnectedError
+from .interpreter import PythonHocInterpreter
 
 try:
-    from functools import cached_property, cache
+    from functools import cache, cached_property
 except ImportError:  # pragma: nocover
     import functools
 

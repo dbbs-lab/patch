@@ -1,7 +1,7 @@
 import typing
 from typing import Union
 
-from patch import NotConnectableError
+from .exceptions import NotConnectableError
 
 if typing.TYPE_CHECKING:
     from neuron.hoc import HocObject
@@ -102,8 +102,7 @@ def is_point_process(obj: Union[str, "HocObject"]):
       attribute of ``neuron.h``.
     :rtype: bool
     """
-    from neuron import h
-    from neuron import hoc
+    from neuron import h, hoc
 
     try:
         if not isinstance(obj, hoc.HocObject):
@@ -121,9 +120,8 @@ def is_density_mechanism(obj: Union[str, "HocObject"]):
       attribute of ``neuron.h``.
     :rtype: bool
     """
-    from neuron import h
-    from neuron import hoc
     import nrn
+    from neuron import h, hoc
 
     if isinstance(obj, nrn.Mechanism):
         return True

@@ -1,13 +1,14 @@
 import _shared
-from patch import p
 from neuron import h
-from patch.exceptions import *
+
+from patch import p
 from patch.error_handler import (
     CatchNetCon,
     ErrorHandler,
     _suppress_nrn,
     catch_hoc_error,
 )
+from patch.exceptions import *
 
 
 class TestErrorHandling(_shared.NeuronTestCase):
