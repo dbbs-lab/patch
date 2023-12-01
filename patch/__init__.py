@@ -2,6 +2,17 @@
 Quality of life patch for the NEURON simulator.
 """
 
+try:
+    from functools import cache, cached_property
+except ImportError:  # pragma: nocover
+    import functools
+
+    def cached_property(f):
+        return property(functools.lru_cache()(f))
+
+    functools.cache = functools.lru_cache()
+    functools.cached_property = cached_property
+
 from .core import (
     is_density_mechanism,
     is_nrn_scalar,
@@ -15,17 +26,6 @@ from .core import (
 )
 from .exceptions import NotConnectableError, NotConnectedError
 from .interpreter import PythonHocInterpreter
-
-try:
-    from functools import cache, cached_property
-except ImportError:  # pragma: nocover
-    import functools
-
-    def cached_property(f):
-        return property(functools.lru_cache()(f))
-
-    functools.cache = functools.lru_cache()
-    functools.cached_property = cached_property
 
 __version__ = "4.0.0b0"
 p: "PythonHocInterpreter"
