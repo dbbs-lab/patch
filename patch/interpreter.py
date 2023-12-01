@@ -237,7 +237,7 @@ class PythonHocInterpreter:
     def ParallelContext(self):
         return self.parallel
 
-    def VecStim(self, pattern=None, *args, **kwargs):
+    def VecStim(self, /, *args, pattern=None, **kwargs):
         import glia as g
 
         mod_name = g.resolve("VecStim")

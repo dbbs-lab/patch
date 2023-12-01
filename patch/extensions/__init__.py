@@ -15,7 +15,7 @@ class Mod:
 def package():
     pkg = Package()
     pkg.path = os.path.dirname(__file__)
-    pkg.name = os.path.basename(pkg.path)
+    pkg.name = os.path.basename("patch_extensions")
     pkg.astro_version = "0.2.0"
     pkg.glia_version = "0.1.1"
 
