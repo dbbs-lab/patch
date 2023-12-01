@@ -40,7 +40,8 @@ jobs:
         pip install -e .
     - name: Run tests & coverage
       run: |
-        coverage run --parallel-mode -m unittest discover -v -s ./tests/seperate
-        coverage run --parallel-mode -m unittest discover -v -s ./tests
-        mpiexec -n 2 coverage run --parallel-mode -m unittest discover -v -s ./tests
+        cd tests
+        coverage run --parallel-mode -m unittest discover -v -s ./separate
+        coverage run --parallel-mode -m unittest discover -v -s .
+        mpiexec -n 2 coverage run --parallel-mode -m unittest discover -v -s .
         bash <(curl -s https://codecov.io/bash)

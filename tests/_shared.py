@@ -1,10 +1,13 @@
-# noinspection PyUnresolvedReferences, PyPackageRequirements
-# Import mpi4py before importing patch during the tests.
 import gc
 import unittest
 
-import mpi4py.MPI
 
+try:
+    # Import mpi4py before patch is imported during the tests.
+    # noinspection PyPackageRequirements
+    import mpi4py.MPI
+except ImportError:
+    pass
 
 class NeuronTestCase(unittest.TestCase):
     def tearDown(self):
