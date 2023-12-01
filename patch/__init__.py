@@ -10,7 +10,7 @@ except ImportError:  # pragma: nocover
     def cached_property(f):
         return property(functools.lru_cache()(f))
 
-    functools.cache = functools.lru_cache()
+    functools.cache = cache = functools.lru_cache()
     functools.cached_property = cached_property
 
 from .core import (
