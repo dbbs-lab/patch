@@ -17,7 +17,7 @@ classifiers = [
 dynamic = ["version", "description"]
 python_requires = ">=3.8"
 dependencies = [
-    "nrn-glia[neuron]>=4.0.0b1",
+    "nmodl-glia[neuron]>=4.0.0b0",
     "errr>=1.2.0",
     "numpy>=1.21.0",
     "NEURON>=8.0",
@@ -27,7 +27,7 @@ dependencies = [
 Home = "https://github.com/dbbs-lab/patch"
 
 [project.entry-points."glia.package"]
-extensions = "patch.extensions"
+extensions = "patch.extensions:package"
 
 [project.optional-dependencies]
 dev = [
