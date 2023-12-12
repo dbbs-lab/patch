@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        py: ["3.8", "3.9"]
-        nrn: ["8.0.0", "8.1.0", "8.2.0"]
+        py: ["3.9","3.10","3.11","3.12"]
+        nrn: ["8.1.0", "8.2.0"]
         include:
-          - nrn: "8.2.0"
-            py: "3.10"
+          - nrn: "8.0.0"
+            py: "3.9"
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.py }}
