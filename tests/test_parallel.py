@@ -233,7 +233,6 @@ class TestParallelPointProcess(_shared.NeuronTestCase):
         p.run(100)
 
         spikes = [3032, 3033] if not p.parallel.id() else []
-        print(list(spid))
         self.assertEqual(len(spikes), len(spid), "expected 2 on main, 0 elsewhere")
         self.assertEqual(spikes, sorted(list(spid)), "expected 2 on main, 0 elsewhere")
         arr = np.array(p.parallel.py_allgather(list(vps)))

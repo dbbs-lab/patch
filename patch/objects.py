@@ -176,6 +176,7 @@ class WrapsPointers:
         target = self.__neuron__()
         hoctype = str(target).split("[")[0].split("_0x")[0]
         if hoctype not in _had_pointers_wrapped:
+            params = []
             for k in dir(target):
                 if not k.startswith("_"):
                     try:
@@ -186,6 +187,8 @@ class WrapsPointers:
                         is_ptr = False
                     if is_ptr:
                         setattr(cls, k, PointerWrapper(k))
+                        params.append(k)
+            cls.parameters = params
             _had_pointers_wrapped.add(hoctype)
 
 
