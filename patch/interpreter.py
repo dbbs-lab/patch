@@ -370,10 +370,9 @@ class PythonHocInterpreter:
         return locals()[point_process]
 
     def _setup_transfer(self):  # pragma: nocover
-        from mpi4py import MPI
-
-        comm = MPI.COMM_WORLD
-        should_setup = sum(comm.allgather(self.parallel._transfer_flag))
+        v = self.__h.Vector()
+        self.parallel.allgather(self.parallel._transfer_flag, v)
+        should_setup = sum(v)
         if should_setup:
             self.parallel.setup_transfer()
 
