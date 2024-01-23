@@ -9,7 +9,7 @@ if typing.TYPE_CHECKING:
 
 
 _registration_queue = []
-_had_pointers_wrapped = set()
+_had_pointers_wrapped = {}
 
 
 def _safe_call(method):
@@ -188,8 +188,8 @@ class WrapsPointers:
                     if is_ptr:
                         setattr(cls, k, PointerWrapper(k))
                         params.append(k)
-            cls.parameters = params
-            _had_pointers_wrapped.add(hoctype)
+            _had_pointers_wrapped[hoctype] = params
+        self.parameters = _had_pointers_wrapped[hoctype]
 
 
 class Section(PythonHocObject, Connectable, WrapsPointers):
