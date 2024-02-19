@@ -180,8 +180,9 @@ class WrapsPointers:
             for k in dir(target):
                 if not k.startswith("_"):
                     try:
-                        is_ptr = str(getattr(target, f"_ref_{k}", None)).startswith(
-                            "<pointer"
+                        ptr_str = str(getattr(target, f"_ref_{k}", None))
+                        is_ptr = ptr_str.startswith("<pointer") or ptr_str.startswith(
+                            "data_handle"
                         )
                     except:
                         is_ptr = False
