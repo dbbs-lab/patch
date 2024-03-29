@@ -18,10 +18,10 @@ classifiers = [
 dynamic = ["version", "description"]
 python_requires = ">=3.9"
 dependencies = [
-    "nmodl-glia[neuron]>=4.0.0b3",
-    "errr>=1.2.0",
-    "numpy>=1.21.0",
-    "NEURON>=8.0",
+    "nmodl-glia[neuron]~=4.0",
+    "errr~=1.2",
+    "numpy~=1.21",
+    "NEURON>=8.0,<10.0",
 ]
 
 [project.urls]
@@ -31,12 +31,19 @@ Home = "https://github.com/dbbs-lab/patch"
 extensions = "patch.extensions:package"
 
 [project.optional-dependencies]
+parallel = ["mpi4py~=3.0"]
+test = [
+    "coverage~=7.0"
+]
+docs = [
+    "sphinx~=7.2",
+    "helveg--sphinx-code-tabs~=0.2",
+    "sphinx-rtd-theme~=2.0",
+]
 dev = [
-    "sphinx",
-    "pre-commit",
-    "black>=23.11.0",
-    "helveg--sphinx-code-tabs",
-    "sphinx_rtd_theme",
+    "nrn-patch[test, docs]",
+    "pre-commit~=3.0",
+    "black~=24.0",
 ]
 
 [tool.flit.module]
@@ -47,3 +54,39 @@ line-length = 90
 
 [tool.isort]
 profile = "black"
+
+[tool.bumpversion]
+current_version = "4.0.0-rc0"
+parse = """(?x)
+    (?P<major>0|[1-9]\\d*)\\.
+    (?P<minor>0|[1-9]\\d*)\\.
+    (?P<patch>0|[1-9]\\d*)
+    (?:
+        -                             # dash seperator for pre-release section
+        (?P<pre_l>[a-zA-Z-]+)         # pre-release label
+        (?P<pre_n>0|[1-9]\\d*)        # pre-release version number
+    )?                                # pre-release section is optional
+"""
+serialize = [
+    "{major}.{minor}.{patch}-{pre_l}{pre_n}",
+    "{major}.{minor}.{patch}",
+]
+search = "{current_version}"
+replace = "{new_version}"
+regex = false
+ignore_missing_version = false
+tag = true
+sign_tags = false
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+allow_dirty = false
+commit = true
+message = "Bump version: {current_version} → {new_version}"
+commit_args = "--no-verify"
+
+[tool.bumpversion.parts.pre_l]
+values = ["dev", "a", "b", "rc", "final"]
+optional_value = "final"
+
+[[tool.bumpversion.files]]
+filename = "patch/__init__.py"
