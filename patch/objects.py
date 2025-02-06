@@ -237,6 +237,14 @@ class Section(PythonHocObject, Connectable, WrapsPointers):
         """
         return self(self.__arc__()).__record__()
 
+    def __record_imem__(self):
+        """
+        Return the imem pointer to record.
+
+        Defaults to ``self(0.5)._ref_i_membrane_``
+        """
+        return self(self.__arc__()).__record_imem__()
+
     def __call__(self, x, ephemeral=False, *args, **kwargs):
         v = super().__call__(x, *args, **kwargs)
         if type(v).__name__ != "Segment":  # pragma: no cover
@@ -407,6 +415,7 @@ class Section(PythonHocObject, Connectable, WrapsPointers):
         duration: float = 100,
         after: float = 0,
         holding=-70,
+        rs: float = 1.0,
     ) -> "SEClamp":
         """
         Create a voltage clamp on the section.
@@ -437,6 +446,7 @@ class Section(PythonHocObject, Connectable, WrapsPointers):
         clamp.duration = duration
         clamp.after = after
         clamp.voltage = voltage
+        clamp.rs = rs
         return clamp
 
     def push(self):
@@ -715,6 +725,10 @@ class Segment(PythonHocObject, Connectable, WrapsPointers):
 
     def __record__(self):
         return self.__neuron__()._ref_v
+
+    def __record_imem__(self):
+        self._interpreter.CVode().use_fast_imem(1)
+        return self.__neuron__()._ref_i_membrane_
 
 
 class PointProcess(PythonHocObject, Connectable, WrapsPointers):
